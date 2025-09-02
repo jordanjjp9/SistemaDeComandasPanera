@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{70390575-5FFE-4A07-ADBF-16632D13290C}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>CapaPresentacion</RootNamespace>
+    <AssemblyName>CapaPresentacion</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Guna.UI2, Version=2.0.4.7, Culture=neutral, PublicKeyToken=8b9d14aa5142e261, processorArchitecture=MSIL">
+      <HintPath>..\packages\Guna.UI2.WinForms.2.0.4.7\lib\net472\Guna.UI2.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Ambientes\frmSalonPrincipal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Ambientes\frmSalonPrincipal.Designer.cs">
+      <DependentUpon>frmSalonPrincipal.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmAdicional.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmAdicional.Designer.cs">
+      <DependentUpon>frmAdicional.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmBebidasC.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmBebidasC.Designer.cs">
+      <DependentUpon>frmBebidasC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmBebidasF.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmBebidasF.Designer.cs">
+      <DependentUpon>frmBebidasF.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmBocaditos.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmBocaditos.Designer.cs">
+      <DependentUpon>frmBocaditos.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmChicharron.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmChicharron.Designer.cs">
+      <DependentUpon>frmChicharron.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmDesayunos.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmDesayunos.Designer.cs">
+      <DependentUpon>frmDesayunos.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmEnsaladas.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmEnsaladas.Designer.cs">
+      <DependentUpon>frmEnsaladas.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmFiambres.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmFiambres.Designer.cs">
+      <DependentUpon>frmFiambres.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmHamburguesasyPizza.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmHamburguesasyPizza.Designer.cs">
+      <DependentUpon>frmHamburguesasyPizza.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmHeladosyMilkshake.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmHeladosyMilkshake.Designer.cs">
+      <DependentUpon>frmHeladosyMilkshake.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmJugos.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmJugos.Designer.cs">
+      <DependentUpon>frmJugos.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmPastas.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmPastas.Designer.cs">
+      <DependentUpon>frmPastas.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmPorciones.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmPorciones.Designer.cs">
+      <DependentUpon>frmPorciones.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmSandwich.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmSandwich.Designer.cs">
+      <DependentUpon>frmSandwich.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmTortasEnteras.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmTortasEnteras.Designer.cs">
+      <DependentUpon>frmTortasEnteras.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Botoneras\frmWaffles.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Botoneras\frmWaffles.Designer.cs">
+      <DependentUpon>frmWaffles.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controles\ComboPedidoItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controles\ComboPedidoItem.Designer.cs">
+      <DependentUpon>ComboPedidoItem.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controles\LineaPedidoItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controles\LineaPedidoItem.Designer.cs">
+      <DependentUpon>LineaPedidoItem.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmARappi.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmARappi.Designer.cs">
+      <DependentUpon>frmARappi.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmBotoneraPrincipal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmBotoneraPrincipal.Designer.cs">
+      <DependentUpon>frmBotoneraPrincipal.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmComentarioLbr.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmComentarioLbr.Designer.cs">
+      <DependentUpon>frmComentarioLbr.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmDelivery.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmDelivery.Designer.cs">
+      <DependentUpon>frmDelivery.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmListaProductos.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmListaProductos.Designer.cs">
+      <DependentUpon>frmListaProductos.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmLogin.Designer.cs">
+      <DependentUpon>frmLogin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmMenuPrincipal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmMenuPrincipal.Designer.cs">
+      <DependentUpon>frmMenuPrincipal.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmMesas.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmMesas.Designer.cs">
+      <DependentUpon>frmMesas.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmNotaHelados.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmNotaHelados.Designer.cs">
+      <DependentUpon>frmNotaHelados.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmNotasBebidas.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmNotasBebidas.Designer.cs">
+      <DependentUpon>frmNotasBebidas.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmNotasJugo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmNotasJugo.Designer.cs">
+      <DependentUpon>frmNotasJugo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmNotasSandwich.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmNotasSandwich.Designer.cs">
+      <DependentUpon>frmNotasSandwich.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmNumeroPersonas.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmNumeroPersonas.Designer.cs">
+      <DependentUpon>frmNumeroPersonas.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmSalonPrincipal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmSalonPrincipal.Designer.cs">
+      <DependentUpon>frmSalonPrincipal.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmValidacion.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmValidacion.Designer.cs">
+      <DependentUpon>frmValidacion.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\ControlExtensions.cs" />
+    <Compile Include="Helpers\DragScroller.cs" />
+    <Compile Include="Helpers\FlowLayoutPanelSinScroll.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Helpers\ISelectorProducto.cs" />
+    <Compile Include="Helpers\LineaPedidoItemExtensions.cs" />
+    <Compile Include="Helpers\NoFocusScrollFlowLayoutPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Helpers\SesionActual.cs" />
+    <Compile Include="Notas\frmNBebidas.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Notas\frmNBebidas.Designer.cs">
+      <DependentUpon>frmNBebidas.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Notas\frmCBebidasCalientes.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Notas\frmCBebidasCalientes.Designer.cs">
+      <DependentUpon>frmCBebidasCalientes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Notas\frmNDesayunoContinental.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Notas\frmNDesayunoContinental.Designer.cs">
+      <DependentUpon>frmNDesayunoContinental.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Notas\frmNDesayunoTamal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Notas\frmNDesayunoTamal.Designer.cs">
+      <DependentUpon>frmNDesayunoTamal.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Notas\frmNHelados.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Notas\frmNHelados.Designer.cs">
+      <DependentUpon>frmNHelados.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Notas\frmCJugoDesayuno.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Notas\frmCJugoDesayuno.Designer.cs">
+      <DependentUpon>frmCJugoDesayuno.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Notas\frmNSandwich.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Notas\frmNSandwich.Designer.cs">
+      <DependentUpon>frmNSandwich.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Notas\frmNWaffles.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Notas\frmNWaffles.Designer.cs">
+      <DependentUpon>frmNWaffles.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ucLineaPedido.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ucLineaPedido.Designer.cs">
+      <DependentUpon>ucLineaPedido.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Ambientes\frmSalonPrincipal.resx">
+      <DependentUpon>frmSalonPrincipal.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmAdicional.resx">
+      <DependentUpon>frmAdicional.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmBebidasC.resx">
+      <DependentUpon>frmBebidasC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmBebidasF.resx">
+      <DependentUpon>frmBebidasF.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmBocaditos.resx">
+      <DependentUpon>frmBocaditos.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmChicharron.resx">
+      <DependentUpon>frmChicharron.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmDesayunos.resx">
+      <DependentUpon>frmDesayunos.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmEnsaladas.resx">
+      <DependentUpon>frmEnsaladas.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmFiambres.resx">
+      <DependentUpon>frmFiambres.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmHamburguesasyPizza.resx">
+      <DependentUpon>frmHamburguesasyPizza.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmHeladosyMilkshake.resx">
+      <DependentUpon>frmHeladosyMilkshake.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmJugos.resx">
+      <DependentUpon>frmJugos.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmPastas.resx">
+      <DependentUpon>frmPastas.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmPorciones.resx">
+      <DependentUpon>frmPorciones.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmSandwich.resx">
+      <DependentUpon>frmSandwich.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmTortasEnteras.resx">
+      <DependentUpon>frmTortasEnteras.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Botoneras\frmWaffles.resx">
+      <DependentUpon>frmWaffles.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controles\ComboPedidoItem.resx">
+      <DependentUpon>ComboPedidoItem.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controles\LineaPedidoItem.resx">
+      <DependentUpon>LineaPedidoItem.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmARappi.resx">
+      <DependentUpon>frmARappi.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmBotoneraPrincipal.resx">
+      <DependentUpon>frmBotoneraPrincipal.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmComentarioLbr.resx">
+      <DependentUpon>frmComentarioLbr.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmDelivery.resx">
+      <DependentUpon>frmDelivery.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmListaProductos.resx">
+      <DependentUpon>frmListaProductos.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmLogin.resx">
+      <DependentUpon>frmLogin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmMenuPrincipal.resx">
+      <DependentUpon>frmMenuPrincipal.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmMesas.resx">
+      <DependentUpon>frmMesas.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmNotaHelados.resx">
+      <DependentUpon>frmNotaHelados.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmNotasBebidas.resx">
+      <DependentUpon>frmNotasBebidas.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmNotasJugo.resx">
+      <DependentUpon>frmNotasJugo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmNotasSandwich.resx">
+      <DependentUpon>frmNotasSandwich.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmNumeroPersonas.resx">
+      <DependentUpon>frmNumeroPersonas.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmSalonPrincipal.resx">
+      <DependentUpon>frmSalonPrincipal.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmValidacion.resx">
+      <DependentUpon>frmValidacion.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Notas\frmNBebidas.resx">
+      <DependentUpon>frmNBebidas.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Notas\frmCBebidasCalientes.resx">
+      <DependentUpon>frmCBebidasCalientes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Notas\frmNDesayunoContinental.resx">
+      <DependentUpon>frmNDesayunoContinental.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Notas\frmNDesayunoTamal.resx">
+      <DependentUpon>frmNDesayunoTamal.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Notas\frmNHelados.resx">
+      <DependentUpon>frmNHelados.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Notas\frmCJugoDesayuno.resx">
+      <DependentUpon>frmCJugoDesayuno.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Notas\frmNSandwich.resx">
+      <DependentUpon>frmNSandwich.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Notas\frmNWaffles.resx">
+      <DependentUpon>frmNWaffles.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="ucLineaPedido.resx">
+      <DependentUpon>ucLineaPedido.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CapaDatos\CapaDatos.csproj">
+      <Project>{52f1c587-7f2b-47ca-8d8c-ba3b0c1787a5}</Project>
+      <Name>CapaDatos</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CapaEntidad\CapaEntidad.csproj">
+      <Project>{4C8F07B6-9B79-40F0-BF9A-78154206B372}</Project>
+      <Name>CapaEntidad</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CapaNegocio\CapaNegocio.csproj">
+      <Project>{864A6D5C-1528-4E43-A9AE-653DD320F816}</Project>
+      <Name>CapaNegocio</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MOKA1.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MOKA.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Cafe con leche.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Chocolate Caliente.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cafe americano.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cafe descafeinado.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cafe expresso.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\expreso doble.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ANIS.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Manzanilla.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Manzanilla1.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\taza de leche.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documentox.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documento.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documentox1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\documento1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\editar.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\boton-cerrar.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\portapapeles.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\check.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\boton-cerrar1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cerrar.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Mesa.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Mesa mid.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\LOGOLAPANERA31072025.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\logo pan.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
