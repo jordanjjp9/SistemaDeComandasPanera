@@ -43,7 +43,7 @@
             this.pnlButton = new System.Windows.Forms.Panel();
             this.btnEliminar = new Guna.UI2.WinForms.Guna2Button();
             this.btnContinuar = new Guna.UI2.WinForms.Guna2Button();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.pnlSNotasBeb = new System.Windows.Forms.Panel();
             this.txtNotasBebida = new Guna.UI2.WinForms.Guna2TextBox();
             this.txtProductoSelect = new Guna.UI2.WinForms.Guna2TextBox();
             this.pnlCabecera = new System.Windows.Forms.Panel();
@@ -52,7 +52,7 @@
             this.pnlNBebidas.SuspendLayout();
             this.flpNHelados.SuspendLayout();
             this.pnlButton.SuspendLayout();
-            this.panel1.SuspendLayout();
+            this.pnlSNotasBeb.SuspendLayout();
             this.pnlCabecera.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -60,7 +60,7 @@
             // 
             this.pnlNBebidas.Controls.Add(this.flpNHelados);
             this.pnlNBebidas.Controls.Add(this.pnlButton);
-            this.pnlNBebidas.Controls.Add(this.panel1);
+            this.pnlNBebidas.Controls.Add(this.pnlSNotasBeb);
             this.pnlNBebidas.Controls.Add(this.pnlCabecera);
             this.pnlNBebidas.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlNBebidas.Location = new System.Drawing.Point(0, 0);
@@ -302,15 +302,15 @@
             this.btnContinuar.Text = "Continuar";
             this.btnContinuar.Click += new System.EventHandler(this.btnContinuar_Click);
             // 
-            // panel1
+            // pnlSNotasBeb
             // 
-            this.panel1.Controls.Add(this.txtNotasBebida);
-            this.panel1.Controls.Add(this.txtProductoSelect);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel1.Location = new System.Drawing.Point(1043, 64);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(341, 811);
-            this.panel1.TabIndex = 2;
+            this.pnlSNotasBeb.Controls.Add(this.txtNotasBebida);
+            this.pnlSNotasBeb.Controls.Add(this.txtProductoSelect);
+            this.pnlSNotasBeb.Dock = System.Windows.Forms.DockStyle.Right;
+            this.pnlSNotasBeb.Location = new System.Drawing.Point(1043, 64);
+            this.pnlSNotasBeb.Name = "pnlSNotasBeb";
+            this.pnlSNotasBeb.Size = new System.Drawing.Size(341, 811);
+            this.pnlSNotasBeb.TabIndex = 2;
             // 
             // txtNotasBebida
             // 
@@ -405,7 +405,7 @@
             this.pnlNBebidas.ResumeLayout(false);
             this.flpNHelados.ResumeLayout(false);
             this.pnlButton.ResumeLayout(false);
-            this.panel1.ResumeLayout(false);
+            this.pnlSNotasBeb.ResumeLayout(false);
             this.pnlCabecera.ResumeLayout(false);
             this.pnlCabecera.PerformLayout();
             this.ResumeLayout(false);
@@ -418,22 +418,22 @@
         private System.Windows.Forms.Panel pnlCabecera;
         private Guna.UI2.WinForms.Guna2HtmlLabel lblTitle;
         private Guna.UI2.WinForms.Guna2Button btnCerrar;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel pnlSNotasBeb;
         private System.Windows.Forms.FlowLayoutPanel flpNHelados;
         private Guna.UI2.WinForms.Guna2Button btnHelad;
         private Guna.UI2.WinForms.Guna2Button btnSnHelar;
-        private Guna.UI2.WinForms.Guna2Button btnTib;
         private System.Windows.Forms.Panel pnlButton;
         private Guna.UI2.WinForms.Guna2Button btnEliminar;
         private Guna.UI2.WinForms.Guna2Button btnContinuar;
         private Guna.UI2.WinForms.Guna2TextBox txtNotasBebida;
         private Guna.UI2.WinForms.Guna2TextBox txtProductoSelect;
+        private Guna.UI2.WinForms.Guna2Button btnTib;
         private Guna.UI2.WinForms.Guna2Button btnCAzucar;
         private Guna.UI2.WinForms.Guna2Button btnSAzucar;
         private Guna.UI2.WinForms.Guna2Button btnGrd;
         private Guna.UI2.WinForms.Guna2Button btnCEdulc;
-        private Guna.UI2.WinForms.Guna2Button btnSnLact;
         private Guna.UI2.WinForms.Guna2Button btnPLlevar;
+        private Guna.UI2.WinForms.Guna2Button btnSnLact;
         private Guna.UI2.WinForms.Guna2Button btnEApart;
     }
 }

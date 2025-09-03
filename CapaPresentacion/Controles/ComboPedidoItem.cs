@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CapaPresentacion.Botoneras;
 using Guna.UI2.WinForms;
 using Guna.UI2.WinForms.Suite;
 
@@ -16,104 +17,110 @@ namespace CapaPresentacion.Controles
 {
     public partial class ComboPedidoItem : UserControl
     {
-        // ======== Selección global (exclusiva para combos) ========
+        // ========= Selección global (exclusiva para combos) =========
         public static ComboPedidoItem SeleccionActual { get; private set; }
         public static event EventHandler SeleccionCambio;
 
-        // ======== Datos del combo ========
+        // ========= Datos del combo (encabezado) =========
         public string Codigo { get; private set; } = "";
         public string Descripcion { get; private set; } = "";
         public int Cantidad { get; private set; } = 1;
-        public decimal PrecioUnitario { get; private set; } = 0m;   // PU final (con extra promedio)
-        public decimal Total => Cantidad * PrecioUnitario;
+        public decimal PrecioUnitario { get; private set; } = 0m;   // PU final (con extras promediados)
+        public decimal Total { get { return Cantidad * PrecioUnitario; } }
 
-        // Accesos de solo lectura
-        public string TextoCombo => txtCombo != null ? txtCombo.Text : string.Empty;
+        // Preferencias de agrupación
+        public bool AgruparJugosIguales { get; set; } = true;  // false = un textbox por jugo
+        public bool AgruparBebidasIguales { get; set; } = true; // true  = agrupar bebidas iguales
 
-        // ======== UI / estado ========
+        // ========= Estado UI =========
         private readonly ToolTip _tt = new ToolTip();
-        private int _baseHeight;                 // alto del control sin contar txtCombo ni flpJugos
-        private bool _pendingGrow = false;       // para recalcular cuando aún no hay handle
+        private int _baseHeight;       // alto del control sin los contenedores dinámicos
+        private bool _pendingGrow = false;
 
-        // Plantilla opcional para clonar estilo de los jugos (si existe en diseñador)
+        // Plantillas (opcionales) tomadas del diseñador si existen
         private Guna2TextBox _tplJugo;
+        private Guna2TextBox _tplBeb;
 
-        // Contenedor dinámico de jugos (debe existir en diseñador; si no, lo creo en runtime)
-        private FlowLayoutPanel _flpJugos;
-
-        // ======== Modelo interno de cada bloque de jugo ========
-        private sealed class JugoBlock
+        // ========= Modelo interno =========
+        private sealed class BloqueTexto
         {
-            public string Key;                        // Descripcion(normalizada) + "|" + PrecioExtra
+            public string Key;
             public string Descripcion;
             public decimal PrecioExtra;
-            public int Cantidad;                      // cuántas unidades agrupa
+            public int Cantidad;               // cuántas unidades agrupa
             public List<string> Notas = new List<string>();
-            public Guna2TextBox TextBox;              // textbox visual editable
+            public Guna2TextBox TextBox;       // textbox visible
         }
 
-        private readonly List<JugoBlock> _jugos = new List<JugoBlock>();
-        private JugoBlock _ultimoBloque;
+        private readonly List<BloqueTexto> _jugos = new List<BloqueTexto>();
+        private readonly List<BloqueTexto> _bebidas = new List<BloqueTexto>();
+        private BloqueTexto _ultimoJugo;
+        private BloqueTexto _ultimaBebida;
 
         public ComboPedidoItem()
         {
             InitializeComponent();
 
-            // Configura cabecera
-            ConfigurarTextBoxSoloLectura(txtCombo);
-
-            // Localiza contenedor de jugos
-            _flpJugos = this.Controls.Find("flpJugos", true).OfType<FlowLayoutPanel>().FirstOrDefault();
-            if (_flpJugos == null)
-            {
-                // Fallback: si no existe en diseñador, lo creo (para no romper)
-                _flpJugos = new FlowLayoutPanel
-                {
-                    Name = "flpJugos",
-                    FlowDirection = FlowDirection.TopDown,
-                    WrapContents = false,
-                    AutoSize = true,
-                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                    Dock = DockStyle.Top,
-                    Margin = new Padding(0),
-                    Padding = new Padding(0)
-                };
-                this.Controls.Add(_flpJugos);
-                _flpJugos.BringToFront();
-            }
-
-            // Intenta capturar plantilla de jugo (si existe un txtJugoDesayuno en el diseñador)
+            // 1) Saca plantillas del contenedor (evita medir mal el FlowLayoutPanel)
             _tplJugo = this.Controls.Find("txtJugoDesayuno", true).OfType<Guna2TextBox>().FirstOrDefault();
+            _tplBeb = this.Controls.Find("txtBebCDesay", true).OfType<Guna2TextBox>().FirstOrDefault();
+
             if (_tplJugo != null)
             {
-                _tplJugo.Visible = false; // se usa solo como plantilla
+                _tplJugo.Visible = false;
+                if (_tplJugo.Parent is FlowLayoutPanel p1) p1.Controls.Remove(_tplJugo);
+            }
+            if (_tplBeb != null)
+            {
+                _tplBeb.Visible = false;
+                if (_tplBeb.Parent is FlowLayoutPanel p2) p2.Controls.Remove(_tplBeb);
             }
 
-            // Calcula baseHeight cuando el layout sea real
-            this.Load += (s, e) =>
-            {
-                int hCombo = txtCombo != null ? txtCombo.Height : 0;
-                int hJugos = _flpJugos != null ? _flpJugos.Height : 0;
+            // 2) Encabezado (solo lectura)
+            ConfigurarTextBoxSoloLectura(txtCombo);
 
-                _baseHeight = this.Height - (hCombo + hJugos);
-                BeginInvoke(new Action(RecalcAutoGrow));
-            };
+            // 3) Asegura configuración de contenedores (los tuyos del diseñador)
+            PrepFlow(flpJugos);
+            FlowLayoutPanel flpBeb;
+            if (TryFindControl("flpBebCDesayuno", out flpBeb)) PrepFlow(flpBeb);
 
-            // Reajustes de altura
+            // 4) AutoGrow + selección
             if (txtCombo != null) txtCombo.TextChanged += (s, e) => RecalcAutoGrow();
-            if (_flpJugos != null) _flpJugos.SizeChanged += (s, e) => RecalcAutoGrow();
-            this.SizeChanged += (s, e) => RecalcAutoGrow();
+            if (flpJugos != null)
+            {
+                flpJugos.SizeChanged += (s, e) => RecalcAutoGrow();
+                flpJugos.ControlAdded += (s, e) => RecalcAutoGrow();
+                flpJugos.ControlRemoved += (s, e) => RecalcAutoGrow();
+            }
+            if (flpBeb != null)
+            {
+                flpBeb.SizeChanged += (s, e) => RecalcAutoGrow();
+                flpBeb.ControlAdded += (s, e) => RecalcAutoGrow();
+                flpBeb.ControlRemoved += (s, e) => RecalcAutoGrow();
+            }
 
-            // Selección exclusiva: clic en cualquier parte (y en TextBox interno)
+            this.SizeChanged += (s, e) => RecalcAutoGrow();
             WireSelectClick(this);
             WireInnerTextBoxClicks(txtCombo);
         }
 
-        // ========= API pública =========
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
 
-        /// <summary>
-        /// Establece el encabezado del combo y su PU. El texto queda como: "N x DESCRIPCION = S/ total".
-        /// </summary>
+            // Calcula baseHeight con layout materializado
+            int hCombo = (txtCombo != null) ? txtCombo.Height : 0;
+            int hJugos = (flpJugos != null) ? flpJugos.Height : 0;
+
+            FlowLayoutPanel flpBeb;
+            TryFindControl("flpBebCDesayuno", out flpBeb);
+            int hBeb = (flpBeb != null) ? flpBeb.Height : 0;
+
+            _baseHeight = this.Height - (hCombo + hJugos + hBeb);
+            BeginInvoke(new Action(RecalcAutoGrow));
+        }
+
+        // ========= API ENCABEZADO =========
         public void SetCombo(string codigo, string descripcion, int cantidad, decimal precioUnitarioFinal)
         {
             Codigo = (codigo ?? string.Empty).Trim();
@@ -128,101 +135,166 @@ namespace CapaPresentacion.Controles
                 _tt.SetToolTip(txtCombo, string.Format("PU: S/ {0:0.00}", PrecioUnitario));
             }
 
-            // Asegura recálculo
             if (IsHandleCreated) BeginInvoke(new Action(RecalcAutoGrow));
             else _pendingGrow = true;
         }
 
-        /// <summary>
-        /// Limpia todos los jugos del combo.
-        /// </summary>
+        // ========= API JUGOS =========
         public void ClearJugos()
         {
             _jugos.Clear();
-            _ultimoBloque = null;
-            if (_flpJugos != null) _flpJugos.Controls.Clear();
+            _ultimoJugo = null;
+            if (flpJugos != null) flpJugos.Controls.Clear();
             RecalcAutoGrow();
         }
 
         /// <summary>
-        /// Agrega una unidad de jugo. Si coincide con uno ya existente (misma descripción y precio extra), se agrupa.
-        /// Las notas (líneas) se agregan al bloque correspondiente.
+        /// Agrega una unidad de jugo.
+        /// forzarIndividual = true ⇒ siempre crea un textbox nuevo.
+        /// forzarIndividual = false ⇒ intenta agrupar jugos iguales (descripcion+precio).
+        /// null ⇒ usa AgruparJugosIguales.
         /// </summary>
-        public void AddJugoUnidad(string descripcion, decimal precioExtra, string notas)
+        public void AddJugoUnidad(string descripcion, decimal precioExtra, string notas, bool? forzarIndividual)
         {
-            if (_flpJugos == null) return;
+            if (flpJugos == null) return;
 
-            string key = KeyDe(descripcion, precioExtra);
-            var bloque = _jugos.FirstOrDefault(x => x.Key == key);
+            bool individual = (forzarIndividual.HasValue) ? forzarIndividual.Value : !AgruparJugosIguales;
+
+            BloqueTexto bloque = null;
+            if (!individual)
+            {
+                string key = KeyDe(descripcion, precioExtra);
+                bloque = _jugos.FirstOrDefault(x => x.Key == key);
+            }
 
             if (bloque == null)
             {
-                bloque = new JugoBlock
-                {
-                    Key = key,
-                    Descripcion = (descripcion ?? "").Trim(),
-                    PrecioExtra = precioExtra,
-                    Cantidad = 1,
-                    TextBox = CrearTextBoxJugo()
-                };
+                bloque = new BloqueTexto();
+                bloque.Key = KeyDe(descripcion, precioExtra);
+                bloque.Descripcion = (descripcion ?? "").Trim();
+                bloque.PrecioExtra = precioExtra;
+                bloque.Cantidad = 1;
+                bloque.TextBox = CrearTextBoxDesdePlantilla(_tplJugo);
 
                 if (!string.IsNullOrWhiteSpace(notas))
                     bloque.Notas.AddRange(ToNotas(notas));
 
                 bloque.TextBox.Text = TextoDe(bloque);
 
-                _flpJugos.Controls.Add(bloque.TextBox);
+                flpJugos.Controls.Add(bloque.TextBox);
+                flpJugos.PerformLayout(); // fuerza layout inmediato
+
                 _jugos.Add(bloque);
             }
             else
             {
-                // Agrupar
                 bloque.Cantidad += 1;
+                if (!string.IsNullOrWhiteSpace(notas))
+                    bloque.Notas.AddRange(ToNotas(notas));
+                bloque.TextBox.Text = TextoDe(bloque);
+            }
+
+            _ultimoJugo = bloque;
+            RecalcAutoGrow();
+        }
+
+        public void AppendNotasAlUltimoJugo(string notas)
+        {
+            if (_ultimoJugo == null || string.IsNullOrWhiteSpace(notas)) return;
+            _ultimoJugo.Notas.AddRange(ToNotas(notas));
+            _ultimoJugo.TextBox.Text = TextoDe(_ultimoJugo);
+            RecalcAutoGrow();
+        }
+
+        public decimal GetExtraPromedioJugosPorUnidad(int cantidadTotal)
+        {
+            if (cantidadTotal <= 0) return 0m;
+            decimal extraTotal = 0m;
+            foreach (var b in _jugos) extraTotal += (b.PrecioExtra * b.Cantidad);
+            return extraTotal / cantidadTotal;
+        }
+
+        // ========= API BEBIDAS =========
+        public void ClearBebidas()
+        {
+            _bebidas.Clear();
+            _ultimaBebida = null;
+
+            FlowLayoutPanel flpBeb;
+            if (TryFindControl("flpBebCDesayuno", out flpBeb))
+                flpBeb.Controls.Clear();
+
+            RecalcAutoGrow();
+        }
+
+        public void AddBebidaUnidad(string descripcion, decimal precioExtra, string notas, bool? forzarIndividual)
+        {
+            FlowLayoutPanel flpBeb;
+            if (!TryFindControl("flpBebCDesayuno", out flpBeb)) return;
+
+            bool individual = (forzarIndividual.HasValue) ? forzarIndividual.Value : !AgruparBebidasIguales;
+
+            BloqueTexto bloque = null;
+            if (!individual)
+            {
+                string key = KeyDe(descripcion, precioExtra);
+                bloque = _bebidas.FirstOrDefault(x => x.Key == key);
+            }
+
+            if (bloque == null)
+            {
+                bloque = new BloqueTexto();
+                bloque.Key = KeyDe(descripcion, precioExtra);
+                bloque.Descripcion = (descripcion ?? "").Trim();
+                bloque.PrecioExtra = precioExtra;
+                bloque.Cantidad = 1;
+                bloque.TextBox = CrearTextBoxDesdePlantilla(_tplBeb);
+
                 if (!string.IsNullOrWhiteSpace(notas))
                     bloque.Notas.AddRange(ToNotas(notas));
 
                 bloque.TextBox.Text = TextoDe(bloque);
+
+                flpBeb.Controls.Add(bloque.TextBox);
+                flpBeb.PerformLayout();
+
+                _bebidas.Add(bloque);
+            }
+            else
+            {
+                bloque.Cantidad += 1;
+                if (!string.IsNullOrWhiteSpace(notas))
+                    bloque.Notas.AddRange(ToNotas(notas));
+                bloque.TextBox.Text = TextoDe(bloque);
             }
 
-            _ultimoBloque = bloque;
+            _ultimaBebida = bloque;
             RecalcAutoGrow();
         }
 
-        /// <summary>
-        /// Agrega líneas de notas al último bloque de jugo creado o utilizado.
-        /// </summary>
-        public void AppendNotasAlUltimoJugo(string notas)
+        public void AppendNotasALaUltimaBebida(string notas)
         {
-            if (_ultimoBloque == null || string.IsNullOrWhiteSpace(notas)) return;
-            _ultimoBloque.Notas.AddRange(ToNotas(notas));
-            _ultimoBloque.TextBox.Text = TextoDe(_ultimoBloque);
+            if (_ultimaBebida == null || string.IsNullOrWhiteSpace(notas)) return;
+            _ultimaBebida.Notas.AddRange(ToNotas(notas));
+            _ultimaBebida.TextBox.Text = TextoDe(_ultimaBebida);
             RecalcAutoGrow();
         }
 
-        /// <summary>
-        /// Devuelve el extra promedio por unidad de desayuno (para ajustar el PU final).
-        /// </summary>
-        public decimal GetExtraPromedioPorUnidad(int cantidadTotal)
+        public decimal GetExtraPromedioBebidasPorUnidad(int cantidadTotal)
         {
             if (cantidadTotal <= 0) return 0m;
             decimal extraTotal = 0m;
-            foreach (var b in _jugos)
-                extraTotal += (b.PrecioExtra * b.Cantidad);
+            foreach (var b in _bebidas) extraTotal += (b.PrecioExtra * b.Cantidad);
             return extraTotal / cantidadTotal;
         }
 
-        protected override void OnHandleCreated(EventArgs e)
+        public decimal GetExtraPromedioTotalPorUnidad(int cantidadTotal)
         {
-            base.OnHandleCreated(e);
-            if (_pendingGrow)
-            {
-                _pendingGrow = false;
-                BeginInvoke(new Action(RecalcAutoGrow));
-            }
+            return GetExtraPromedioJugosPorUnidad(cantidadTotal) +
+                   GetExtraPromedioBebidasPorUnidad(cantidadTotal);
         }
 
-        // ========= Selección (exclusiva) =========
-
+        // ========= Selección =========
         private void WireSelectClick(Control root)
         {
             if (root == null) return;
@@ -239,7 +311,6 @@ namespace CapaPresentacion.Controles
             TextBox inner = TryGetInnerTextBox(guna2TextBox);
             if (inner == null) return;
 
-            // txtCombo es solo lectura: el click selecciona el panel
             inner.ReadOnly = true;
             inner.ShortcutsEnabled = false;
             inner.Cursor = Cursors.Hand;
@@ -248,26 +319,22 @@ namespace CapaPresentacion.Controles
             inner.MouseDown -= Any_Click_Select; inner.MouseDown += Any_Click_Select;
         }
 
-        private void Any_Click_Select(object sender, EventArgs e)
-        {
-            SeleccionarEste();
-        }
+        private void Any_Click_Select(object sender, EventArgs e) { SeleccionarEste(); }
 
         public void SeleccionarEste()
         {
             if (SeleccionActual == this) return;
 
-            var anterior = SeleccionActual;
+            ComboPedidoItem anterior = SeleccionActual;
             SeleccionActual = this;
 
             if (anterior != null) anterior.SetVisualSelected(false);
             this.SetVisualSelected(true);
 
-            // Asegura visibilidad en su contenedor scrollable
-            var scrollable = this.Parent as ScrollableControl;
+            ScrollableControl scrollable = this.Parent as ScrollableControl;
             if (scrollable != null) scrollable.ScrollControlIntoView(this);
 
-            var handler = SeleccionCambio;
+            EventHandler handler = SeleccionCambio;
             if (handler != null) handler.Invoke(null, EventArgs.Empty);
         }
 
@@ -276,65 +343,127 @@ namespace CapaPresentacion.Controles
             this.BorderStyle = selected ? BorderStyle.FixedSingle : BorderStyle.None;
         }
 
-        // ========= AutoGrow =========
+        public static void Seleccionar(ComboPedidoItem item, bool scrollIntoView)
+        {
+            if (SeleccionActual == item) return;
 
+            if (SeleccionActual != null) SeleccionActual.SetVisualSelected(false);
+            SeleccionActual = item;
+
+            if (SeleccionActual != null)
+            {
+                SeleccionActual.SetVisualSelected(true);
+
+                if (scrollIntoView)
+                {
+                    ScrollableControl sc = GetScrollableAncestor(SeleccionActual);
+                    if (sc != null) sc.ScrollControlIntoView(SeleccionActual);
+                }
+            }
+
+            EventHandler handler = SeleccionCambio;
+            if (handler != null) handler.Invoke(null, EventArgs.Empty);
+        }
+
+        private static ScrollableControl GetScrollableAncestor(Control c)
+        {
+            for (Control p = c != null ? c.Parent : null; p != null; p = p.Parent)
+                if (p is ScrollableControl) return (ScrollableControl)p;
+            return null;
+        }
+
+        // ========= AutoGrow / medidas =========
         private void RecalcAutoGrow()
         {
             if (!IsHandleCreated) return;
 
+            AjustarAnchosContenedor(flpJugos);
+            FlowLayoutPanel flpBeb;
+            if (TryFindControl("flpBebCDesayuno", out flpBeb))
+                AjustarAnchosContenedor(flpBeb);
+
             int hCombo = AltoNecesario(txtCombo);
-            int hJugos = (_flpJugos != null) ? _flpJugos.Height : 0;
+            int hJugos = (flpJugos != null) ? flpJugos.Height : 0;
+            int hBeb = 0;
+            FlowLayoutPanel flpBeb2;
+            if (TryFindControl("flpBebCDesayuno", out flpBeb2))
+                hBeb = flpBeb2.Height;
 
             SuspendLayout();
-            if (txtCombo != null && txtCombo.Height != hCombo) txtCombo.Height = hCombo;
 
-            // La altura total es base + cabecera + contenedor de jugos (AutoSize)
-            this.Height = _baseHeight + hCombo + hJugos;
+            if (txtCombo != null && txtCombo.Height != hCombo)
+                txtCombo.Height = hCombo;
+
+            this.Height = _baseHeight + hCombo + hJugos + hBeb;
+
             ResumeLayout();
         }
 
-        private int AltoNecesario(Control txt)
+        private void AjustarAnchosContenedor(FlowLayoutPanel cont)
         {
-            if (txt == null) return 0;
+            if (cont == null) return;
 
-            string t = Convert.ToString(txt.GetType().GetProperty("Text").GetValue(txt, null)) ?? string.Empty;
+            int ancho = Math.Max(1, cont.ClientSize.Width);
 
-            // Ancho disponible
-            int w = txt.ClientSize.Width > 0 ? txt.ClientSize.Width : Math.Max(1, txt.Width - 6);
+            foreach (Control c in cont.Controls)
+            {
+                if (c.Width != ancho)
+                {
+                    c.Width = ancho;
+                    AjustarAlturaControl(c);
+                }
+            }
+        }
 
-            // Si está vacío, usa un mínimo
-            if (t.Length == 0)
-                return Math.Max(24, txt.Font.Height + 6);
+        private void AjustarAlturaControl(Control c)
+        {
+            Guna2TextBox tb = c as Guna2TextBox;
+            if (tb == null) return;
 
-            // 1) Si es Guna2TextBox y podemos acceder al TextBox interno, contamos líneas exactas
-            TextBox inner = TryGetInnerTextBox(txt);
+            int w = Math.Max(1, tb.ClientSize.Width);
+            using (Graphics g = tb.CreateGraphics())
+            {
+                StringFormat sf = new StringFormat(StringFormatFlags.LineLimit | StringFormatFlags.MeasureTrailingSpaces);
+                SizeF size = g.MeasureString((tb.Text ?? "") + "\nA", tb.Font, w, sf);
+                int needed = (int)Math.Ceiling(size.Height) + 4;
+                if (needed < 28) needed = 28;
+                if (tb.Height != needed) tb.Height = needed;
+            }
+        }
+
+        private int AltoNecesario(Control tb)
+        {
+            if (tb == null) return 0;
+
+            string t = Convert.ToString(tb.GetType().GetProperty("Text").GetValue(tb, null)) ?? string.Empty;
+            int w = tb.ClientSize.Width > 0 ? tb.ClientSize.Width : Math.Max(1, tb.Width - 6);
+
+            if (t.Length == 0) return Math.Max(24, tb.Font.Height + 6);
+
+            TextBox inner = TryGetInnerTextBox(tb);
             if (inner != null && inner.IsHandleCreated)
             {
-                int last = t.Length - 1;
+                int last = Math.Max(0, t.Length - 1);
                 while (last >= 0 && (t[last] == '\r' || t[last] == '\n')) last--;
                 if (last < 0) last = 0;
 
                 try { inner.WordWrap = true; } catch { }
 
                 Point pt = inner.GetPositionFromCharIndex(last);
-                int needed = pt.Y + inner.Font.Height + 6; // padding inferior
-                return Math.Max(24, needed);
+                int needed = pt.Y + inner.Font.Height + 6;
+                return Math.Max(28, needed);
             }
 
-            // 2) Fallback genérico (mide dibujo; añade "\nA" para no perder última línea)
-            using (Graphics g = txt.CreateGraphics())
+            using (Graphics g = tb.CreateGraphics())
             {
-                StringFormat sf = new StringFormat(StringFormatFlags.LineLimit | StringFormatFlags.NoClip);
-                sf.FormatFlags |= StringFormatFlags.MeasureTrailingSpaces;
-
-                SizeF size = g.MeasureString(t + "\nA", txt.Font, w, sf);
+                StringFormat sf = new StringFormat(StringFormatFlags.LineLimit | StringFormatFlags.MeasureTrailingSpaces);
+                SizeF size = g.MeasureString(t + "\nA", tb.Font, w, sf);
                 int needed = (int)Math.Ceiling(size.Height) + 4;
-                return Math.Max(24, needed);
+                return Math.Max(28, needed);
             }
         }
 
         // ========= Helpers =========
-
         private static void ConfigurarTextBoxSoloLectura(Guna2TextBox tb)
         {
             if (tb == null) return;
@@ -343,52 +472,51 @@ namespace CapaPresentacion.Controles
             tb.WordWrap = true;
             tb.AcceptsReturn = true;
             tb.ScrollBars = ScrollBars.None;
-            tb.ReadOnly = true;      // encabezado del combo NO editable
+            tb.ReadOnly = true;
             tb.Enabled = true;
             tb.Cursor = Cursors.Hand;
+            tb.Dock = DockStyle.Top;
         }
 
-        private Guna2TextBox CrearTextBoxJugo()
+        private Guna2TextBox CrearTextBoxDesdePlantilla(Guna2TextBox plantilla)
         {
-            Guna2TextBox tb;
+            var tb = new Guna2TextBox();
 
-            if (_tplJugo != null)
+            if (plantilla != null)
             {
-                tb = new Guna2TextBox
-                {
-                    Font = _tplJugo.Font,
-                    ForeColor = _tplJugo.ForeColor,
-                    FillColor = _tplJugo.FillColor,
-                    BorderRadius = _tplJugo.BorderRadius,
-                    BorderColor = _tplJugo.BorderColor,
-                    BorderThickness = _tplJugo.BorderThickness,
-                    Padding = _tplJugo.Padding,
-                    Margin = new Padding(0, 4, 0, 0)
-                };
+                tb.Font = plantilla.Font;
+                tb.ForeColor = plantilla.ForeColor;
+                tb.FillColor = plantilla.FillColor;
+                tb.BorderRadius = plantilla.BorderRadius;
+                tb.BorderColor = plantilla.BorderColor;
+                tb.BorderThickness = plantilla.BorderThickness;
+                tb.Padding = plantilla.Padding;
+                tb.Margin = new Padding(0, 4, 0, 0);
+                tb.PlaceholderText = plantilla.PlaceholderText;
+                tb.TextAlign = plantilla.TextAlign;
             }
             else
             {
-                tb = new Guna2TextBox
-                {
-                    BorderRadius = 6,
-                    BorderThickness = 1,
-                    Margin = new Padding(0, 4, 0, 0)
-                };
+                tb.BorderRadius = 6;
+                tb.BorderThickness = 1;
+                tb.Margin = new Padding(0, 4, 0, 0);
             }
 
-            // Jugos: EDITABLES (para que el mozo pueda ajustar notas)
+            tb.Dock = DockStyle.Top;
+            tb.Width = (flpJugos != null ? flpJugos.ClientSize.Width
+                     : this.ClientSize.Width > 0 ? this.ClientSize.Width : 300);
+            tb.MinimumSize = new Size(tb.Width, 28);
+
             tb.Multiline = true;
             tb.WordWrap = true;
             tb.AcceptsReturn = true;
             tb.ScrollBars = ScrollBars.None;
-            tb.ReadOnly = false;
+            tb.ReadOnly = true;              // si quieres editable, cambia a false
             tb.Enabled = true;
-            tb.Cursor = Cursors.IBeam;
+            tb.Cursor = Cursors.Hand;
+            tb.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
 
-            // Al teclear, recalcula altura total del control
             tb.TextChanged += (s, e) => RecalcAutoGrow();
-
-            // Click selecciona el panel
             tb.Click += (s, e) => SeleccionarEste();
 
             return tb;
@@ -396,15 +524,26 @@ namespace CapaPresentacion.Controles
 
         private static string KeyDe(string descripcion, decimal precio)
         {
-            var d = (descripcion ?? "").Trim().ToUpperInvariant();
+            string d = (descripcion ?? "").Trim().ToUpperInvariant();
             return d + "|" + precio.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
         }
 
-        private static string TextoDe(JugoBlock b)
+        private static IEnumerable<string> ToNotas(string notas)
+        {
+            string t = (notas ?? "").Replace("\r\n", "\n");
+            foreach (string raw in t.Split('\n'))
+            {
+                string s = raw.Trim();
+                if (s.Length == 0) continue;
+                if (s.StartsWith("-")) s = s.TrimStart('-').Trim();
+                yield return s;
+            }
+        }
+
+        private static string TextoDe(BloqueTexto b)
         {
             var sb = new StringBuilder();
 
-            // Encabezado del bloque: "N x DESCRIPCION (= S/ 0.00 si aplica)"
             if (b.Cantidad <= 1)
                 sb.Append("1 x ").Append(b.Descripcion);
             else
@@ -413,24 +552,10 @@ namespace CapaPresentacion.Controles
             if (b.PrecioExtra > 0)
                 sb.Append(" = S/ ").Append(b.PrecioExtra.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
 
-            // Notas
-            foreach (var n in b.Notas)
+            foreach (string n in b.Notas)
                 sb.AppendLine().Append("  - ").Append(n);
 
             return sb.ToString();
-        }
-
-        private static IEnumerable<string> ToNotas(string notas)
-        {
-            var t = (notas ?? "").Replace("\r\n", "\n");
-            var parts = t.Split('\n');
-            foreach (var s0 in parts)
-            {
-                var s = s0.Trim();
-                if (s.Length == 0) continue;
-                if (s.StartsWith("-")) s = s.TrimStart('-').Trim();
-                yield return s;
-            }
         }
 
         private static TextBox TryGetInnerTextBox(Control guna2TextBox)
@@ -446,6 +571,24 @@ namespace CapaPresentacion.Controles
             {
                 return null;
             }
+        }
+
+        private static void PrepFlow(FlowLayoutPanel flp)
+        {
+            if (flp == null) return;
+            flp.FlowDirection = FlowDirection.TopDown;
+            flp.WrapContents = false;
+            flp.AutoSize = true;
+            flp.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            flp.Dock = DockStyle.Top;
+            flp.Margin = new Padding(0);
+            flp.Padding = new Padding(0);
+        }
+
+        private bool TryFindControl<T>(string name, out T ctrl) where T : Control
+        {
+            ctrl = this.Controls.Find(name, true).OfType<T>().FirstOrDefault();
+            return (ctrl != null);
         }
     }
 }

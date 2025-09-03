@@ -16,5 +16,25 @@ namespace CapaPresentacion.Notas
         {
             InitializeComponent();
         }
+
+        private void frmNDesayunoContinental_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnCerrar_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnContinuar_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnEliminar_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

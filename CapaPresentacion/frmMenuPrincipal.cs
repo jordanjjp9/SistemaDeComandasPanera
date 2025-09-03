@@ -348,7 +348,7 @@ namespace CapaPresentacion
             // 1) ¿Es un combo de desayuno? -> abre el wizard (jugos + notas) y termina aquí
             if (_svcProductos.EsComboDesayuno(prod))
             {
-                EjecutarWizardDesayunoPorUnidad(prod, cantidad); // ⇦ NUEVO
+                EjecutarWizardDesayunoPorUnidad(prod, cantidad);   // ← usa este
                 return;
             }
 
@@ -619,121 +619,454 @@ namespace CapaPresentacion
         //////////    return sb.ToString();
         //////////}
 
+        //private void EjecutarWizardDesayunoPorUnidad(ceProductos prod, int cantidad)
+        //{
+        //    if (prod == null || cantidad <= 0) return;
+
+        //    // 1) Crea el panel del combo (todavía sin PU final).
+        //    var item = new CapaPresentacion.Controles.ComboPedidoItem();
+
+        //    // Acumulador de extras para calcular PU final
+        //    decimal extraTotal = 0m;
+
+        //    // 2) Recolecta: (CJugo → NBebidas) por cada unidad
+        //    for (int i = 1; i <= cantidad; i++)
+        //    {
+        //        // --- 2.1 Selección del jugo (obligatoria, una por pasada) ---
+        //        CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple jugoSel;
+        //        using (var frmJ = new CapaPresentacion.Notas.frmCJugoDesayuno())
+        //        {
+        //            frmJ.CantidadRequerida = 1; // UNA selección por vuelta
+        //            frmJ.ProductoBaseTexto = $"1 x {(prod.Descripcion ?? prod.Codigo)}  ({i}/{cantidad})";
+        //            frmJ.ListaPrecio = "001";
+
+        //            if (frmJ.ShowDialog(this) != DialogResult.OK) return;
+
+        //            var lista = frmJ.Selecciones ?? new List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple>();
+        //            if (lista.Count == 0) return;
+        //            jugoSel = lista[0];
+        //        }
+
+        //        // Sumamos recargo
+        //        extraTotal += jugoSel.PrecioExtra;
+
+        //        // Insertamos el bloque del jugo (sin notas aún) en el control
+        //        item.AddJugoUnidad(jugoSel.Descripcion, jugoSel.PrecioExtra, null);
+
+        //        // --- 2.2 Notas de bebidas (opcional) para esta unidad ---
+        //        using (var frmB = new CapaPresentacion.Notas.frmNBebidas())
+        //        {
+        //            // Si quisieras mostrar referencia arriba, podrías precargar:
+        //            // frmB.TextoInicial = ""; // lo dejamos vacío para que no duplique encabezados
+        //            if (frmB.ShowDialog(this) == DialogResult.OK && !string.IsNullOrWhiteSpace(frmB.Notas))
+        //            {
+        //                // Agrega las notas a ESTE jugo (el último añadido)
+        //                item.AppendNotasAlUltimoJugo(frmB.Notas);
+        //            }
+        //        }
+        //    }
+
+        //    // 3) Calcular PU final = base + promedio de extras por unidad
+        //    decimal extraPromedio = item.GetExtraPromedioPorUnidad(cantidad);
+        //    decimal puFinal = PrecioDe(prod) + extraPromedio;
+
+        //    // 4) Encabezado del combo + pintar en la lista
+        //    item.SetCombo(prod.Codigo, prod.Descripcion, cantidad, puFinal);
+
+        //    flpLineas.SuspendLayout();
+        //    flpLineas.Controls.Add(item);
+        //    flpLineas.ResumeLayout();
+
+        //    // Seleccionar la línea recién agregada
+        //    item.SeleccionarEste();
+        //    btnEliminar.Enabled = (CapaPresentacion.Controles.ComboPedidoItem.SeleccionActual != null);
+        //}
+
+        //private void EjecutarWizardDesayunoPorUnidad(ceProductos prod, int cantidad)
+        //{
+        //    if (prod == null || cantidad <= 0) return;
+
+        //    // 1) Recolectar (Jugo + Notas) por cada unidad solicitada
+        //    var unidades = new List<(string desc, decimal extra, string notas)>();
+
+        //    for (int i = 1; i <= cantidad; i++)
+        //    {
+        //        // --- 1.1 Jugo (una unidad por pasada) ---
+        //        List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple> sel = null;
+
+        //        using (var frmJ = new CapaPresentacion.Notas.frmCJugoDesayuno())
+        //        {
+        //            frmJ.CantidadRequerida = 1; // una unidad
+        //            frmJ.ListaPrecio = "001";
+        //            frmJ.ProductoBaseTexto = string.Format("{0} x {1}  ({2}/{3})",
+        //                                    1, (prod.Descripcion ?? prod.Codigo), i, cantidad);
+
+        //            if (frmJ.ShowDialog(this) != DialogResult.OK) return;
+
+        //            sel = frmJ.Selecciones ?? new List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple>();
+        //            if (sel.Count == 0) return; // canceló o no eligió
+        //        }
+
+        //        var j = sel[0]; // solo una selección por pasada
+
+        //        // --- 1.2 Notas de bebidas (opcionales) ---
+        //        string notasBebidas = string.Empty;
+        //        using (var frmB = new CapaPresentacion.Notas.frmNBebidas())
+        //        {
+        //            // Si quieres precargar algo, puedes dejarlo en blanco por unidad
+        //            // frmB.TextoInicial = "";
+        //            if (frmB.ShowDialog(this) == DialogResult.OK)
+        //                notasBebidas = frmB.Notas ?? string.Empty;
+        //        }
+
+        //        unidades.Add((j.Descripcion, j.PrecioExtra, notasBebidas));
+        //    }
+
+        //    // 2) Precio final por unidad = base del desayuno + (promedio de extras por unidad)
+        //    decimal extraTotal = unidades.Sum(u => u.extra);
+        //    decimal puConExtra = PrecioDe(prod) + (cantidad > 0 ? (extraTotal / cantidad) : 0m);
+
+        //    // 3) Crear el ComboPedidoItem y setear cabecera
+        //    var item = new CapaPresentacion.Controles.ComboPedidoItem();
+        //    item.SetCombo(prod.Codigo, prod.Descripcion, cantidad, puConExtra);
+
+        //    // 4) Agregar un textbox (clonado) por cada unidad, con sus notas debajo
+        //    foreach (var u in unidades)
+        //    {
+        //        var header = new StringBuilder();
+        //        header.Append("1 x ").Append(u.desc);
+        //        if (u.extra > 0m)
+        //            header.Append(" = S/ ").Append(u.extra.ToString("0.00", CultureInfo.InvariantCulture));
+
+        //        // crea el bloque/textarea del jugo
+        //        item.AddJugoDesayuno(header.ToString());
+
+        //        // añade notas (una por línea) al último jugo
+        //        if (!string.IsNullOrWhiteSpace(u.notas))
+        //        {
+        //            var lines = (u.notas ?? string.Empty)
+        //                        .Replace("\r\n", "\n")
+        //                        .Split('\n')
+        //                        .Select(s => (s ?? string.Empty).Trim())
+        //                        .Where(s => s.Length > 0);
+
+        //            foreach (var ln in lines)
+        //                item.AppendNotaAlUltimoJugo(ln);
+        //        }
+        //    }
+
+        //    // 5) Mostrar el item en el panel izquierdo
+        //    flpLineas.SuspendLayout();
+        //    flpLineas.Controls.Add(item);
+        //    flpLineas.ResumeLayout();
+
+        //    // Seleccionar recién agregado y habilitar Eliminar
+        //    item.SeleccionarEste();
+        //    btnEliminar.Enabled = (CapaPresentacion.Controles.ComboPedidoItem.SeleccionActual != null);
+        //}
+
+        // ===== flujo completo por unidad: (Jugo + Notas) y luego Bebida Caliente =====
+        //private void EjecutarWizardDesayunoPorUnidad(ceProductos prod, int cantidad)
+        //{
+        //    if (prod == null || cantidad <= 0) return;
+
+        //    // 1) Crea el Item del combo (lo mostraremos y luego actualizamos el PU con extras)
+        //    var item = new CapaPresentacion.Controles.ComboPedidoItem();
+        //    item.SetCombo(prod.Codigo, prod.Descripcion, cantidad, PrecioDe(prod));   // PU base primero
+
+        //    // 2) Por cada desayuno, pedir: Jugo + Notas, y luego Bebida Caliente
+        //    for (int i = 1; i <= cantidad; i++)
+        //    {
+        //        // --- 2.1 JUGO (una unidad) ---
+        //        List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple> selJ = null;
+        //        using (var frmJ = new CapaPresentacion.Notas.frmCJugoDesayuno())
+        //        {
+        //            frmJ.CantidadRequerida = 1;
+        //            frmJ.ListaPrecio = "001";
+        //            frmJ.ProductoBaseTexto = $"{cantidad} x {prod.Descripcion}  ({i}/{cantidad})";
+
+        //            if (frmJ.ShowDialog(this) != DialogResult.OK) return;
+
+        //            selJ = frmJ.Selecciones ?? new List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple>();
+        //            if (selJ.Count == 0) return;
+        //        }
+
+        //        var j = selJ[0];
+
+        //        // --- 2.2 NOTAS BEBIDAS FRÍAS para este jugo (opcional) ---
+        //        string notasBebidas = string.Empty;
+        //        using (var frmNB = new CapaPresentacion.Notas.frmNBebidas())
+        //        {
+        //            // precarga vacío por unidad
+        //            if (frmNB.ShowDialog(this) == DialogResult.OK)
+        //                notasBebidas = frmNB.Notas ?? string.Empty;
+        //        }
+
+        //        // agrega al item (agrupa iguales)
+        //        item.AddJugoUnidad(j.Descripcion, j.PrecioExtra, notasBebidas);
+
+        //        // --- 2.3 BEBIDA CALIENTE (una unidad) ---
+        //        List<CapaPresentacion.Notas.frmCBebidasCalientes.SeleccionSimple> selB = null;
+        //        using (var frmB = new CapaPresentacion.Notas.frmCBebidasCalientes())
+        //        {
+        //            frmB.CantidadRequerida = 1;
+        //            frmB.ListaPrecio = "001";
+        //            frmB.ProductoBaseTexto = $"{cantidad} x {prod.Descripcion}  ({i}/{cantidad})";
+
+        //            if (frmB.ShowDialog(this) != DialogResult.OK) return;
+
+        //            selB = frmB.Selecciones ?? new List<CapaPresentacion.Notas.frmCBebidasCalientes.SeleccionSimple>();
+        //            if (selB.Count == 0) return;
+        //        }
+
+        //        var b = selB[0];
+
+        //        // agrega bebida caliente (si quieres permitir notas separadas, aquí podrías abrir otro diálogo)
+        //        item.AddBebidaUnidad(b.Descripcion, b.PrecioExtra, null);
+        //    }
+
+        //    // 3) Recalcular PU = base + promedio de TODOS los extras (jugos + bebidas)
+        //    decimal puConExtra = PrecioDe(prod) + item.GetExtraPromedioTotal(cantidad);
+        //    item.SetCombo(prod.Codigo, prod.Descripcion, cantidad, puConExtra); // actualiza cabecera
+
+        //    // 4) Agregar al panel izquierdo
+        //    flpLineas.SuspendLayout();
+        //    flpLineas.Controls.Add(item);
+        //    flpLineas.ResumeLayout();
+
+        //    CapaPresentacion.Controles.ComboPedidoItem.Seleccionar(item, true);
+        //    btnEliminar.Enabled = (CapaPresentacion.Controles.ComboPedidoItem.SeleccionActual != null);
+        //}
+
+        // frmMenuPrincipal.cs  (REEMPLAZA TU MÉTODO)
+        //private void EjecutarWizardDesayunoPorUnidad(ceProductos prod, int cantidad)
+        //{
+        //    if (prod == null || cantidad <= 0) return;
+
+        //    // 0) Crear el item de combo con PU base (sin extras) y mostrarlo ya en la lista
+        //    var item = new CapaPresentacion.Controles.ComboPedidoItem();
+        //    decimal puBase = PrecioDe(prod);
+        //    item.SetCombo(prod.Codigo, prod.Descripcion, cantidad, puBase);
+
+        //    flpLineas.SuspendLayout();
+        //    flpLineas.Controls.Add(item);
+        //    flpLineas.ResumeLayout();
+        //    CapaPresentacion.Controles.ComboPedidoItem.Seleccionar(item, true);
+        //    btnEliminar.Enabled = (CapaPresentacion.Controles.ComboPedidoItem.SeleccionActual != null);
+
+        //    // 1) JUGOS POR UNIDAD (cada uno con su nota)
+        //    for (int i = 1; i <= cantidad; i++)
+        //    {
+        //        // 1.1) Elegir el jugo (UNA unidad en cada pasada)
+        //        List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple> sel = null;
+        //        using (var frmJ = new CapaPresentacion.Notas.frmCJugoDesayuno())
+        //        {
+        //            frmJ.CantidadRequerida = 1; // una unidad por pasada
+        //            frmJ.ProductoBaseTexto = $"1 x {prod.Descripcion}  ({i}/{cantidad})";
+        //            frmJ.ListaPrecio = "001";
+
+        //            if (frmJ.ShowDialog(this) != DialogResult.OK)
+        //            {
+        //                // Canceló → deshacer y salir
+        //                flpLineas.Controls.Remove(item);
+        //                item.Dispose();
+        //                return;
+        //            }
+
+        //            sel = frmJ.Selecciones ?? new List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple>();
+        //            if (sel.Count == 0)
+        //            {
+        //                flpLineas.Controls.Remove(item);
+        //                item.Dispose();
+        //                return;
+        //            }
+        //        }
+
+        //        var j = sel[0]; // debe venir justo 1
+        //        item.AddJugoUnidad(j.Descripcion, j.PrecioExtra, null);
+
+        //        // 1.2) Nota para este jugo
+        //        using (var frmN = new CapaPresentacion.Notas.frmNBebidas())
+        //        {
+        //            // Precargo el encabezado "1 x JUGO ..."
+        //            frmN.TextoInicial = $"1 x {j.Descripcion}";
+        //            if (frmN.ShowDialog(this) == DialogResult.OK && !string.IsNullOrWhiteSpace(frmN.Notas))
+        //            {
+        //                item.AppendNotasAlUltimoJugo(frmN.Notas);
+        //            }
+        //        }
+        //    }
+
+        //    // 2) BEBIDAS CALIENTES (después de terminar TODOS los jugos)
+        //    using (var frmB = new CapaPresentacion.Notas.frmCBebidasCalientes())
+        //    {
+        //        frmB.CantidadRequerida = cantidad;                               // exige tantas bebidas como desayunos
+        //        frmB.ProductoBaseTexto = $"{cantidad} x {prod.Descripcion}";     // visible arriba
+        //        frmB.ListaPrecio = "001";
+
+        //        if (frmB.ShowDialog(this) != DialogResult.OK)
+        //        {
+        //            // Canceló → deshacer y salir
+        //            flpLineas.Controls.Remove(item);
+        //            item.Dispose();
+        //            return;
+        //        }
+
+        //        var bebidas = frmB.Selecciones ?? new List<CapaPresentacion.Notas.frmCBebidasCalientes.SeleccionSimple>();
+        //        if (bebidas.Count != cantidad)
+        //        {
+        //            // Reglas: deben ser exactamente 'cantidad' bebidas
+        //            MessageBox.Show($"Debes elegir {cantidad} bebida(s) caliente(s).", "Bebidas", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //            flpLineas.Controls.Remove(item);
+        //            item.Dispose();
+        //            return;
+        //        }
+
+        //        foreach (var b in bebidas)
+        //            item.AddBebidaUnidad(b.Descripcion, b.PrecioExtra, null);
+        //    }
+
+        //    // 3) Recalcular PU final con TODOS los extras (jugos + bebidas)
+        //    decimal extraPromedio = item.GetExtraPromedioTotal(cantidad);
+        //    item.SetCombo(prod.Codigo, prod.Descripcion, cantidad, puBase + extraPromedio);
+
+        //    // Seleccionar y listo
+        //    CapaPresentacion.Controles.ComboPedidoItem.Seleccionar(item, true);
+        //    btnEliminar.Enabled = (CapaPresentacion.Controles.ComboPedidoItem.SeleccionActual != null);
+        //}
         private void EjecutarWizardDesayunoPorUnidad(ceProductos prod, int cantidad)
         {
             if (prod == null || cantidad <= 0) return;
 
-            // 1) Crea el panel del combo (todavía sin PU final).
-            var item = new CapaPresentacion.Controles.ComboPedidoItem();
+            // 0) Crear item visual y configurar preferencias de agrupado
+            var item = new CapaPresentacion.Controles.ComboPedidoItem
+            {
+                AgruparJugosIguales = true,   // <<— clave para que salga: 2 x JUGO DE PIÑA + notas
+                AgruparBebidasIguales = true
+            };
 
-            // Acumulador de extras para calcular PU final
-            decimal extraTotal = 0m;
-
-            // 2) Recolecta: (CJugo → NBebidas) por cada unidad
+            // 1) Por cada unidad: un jugo + (opcional) notas libres para ese jugo
             for (int i = 1; i <= cantidad; i++)
             {
-                // --- 2.1 Selección del jugo (obligatoria, una por pasada) ---
-                CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple jugoSel;
+                List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple> sel = null;
+
                 using (var frmJ = new CapaPresentacion.Notas.frmCJugoDesayuno())
                 {
-                    frmJ.CantidadRequerida = 1; // UNA selección por vuelta
-                    frmJ.ProductoBaseTexto = $"1 x {(prod.Descripcion ?? prod.Codigo)}  ({i}/{cantidad})";
+                    frmJ.CantidadRequerida = 1;
                     frmJ.ListaPrecio = "001";
+                    frmJ.ProductoBaseTexto = $"1 x {prod.Descripcion}  ({i}/{cantidad})";
 
                     if (frmJ.ShowDialog(this) != DialogResult.OK) return;
 
-                    var lista = frmJ.Selecciones ?? new List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple>();
-                    if (lista.Count == 0) return;
-                    jugoSel = lista[0];
+                    sel = frmJ.Selecciones ?? new List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple>();
+                    if (sel.Count == 0) return;
                 }
 
-                // Sumamos recargo
-                extraTotal += jugoSel.PrecioExtra;
+                var jugo = sel[0];
 
-                // Insertamos el bloque del jugo (sin notas aún) en el control
-                item.AddJugoUnidad(jugoSel.Descripcion, jugoSel.PrecioExtra, null);
-
-                // --- 2.2 Notas de bebidas (opcional) para esta unidad ---
-                using (var frmB = new CapaPresentacion.Notas.frmNBebidas())
+                string notasJugo = string.Empty;
+                using (var frmN = new CapaPresentacion.Notas.frmNBebidas())
                 {
-                    // Si quisieras mostrar referencia arriba, podrías precargar:
-                    // frmB.TextoInicial = ""; // lo dejamos vacío para que no duplique encabezados
-                    if (frmB.ShowDialog(this) == DialogResult.OK && !string.IsNullOrWhiteSpace(frmB.Notas))
+                    // si quieres precargar algo en el cuadro, ponlo aquí:
+                    // frmN.TextoInicial = "";
+                    if (frmN.ShowDialog(this) == DialogResult.OK)
+                        notasJugo = frmN.Notas ?? string.Empty;
+                }
+
+                // NO forzar individual: así respeta AgruparJugosIguales = true
+                item.AddJugoUnidad(jugo.Descripcion, jugo.PrecioExtra, notasJugo, /*forzarIndividual*/ null);
+            }
+
+            // 2) Elegir Bebidas calientes para el total (bloque)
+            using (var frmB = new CapaPresentacion.Notas.frmCBebidasCalientes())
+            {
+                frmB.CantidadRequerida = cantidad;
+                frmB.ListaPrecio = "001";
+                frmB.ProductoBaseTexto = $"{cantidad} x {prod.Descripcion}";
+
+                if (frmB.ShowDialog(this) == DialogResult.OK)
+                {
+                    // Asegura tipos compatibles (por si la clase de SeleccionSimple difiere)
+                    var seleB = frmB.Selecciones ?? new List<CapaPresentacion.Notas.frmCBebidasCalientes.SeleccionSimple>();
+                    foreach (var b in seleB)
                     {
-                        // Agrega las notas a ESTE jugo (el último añadido)
-                        item.AppendNotasAlUltimoJugo(frmB.Notas);
+                        item.AddBebidaUnidad(b.Descripcion, b.PrecioExtra, /*notas*/ string.Empty, /*forzarIndividual*/ false);
                     }
+                }
+                else
+                {
+                    // Si las bebidas son obligatorias, puedes abortar aquí.
+                    // return;
                 }
             }
 
-            // 3) Calcular PU final = base + promedio de extras por unidad
-            decimal extraPromedio = item.GetExtraPromedioPorUnidad(cantidad);
-            decimal puFinal = PrecioDe(prod) + extraPromedio;
+            // 3) Precio final por unidad = base + promedio de extras (jugos + bebidas)
+            decimal puBase = PrecioDe(prod);
+            decimal puFinal = puBase + item.GetExtraPromedioTotalPorUnidad(cantidad);
 
-            // 4) Encabezado del combo + pintar en la lista
+            // 4) Encabezado del combo y pintar en el panel izquierdo
             item.SetCombo(prod.Codigo, prod.Descripcion, cantidad, puFinal);
 
             flpLineas.SuspendLayout();
             flpLineas.Controls.Add(item);
             flpLineas.ResumeLayout();
 
-            // Seleccionar la línea recién agregada
-            item.SeleccionarEste();
+            CapaPresentacion.Controles.ComboPedidoItem.Seleccionar(item, true);
             btnEliminar.Enabled = (CapaPresentacion.Controles.ComboPedidoItem.SeleccionActual != null);
         }
 
-        private string ConstruirResumenJugoPorUnidad(List<UnidadJugo> unis, int cantidad)
-        {
-            if (unis == null || unis.Count == 0) return string.Empty;
+        ////private string ConstruirResumenJugoPorUnidad(List<UnidadJugo> unis, int cantidad)
+        ////{
+        ////    if (unis == null || unis.Count == 0) return string.Empty;
 
-            // ¿Todos los jugos son la misma descripción?
-            bool todosIguales = true;
-            string refDesc = unis[0].Descripcion ?? "";
-            for (int i = 1; i < unis.Count; i++)
-            {
-                if (!string.Equals(refDesc, unis[i].Descripcion ?? "", StringComparison.OrdinalIgnoreCase))
-                {
-                    todosIguales = false;
-                    break;
-                }
-            }
+        ////    // ¿Todos los jugos son la misma descripción?
+        ////    bool todosIguales = true;
+        ////    string refDesc = unis[0].Descripcion ?? "";
+        ////    for (int i = 1; i < unis.Count; i++)
+        ////    {
+        ////        if (!string.Equals(refDesc, unis[i].Descripcion ?? "", StringComparison.OrdinalIgnoreCase))
+        ////        {
+        ////            todosIguales = false;
+        ////            break;
+        ////        }
+        ////    }
 
-            var sb = new System.Text.StringBuilder();
+        ////    var sb = new System.Text.StringBuilder();
 
-            if (todosIguales)
-            {
-                // Ej: "2 x JUGO DE PIÑA"
-                sb.AppendFormat("{0} x {1}", cantidad, refDesc).AppendLine();
+        ////    if (todosIguales)
+        ////    {
+        ////        // Ej: "2 x JUGO DE PIÑA"
+        ////        sb.AppendFormat("{0} x {1}", cantidad, refDesc).AppendLine();
 
-                // Debajo, todas las notas (unidad 1, 2, ...)
-                for (int i = 0; i < unis.Count; i++)
-                {
-                    var notas = PartirLineas(unis[i].Notas);
-                    foreach (var linea in notas)
-                        if (!string.IsNullOrWhiteSpace(linea))
-                            sb.Append("  - ").Append(linea.Trim()).AppendLine();
-                }
-            }
-            else
-            {
-                // Una sección por unidad:
-                for (int i = 0; i < unis.Count; i++)
-                {
-                    var u = unis[i];
-                    if (u.PrecioExtra > 0m)
-                        sb.AppendFormat("1 x {0} = S/ {1:0.00}", u.Descripcion, u.PrecioExtra).AppendLine();
-                    else
-                        sb.AppendFormat("1 x {0}", u.Descripcion).AppendLine();
+        ////        // Debajo, todas las notas (unidad 1, 2, ...)
+        ////        for (int i = 0; i < unis.Count; i++)
+        ////        {
+        ////            var notas = PartirLineas(unis[i].Notas);
+        ////            foreach (var linea in notas)
+        ////                if (!string.IsNullOrWhiteSpace(linea))
+        ////                    sb.Append("  - ").Append(linea.Trim()).AppendLine();
+        ////        }
+        ////    }
+        ////    else
+        ////    {
+        ////        // Una sección por unidad:
+        ////        for (int i = 0; i < unis.Count; i++)
+        ////        {
+        ////            var u = unis[i];
+        ////            if (u.PrecioExtra > 0m)
+        ////                sb.AppendFormat("1 x {0} = S/ {1:0.00}", u.Descripcion, u.PrecioExtra).AppendLine();
+        ////            else
+        ////                sb.AppendFormat("1 x {0}", u.Descripcion).AppendLine();
 
-                    var notas = PartirLineas(u.Notas);
-                    foreach (var linea in notas)
-                        if (!string.IsNullOrWhiteSpace(linea))
-                            sb.Append("  - ").Append(linea.Trim()).AppendLine();
-                }
-            }
+        ////            var notas = PartirLineas(u.Notas);
+        ////            foreach (var linea in notas)
+        ////                if (!string.IsNullOrWhiteSpace(linea))
+        ////                    sb.Append("  - ").Append(linea.Trim()).AppendLine();
+        ////        }
+        ////    }
 
-            return sb.ToString().TrimEnd();
-        }
+        ////    return sb.ToString().TrimEnd();
+        ////}
 
         // Split seguro de notas en líneas (sin perder saltos)
         private static IEnumerable<string> PartirLineas(string t)

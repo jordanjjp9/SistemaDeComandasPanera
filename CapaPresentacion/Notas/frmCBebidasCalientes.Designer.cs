@@ -51,6 +51,7 @@
             this.txtProductoSelect = new Guna.UI2.WinForms.Guna2TextBox();
             this.pnlCabecera = new System.Windows.Forms.Panel();
             this.lblTitle = new Guna.UI2.WinForms.Guna2HtmlLabel();
+            this.lblEstado = new System.Windows.Forms.Label();
             this.pnlNBebCalient.SuspendLayout();
             this.flpBotoneraBebCaliente.SuspendLayout();
             this.pnlButton.SuspendLayout();
@@ -337,6 +338,7 @@
             this.btnEliminar.Size = new System.Drawing.Size(180, 72);
             this.btnEliminar.TabIndex = 3;
             this.btnEliminar.Text = "Eliminar";
+            this.btnEliminar.Click += new System.EventHandler(this.btnEliminar_Click);
             // 
             // btnContinuar
             // 
@@ -353,6 +355,7 @@
             this.btnContinuar.Size = new System.Drawing.Size(180, 72);
             this.btnContinuar.TabIndex = 2;
             this.btnContinuar.Text = "Continuar";
+            this.btnContinuar.Click += new System.EventHandler(this.btnContinuar_Click);
             // 
             // pnlSlide
             // 
@@ -404,6 +407,7 @@
             // 
             // pnlCabecera
             // 
+            this.pnlCabecera.Controls.Add(this.lblEstado);
             this.pnlCabecera.Controls.Add(this.lblTitle);
             this.pnlCabecera.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlCabecera.Location = new System.Drawing.Point(0, 0);
@@ -421,6 +425,15 @@
             this.lblTitle.TabIndex = 0;
             this.lblTitle.Text = "Bebidas Calientes";
             // 
+            // lblEstado
+            // 
+            this.lblEstado.AutoSize = true;
+            this.lblEstado.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblEstado.Location = new System.Drawing.Point(39, 23);
+            this.lblEstado.Name = "lblEstado";
+            this.lblEstado.Size = new System.Drawing.Size(0, 16);
+            this.lblEstado.TabIndex = 1;
+            // 
             // frmCBebidasCalientes
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -430,6 +443,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "frmCBebidasCalientes";
             this.Text = "frmNBebidasCalientes";
+            this.Load += new System.EventHandler(this.frmCBebidasCalientes_Load);
             this.pnlNBebCalient.ResumeLayout(false);
             this.flpBotoneraBebCaliente.ResumeLayout(false);
             this.pnlButton.ResumeLayout(false);
@@ -465,5 +479,6 @@
         private Guna.UI2.WinForms.Guna2Button btnAviClint;
         private Guna.UI2.WinForms.Guna2Button btnEliminar;
         private Guna.UI2.WinForms.Guna2Button btnContinuar;
+        private System.Windows.Forms.Label lblEstado;
     }
 }
