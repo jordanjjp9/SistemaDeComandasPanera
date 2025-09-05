@@ -90,6 +90,49 @@ namespace CapaPresentacion
 
         private void frmMenuPrincipal_Load(object sender, EventArgs e)
         {
+            //// Cabecera
+            //txtAmb.Text = SesionActual.Ambiente ?? "";
+            //txtMesa.Text = SesionActual.Mesa?.Numero.ToString() ?? "";
+            //txtVendedor.Text = SesionActual.Vendedor?.Nombre ?? "";
+
+            //// Solo lectura visual
+            //txtAmb.ReadOnly = txtMesa.ReadOnly = txtVendedor.ReadOnly = true;
+
+            //// Servicios / cache
+            //_svcProductos = new cnProducto();
+            //RecargarCache("001");
+
+            //// Cantidad por defecto y validaciones
+            //txtCantidad.KeyPress += txtCantidad_KeyPress;
+            //if (string.IsNullOrWhiteSpace(txtCantidad.Text)) txtCantidad.Text = "1";
+
+            //// Botonera superior
+            //var sec = new frmBotoneraPrincipal(this);
+            //MostrarFormularioEnPanel(sec, pnlCSup);
+
+            //// ===== Lista de líneas (panel izquierdo) =====
+            //flpLineas.FlowDirection = FlowDirection.TopDown;  // vertical
+            //flpLineas.WrapContents = false;
+            //flpLineas.AutoScroll = true;
+
+            //// Arrastre + inercia + oculta barras (lo hace el scroller internamente)
+            //_lineasScroller = new CapaPresentacion.Helpers.DragScroller(flpLineas, CapaPresentacion.Helpers.DragAxis.Vertical);
+
+            //// Habilitar/Deshabilitar botones según selección de una línea
+            //LineaPedidoItem.SeleccionCambio += (_, __) =>
+            //{
+            //    bool haySel = (LineaPedidoItem.SeleccionActual != null);
+            //    btnEliminar.Enabled = haySel;
+            //    btnComentarioLbr.Enabled = haySel;  // si quieres que comentario libre solo funcione con un item seleccionado
+            //};
+            //// estado inicial
+            //bool haySelIni = (LineaPedidoItem.SeleccionActual != null);
+            //btnEliminar.Enabled = haySelIni;
+            //btnComentarioLbr.Enabled = haySelIni;
+
+            //flpLineas.ControlAdded += (_, __) => ActualizarSubtotal();
+            //flpLineas.ControlRemoved += (_, __) => ActualizarSubtotal();
+
             // Cabecera
             txtAmb.Text = SesionActual.Ambiente ?? "";
             txtMesa.Text = SesionActual.Mesa?.Numero.ToString() ?? "";
@@ -116,24 +159,28 @@ namespace CapaPresentacion
             flpLineas.AutoScroll = true;
 
             // Arrastre + inercia + oculta barras (lo hace el scroller internamente)
-            _lineasScroller = new CapaPresentacion.Helpers.DragScroller(flpLineas, CapaPresentacion.Helpers.DragAxis.Vertical);
+            _lineasScroller = new CapaPresentacion.Helpers.DragScroller(
+                flpLineas, CapaPresentacion.Helpers.DragAxis.Vertical);
 
-            // Habilitar/Deshabilitar botones según selección de una línea
-            LineaPedidoItem.SeleccionCambio += (_, __) =>
+            // 🔸 Habilitar/Deshabilitar botones según la SELECCIÓN GLOBAL
+            LineaSelection.Changed += (s, ev) =>
             {
-                bool haySel = (LineaPedidoItem.SeleccionActual != null);
-                btnEliminar.Enabled = haySel;
-                btnComentarioLbr.Enabled = haySel;  // si quieres que comentario libre solo funcione con un item seleccionado
-            };
-            // estado inicial
-            bool haySelIni = (LineaPedidoItem.SeleccionActual != null);
-            btnEliminar.Enabled = haySelIni;
-            btnComentarioLbr.Enabled = haySelIni;
+                var sel = LineaSelection.Actual;              // puede ser LineaPedidoItem o ComboPedidoItem
+                bool haySel = (sel != null);
 
+                btnEliminar.Enabled = haySel;
+
+                // Comentario libre: habilitar para líneas normales y combos
+                btnComentarioLbr.Enabled = (sel is LineaPedidoItem) || (sel is ComboPedidoItem);
+            };
+
+            // Estado inicial de botones (nada seleccionado)
+            btnEliminar.Enabled = false;
+            btnComentarioLbr.Enabled = false;
+
+            // Recalcular total al agregar/quitar controles
             flpLineas.ControlAdded += (_, __) => ActualizarSubtotal();
             flpLineas.ControlRemoved += (_, __) => ActualizarSubtotal();
-
-
         }
 
         private int CantidadActual()
@@ -291,24 +338,50 @@ namespace CapaPresentacion
             //        sel.Notas = dlg.Comentario;     // devuelve al panel (con saltos preservados)
             //}
 
-            var lp = CapaPresentacion.Controles.LineaPedidoItem.SeleccionActual;
-            if (lp == null)
+            //var lp = CapaPresentacion.Controles.LineaPedidoItem.SeleccionActual;
+            //if (lp == null)
+            //{
+            //    MessageBox.Show("Selecciona primero una línea.", "Comentario libre",
+            //                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //    return;
+            //}
+
+            //using (var dlg = new frmComentarioLbr())
+            //{
+            //    // Precargar SOLO las notas (sin encabezado)
+            //    dlg.Texto = lp.GetNotasRaw();
+            //    dlg.TextoInicial = dlg.Texto;
+
+            //    if (dlg.ShowDialog(this) == DialogResult.OK)
+            //    {
+            //        lp.SetNotas(dlg.Comentario);   // reemplaza las notas y repinta
+            //    }
+            //}
+
+            var sel = LineaSelection.Actual;
+            if (sel == null)
             {
-                MessageBox.Show("Selecciona primero una línea.", "Comentario libre",
+                MessageBox.Show("Selecciona primero un ítem.", "Comentario",
                                 MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            using (var dlg = new frmComentarioLbr())
+            if (sel is LineaPedidoItem lp)
             {
-                // Precargar SOLO las notas (sin encabezado)
-                dlg.Texto = lp.GetNotasRaw();
-                dlg.TextoInicial = dlg.Texto;
-
-                if (dlg.ShowDialog(this) == DialogResult.OK)
+                using (var dlg = new frmComentarioLbr())
                 {
-                    lp.SetNotas(dlg.Comentario);   // reemplaza las notas y repinta
+                    dlg.Texto = lp.GetNotasRaw();
+                    dlg.TextoInicial = dlg.Texto;
+
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                        lp.SetNotas(dlg.Comentario);
                 }
+            }
+            else if (sel is ComboPedidoItem ci)
+            {
+                if (!ci.EditarUltimoJugoOBebida(this))
+                    MessageBox.Show("No hay jugo/bebida para editar notas.", "Comentario",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -457,11 +530,32 @@ namespace CapaPresentacion
 
         private void AgregarLineaPedido(ceProductos prod, int cantidad, string notas)
         {
+            //if (prod == null || cantidad <= 0) return;
 
+            //decimal pu = PrecioDe(prod); // tu helper existente
+
+            //var item = new LineaPedidoItem();
+            //item.Configurar(prod.Codigo, prod.Descripcion, cantidad, pu, notas ?? string.Empty);
+
+            //flpLineas.SuspendLayout();
+            //flpLineas.Controls.Add(item);
+            //flpLineas.ResumeLayout();
+
+            //// Selecciona la línea recién agregada y hace scroll hacia ella
+            //LineaPedidoItem.Seleccionar(item, true);
+
+            //// (opcional) habilita/deshabilita eliminar según haya selección
+            //btnEliminar.Enabled = (LineaPedidoItem.SeleccionActual != null);
+
+            //// ... tu código existente ...
+            //LineaPedidoItem.Seleccionar(item, true);
+            //btnEliminar.Enabled = (LineaPedidoItem.SeleccionActual != null);
+
+            //ActualizarSubtotal();   // ⬅️ aquí
 
             if (prod == null || cantidad <= 0) return;
 
-            decimal pu = PrecioDe(prod); // tu helper existente
+            decimal pu = PrecioDe(prod);
 
             var item = new LineaPedidoItem();
             item.Configurar(prod.Codigo, prod.Descripcion, cantidad, pu, notas ?? string.Empty);
@@ -470,25 +564,37 @@ namespace CapaPresentacion
             flpLineas.Controls.Add(item);
             flpLineas.ResumeLayout();
 
-            // Selecciona la línea recién agregada y hace scroll hacia ella
-            LineaPedidoItem.Seleccionar(item, true);
+            // 🔸 Selecciona globalmente la línea recién agregada y hace scroll hacia ella
+            LineaSelection.Select(item, true);
 
-            // (opcional) habilita/deshabilita eliminar según haya selección
-            btnEliminar.Enabled = (LineaPedidoItem.SeleccionActual != null);
-
-            // ... tu código existente ...
-            LineaPedidoItem.Seleccionar(item, true);
-            btnEliminar.Enabled = (LineaPedidoItem.SeleccionActual != null);
-
-            ActualizarSubtotal();   // ⬅️ aquí
+            // Los botones se actualizan solos por el handler de LineaSelection.Changed
+            ActualizarSubtotal();
         }
 
         private void btnEliminar_Click(object sender, EventArgs e)
         {
-            flpLineas.RemoveSelected();
+            //flpLineas.RemoveSelected();
 
-            // Habilita/deshabilita el botón según quede selección
-            btnEliminar.Enabled = (flpLineas.GetSeleccion() != null);
+            //// Habilita/deshabilita el botón según quede selección
+            //btnEliminar.Enabled = (flpLineas.GetSeleccion() != null);
+
+            var sel = LineaSelection.Actual;
+            if (sel == null) return;
+
+            var ctrl = sel.View;            // raíz del control seleccionado
+
+            var parent = ctrl.Parent;
+            if (parent != null)
+            {
+                parent.Controls.Remove(ctrl);
+                ctrl.Dispose();
+            }
+
+            LineaSelection.Clear();
+            btnEliminar.Enabled = false;
+            btnComentarioLbr.Enabled = false;
+
+            ActualizarSubtotal();
         }
 
         private void frmMenuPrincipal_Shown(object sender, EventArgs e)
@@ -868,8 +974,10 @@ namespace CapaPresentacion
             flpLineas.Controls.Add(item);
             flpLineas.ResumeLayout();
 
-            CapaPresentacion.Controles.ComboPedidoItem.Seleccionar(item, true);
-            btnEliminar.Enabled = (CapaPresentacion.Controles.ComboPedidoItem.SeleccionActual != null);
+            //CapaPresentacion.Controles.ComboPedidoItem.Seleccionar(item, true);
+            //btnEliminar.Enabled = (CapaPresentacion.Controles.ComboPedidoItem.SeleccionActual != null);
+            LineaSelection.Select(item, true);   // <<< selección única
+            btnEliminar.Enabled = (LineaSelection.Actual != null);
         }
 
 

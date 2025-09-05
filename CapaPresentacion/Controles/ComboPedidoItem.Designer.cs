@@ -82,8 +82,10 @@
             this.txtJugoDesayuno.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(226)))), ((int)(((byte)(226)))));
             this.txtJugoDesayuno.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
             this.txtJugoDesayuno.DisabledState.PlaceholderForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
+            this.txtJugoDesayuno.FillColor = System.Drawing.Color.Silver;
             this.txtJugoDesayuno.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.txtJugoDesayuno.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtJugoDesayuno.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtJugoDesayuno.ForeColor = System.Drawing.Color.Black;
             this.txtJugoDesayuno.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.txtJugoDesayuno.Location = new System.Drawing.Point(0, 4);
             this.txtJugoDesayuno.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
@@ -119,8 +121,10 @@
             this.txtBebCDesay.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(226)))), ((int)(((byte)(226)))));
             this.txtBebCDesay.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
             this.txtBebCDesay.DisabledState.PlaceholderForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
+            this.txtBebCDesay.FillColor = System.Drawing.Color.Silver;
             this.txtBebCDesay.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.txtBebCDesay.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtBebCDesay.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtBebCDesay.ForeColor = System.Drawing.Color.Black;
             this.txtBebCDesay.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.txtBebCDesay.Location = new System.Drawing.Point(0, 4);
             this.txtBebCDesay.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);

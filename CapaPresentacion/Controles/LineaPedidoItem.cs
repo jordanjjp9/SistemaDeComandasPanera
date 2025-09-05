@@ -5,36 +5,40 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
+using CapaPresentacion.Helpers;   // <-- para ILineaSeleccionable y LineaSelection
 
 namespace CapaPresentacion.Controles
 {
-    public partial class LineaPedidoItem : UserControl
+    public partial class LineaPedidoItem : UserControl, ILineaSeleccionable
     {
-        public static LineaPedidoItem SeleccionActual { get; private set; }
-        public static event EventHandler SeleccionCambio;
-
+        // ===== Datos de la línea =====
         public string Codigo { get; private set; } = string.Empty;
         public string Descripcion { get; private set; } = string.Empty;
         public int Cantidad { get; private set; } = 1;
         public decimal PrecioUnitario { get; private set; } = 0m;
-        public decimal Importe => Cantidad * PrecioUnitario;
+        public decimal Importe { get { return Cantidad * PrecioUnitario; } }
 
         private readonly List<string> _notas = new List<string>();
         private readonly ToolTip _tt = new ToolTip();
         private bool _pendingGrow = false;
+
         public string Notas { get; private set; } = string.Empty;
+
+        // ===== ILineaSeleccionable =====
+        public Control View { get { return this; } }
+        public void SetVisualSelected(bool sel) { BorderStyle = sel ? BorderStyle.FixedSingle : BorderStyle.None; }
 
         public LineaPedidoItem()
         {
             InitializeComponent();
 
-            // Un único textbox
+            // Un único textbox (encabezado + notas)
             txtProducto.Multiline = true;
             txtProducto.WordWrap = true;
             txtProducto.AcceptsReturn = true;
             txtProducto.ScrollBars = ScrollBars.None;
-            txtProducto.ReadOnly = true;          // se edita por diálogo
-            txtProducto.Enabled = true;          // ¡importante para medir!
+            txtProducto.ReadOnly = true;     // edición por diálogo
+            txtProducto.Enabled = true;      // importante para medir
             txtProducto.Cursor = Cursors.Hand;
             txtProducto.Dock = DockStyle.Top;
             txtProducto.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
@@ -53,9 +57,9 @@ namespace CapaPresentacion.Controles
             }
         }
 
-        // ==== API ====
+        // ===== API =====
 
-        public void Configurar(string codigo, string descripcion, int cantidad, decimal precioUnitario, string notasIniciales = "")
+        public void Configurar(string codigo, string descripcion, int cantidad, decimal precioUnitario, string notasIniciales)
         {
             Codigo = (codigo ?? string.Empty).Trim();
             Descripcion = string.IsNullOrWhiteSpace(descripcion) ? Codigo : descripcion.Trim();
@@ -65,33 +69,24 @@ namespace CapaPresentacion.Controles
             SetNotas(notasIniciales);
             PintarTexto();
 
-            _tt.SetToolTip(txtProducto, $"PU: S/ {PrecioUnitario:0.00}");
+            _tt.SetToolTip(txtProducto, "PU: S/ " + PrecioUnitario.ToString("0.00"));
         }
 
         public void SetNotas(string notas)
         {
-            //_notas.Clear();
-            //if (!string.IsNullOrWhiteSpace(notasRaw))
-            //    _notas.AddRange(ParseLines(notasRaw));
-            //PintarTexto();
             Notas = NormalizarNotas(notas);
             RedibujarTextoConNotas();
-
         }
 
         public void AppendNotas(string notas)
         {
-            //if (!string.IsNullOrWhiteSpace(notasRaw))
-            //{
-            //    _notas.AddRange(ParseLines(notasRaw));
-            //    PintarTexto();
-            //}
             var extra = NormalizarNotas(notas);
             if (string.IsNullOrEmpty(extra)) return;
 
             Notas = string.IsNullOrEmpty(Notas) ? extra : (Notas + Environment.NewLine + extra);
             RedibujarTextoConNotas();
         }
+
         private static string NormalizarNotas(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
@@ -103,69 +98,33 @@ namespace CapaPresentacion.Controles
                 .Select(l => l.StartsWith("-") ? l : "- " + l);
             return string.Join(Environment.NewLine, lines);
         }
+
         private void RedibujarTextoConNotas()
         {
-            // Construye el encabezado tal como lo haces hoy:
-            string header = $"{Cantidad} x {Descripcion.ToUpperInvariant()} = S/ {Importe:0.00}";
+            string header = string.Format("{0} x {1} = S/ {2:0.00}", Cantidad, Descripcion.ToUpperInvariant(), Importe);
 
-            // Si tienes 1 solo textbox:
             if (txtProducto != null)
-            {
-                txtProducto.Text = string.IsNullOrEmpty(Notas)
-                    ? header
-                    : header + Environment.NewLine + Notas;
-            }
+                txtProducto.Text = string.IsNullOrEmpty(Notas) ? header : header + Environment.NewLine + Notas;
 
-            // Si además manejas txtNote, puedes seguir manteniéndolo:
-            // if (txtNote != null) txtNote.Text = Notas;
-
-            // recalcula alto si tienes autogrow
             try { BeginInvoke((Action)(() => RecalcAutoGrow())); } catch { }
         }
 
-        public string GetNotasRaw() => string.Join(Environment.NewLine, _notas);
+        public string GetNotasRaw() { return string.Join(Environment.NewLine, _notas); }
 
-        // ==== selección ====
+        // ===== selección local -> selector global =====
         private void WireSelectClick(Control root)
         {
             root.Click -= Any_Click_Select; root.Click += Any_Click_Select;
             root.MouseDown -= Any_Click_Select; root.MouseDown += Any_Click_Select;
             foreach (Control c in root.Controls) WireSelectClick(c);
         }
-        private void Any_Click_Select(object s, EventArgs e) => SeleccionarEste();
 
-        private void SeleccionarEste()
+        private void Any_Click_Select(object s, EventArgs e)
         {
-            if (SeleccionActual == this) return;
-            var anterior = SeleccionActual;
-            SeleccionActual = this;
-            anterior?.SetVisualSelected(false);
-            SetVisualSelected(true);
-            SeleccionCambio?.Invoke(null, EventArgs.Empty);
-        }
-        public void SetVisualSelected(bool sel) => BorderStyle = sel ? BorderStyle.FixedSingle : BorderStyle.None;
-
-        public static void Seleccionar(LineaPedidoItem item, bool scrollIntoView = true)
-        {
-            if (SeleccionActual == item) return;
-            SeleccionActual?.SetVisualSelected(false);
-            SeleccionActual = item;
-            if (SeleccionActual != null)
-            {
-                SeleccionActual.SetVisualSelected(true);
-                if (scrollIntoView)
-                    GetScrollableAncestor(SeleccionActual)?.ScrollControlIntoView(SeleccionActual);
-            }
-            SeleccionCambio?.Invoke(null, EventArgs.Empty);
-        }
-        private static ScrollableControl GetScrollableAncestor(Control c)
-        {
-            for (Control p = c?.Parent; p != null; p = p.Parent)
-                if (p is ScrollableControl s && s.AutoScroll) return s;
-            return null;
+            LineaSelection.Select(this, true);   // << selección global única
         }
 
-        // ==== texto ====
+        // ===== texto =====
         private void PintarTexto()
         {
             var sb = new System.Text.StringBuilder();
@@ -191,7 +150,7 @@ namespace CapaPresentacion.Controles
             }
         }
 
-        // ==== AutoGrow ====
+        // ===== AutoGrow =====
         private void RequestAutoGrow()
         {
             if (!IsHandleCreated) { _pendingGrow = true; return; }
@@ -213,7 +172,6 @@ namespace CapaPresentacion.Controles
             SuspendLayout();
             if (txtProducto.Height != hTxt) txtProducto.Height = hTxt;
 
-            // 👇 clave: alto real del control según el Bottom del textbox
             int nuevoAlto = txtProducto.Bottom + this.Padding.Bottom;
             if (Height != nuevoAlto) Height = nuevoAlto;
             ResumeLayout();
@@ -225,7 +183,6 @@ namespace CapaPresentacion.Controles
             string t = tb.Text ?? string.Empty;
             if (t.Length == 0) return Math.Max(28, tb.Font.Height + 8);
 
-            // 1) Preciso con el TextBox interno
             var inner = TryGetInnerTextBox(tb);
             if (inner != null && inner.IsHandleCreated)
             {
@@ -235,17 +192,15 @@ namespace CapaPresentacion.Controles
                 if (last < 0) last = 0;
 
                 var pt = inner.GetPositionFromCharIndex(last);
-                // margen de seguridad más generoso (Guna suele tener padding/borde)
-                int needed = pt.Y + inner.Font.Height + 14;   // <-- antes 6–8, ahora 14
+                int needed = pt.Y + inner.Font.Height + 14;
                 return Math.Max(28, needed);
             }
 
-            // 2) Fallback con MeasureString
             using (var g = tb.CreateGraphics())
             {
                 var sf = new StringFormat(StringFormatFlags.LineLimit | StringFormatFlags.MeasureTrailingSpaces);
                 var size = g.MeasureString(t + "\nA", tb.Font, Math.Max(1, tb.ClientSize.Width), sf);
-                int needed = (int)Math.Ceiling(size.Height) + 10;   // margen extra
+                int needed = (int)Math.Ceiling(size.Height) + 10;
                 return Math.Max(28, needed);
             }
         }
@@ -256,10 +211,9 @@ namespace CapaPresentacion.Controles
             {
                 var prop = guna2TextBox.GetType().GetProperty(
                     "TextBox", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                return prop?.GetValue(guna2TextBox, null) as TextBox;
+                return prop != null ? prop.GetValue(guna2TextBox, null) as TextBox : null;
             }
             catch { return null; }
         }
-
     }
 }

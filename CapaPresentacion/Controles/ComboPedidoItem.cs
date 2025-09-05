@@ -7,36 +7,30 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
+using CapaPresentacion.Helpers;   // <-- para ILineaSeleccionable y LineaSelection
 
 namespace CapaPresentacion.Controles
 {
-    public partial class ComboPedidoItem : UserControl
+    public partial class ComboPedidoItem : UserControl, ILineaSeleccionable
     {
-        // ========= Selección global (exclusiva para combos) =========
-        public static ComboPedidoItem SeleccionActual { get; private set; }
-        public static event EventHandler SeleccionCambio;
-
-        // ========= Datos del combo (encabezado) =========
+        // ===== Encabezado del combo =====
         public string Codigo { get; private set; } = "";
         public string Descripcion { get; private set; } = "";
         public int Cantidad { get; private set; } = 1;
-        public decimal PrecioUnitario { get; private set; } = 0m;   // PU final (con extras promediados)
-        public decimal Total => Cantidad * PrecioUnitario;
+        public decimal PrecioUnitario { get; private set; } = 0m;   // PU final
+        public decimal Total { get { return Cantidad * PrecioUnitario; } }
 
-        // Preferencias de agrupación
-        public bool AgruparJugosIguales { get; set; } = true;   // false = un textbox por jugo
-        public bool AgruparBebidasIguales { get; set; } = true; // true  = agrupar bebidas iguales
+        public bool AgruparJugosIguales { get; set; } = true;
+        public bool AgruparBebidasIguales { get; set; } = true;
 
-        // ========= Estado UI =========
         private readonly ToolTip _tt = new ToolTip();
-        private int _baseHeight;                 // alto del control sin contenedores dinámicos
+        private int _baseHeight;
         private bool _pendingGrow = false;
 
-        // Plantillas opcionales (si existen en el diseñador)
         private Guna2TextBox _tplJugo;
         private Guna2TextBox _tplBeb;
 
-        // ========= Modelo interno =========
+        // ===== Modelo interno =====
         private sealed class BloqueTexto
         {
             public string Key;
@@ -44,65 +38,52 @@ namespace CapaPresentacion.Controles
             public decimal PrecioExtra;
             public int Cantidad;
             public List<string> Notas = new List<string>();
-            public Guna2TextBox TextBox;  // textbox visible
+            public Guna2TextBox TextBox;
         }
 
-        // Listas y punteros
         private readonly List<BloqueTexto> _jugos = new List<BloqueTexto>();
         private readonly List<BloqueTexto> _bebidas = new List<BloqueTexto>();
         private BloqueTexto _ultimoJugo;
         private BloqueTexto _ultimaBebida;
 
-        // === selección de bloque para editar notas ===
         private BloqueTexto _bloqueSeleccionado;
-        public bool TieneBloqueSeleccionado => _bloqueSeleccionado != null;
 
-        // ========= CTOR =========
+        // ===== ILineaSeleccionable =====
+        public Control View { get { return this; } }
+        public void SetVisualSelected(bool selected) { this.BorderStyle = selected ? BorderStyle.FixedSingle : BorderStyle.None; }
+
         public ComboPedidoItem()
         {
             InitializeComponent();
 
-            // 1) Saca plantillas del contenedor (evita medir mal los FlowLayoutPanel)
             _tplJugo = this.Controls.Find("txtJugoDesayuno", true).OfType<Guna2TextBox>().FirstOrDefault();
             _tplBeb = this.Controls.Find("txtBebCDesay", true).OfType<Guna2TextBox>().FirstOrDefault();
 
-            if (_tplJugo != null)
-            {
-                _tplJugo.Visible = false;
-                if (_tplJugo.Parent is FlowLayoutPanel pj) pj.Controls.Remove(_tplJugo);
-            }
-            if (_tplBeb != null)
-            {
-                _tplBeb.Visible = false;
-                if (_tplBeb.Parent is FlowLayoutPanel pb) pb.Controls.Remove(_tplBeb);
-            }
+            if (_tplJugo != null) { _tplJugo.Visible = false; if (_tplJugo.Parent is FlowLayoutPanel pj) pj.Controls.Remove(_tplJugo); }
+            if (_tplBeb != null) { _tplBeb.Visible = false; if (_tplBeb.Parent is FlowLayoutPanel pb) pb.Controls.Remove(_tplBeb); }
 
-            // 2) Encabezado (solo lectura)
             ConfigurarTextBoxSoloLectura(txtCombo);
-
-            // 3) Asegurar configuración de contenedores existentes
             PrepFlow(flpJugos);
-            if (TryFindControl("flpBebCDesayuno", out FlowLayoutPanel flpBeb))
-                PrepFlow(flpBeb);
+            FlowLayoutPanel flpB;
+            if (TryFindControl("flpBebCDesayuno", out flpB)) PrepFlow(flpB);
 
-            // 4) AutoGrow + selección
             if (txtCombo != null) txtCombo.TextChanged += (s, e) => RecalcAutoGrowSafe();
-
             if (flpJugos != null)
             {
                 flpJugos.SizeChanged += (s, e) => RecalcAutoGrowSafe();
                 flpJugos.ControlAdded += (s, e) => RecalcAutoGrowSafe();
                 flpJugos.ControlRemoved += (s, e) => RecalcAutoGrowSafe();
             }
-
-            if (flpBeb != null)
+            if (flpB != null)
             {
-                flpBeb.SizeChanged += (s, e) => RecalcAutoGrowSafe();
-                flpBeb.ControlAdded += (s, e) => RecalcAutoGrowSafe();
-                flpBeb.ControlRemoved += (s, e) => RecalcAutoGrowSafe();
+                flpB.SizeChanged += (s, e) => RecalcAutoGrowSafe();
+                flpB.ControlAdded += (s, e) => RecalcAutoGrowSafe();
+                flpB.ControlRemoved += (s, e) => RecalcAutoGrowSafe();
             }
 
             this.SizeChanged += (s, e) => RecalcAutoGrowSafe();
+
+            // selección global
             WireSelectClick(this);
             WireInnerTextBoxClicks(txtCombo);
         }
@@ -111,12 +92,11 @@ namespace CapaPresentacion.Controles
         {
             base.OnLoad(e);
 
-            // Calcula baseHeight con layout materializado
             int hCombo = (txtCombo != null) ? txtCombo.Height : 0;
             int hJugos = (flpJugos != null) ? flpJugos.Height : 0;
 
-            TryFindControl("flpBebCDesayuno", out FlowLayoutPanel flpBeb);
-            int hBeb = (flpBeb != null) ? flpBeb.Height : 0;
+            FlowLayoutPanel flpB;
+            int hBeb = (TryFindControl("flpBebCDesayuno", out flpB)) ? flpB.Height : 0;
 
             _baseHeight = this.Height - (hCombo + hJugos + hBeb);
             RecalcAutoGrowSafe();
@@ -125,14 +105,10 @@ namespace CapaPresentacion.Controles
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
-            if (_pendingGrow)
-            {
-                _pendingGrow = false;
-                RecalcAutoGrow();
-            }
+            if (_pendingGrow) { _pendingGrow = false; RecalcAutoGrow(); }
         }
 
-        // ========= API ENCABEZADO =========
+        // ===== API Encabezado =====
         public void SetCombo(string codigo, string descripcion, int cantidad, decimal precioUnitarioFinal)
         {
             Codigo = (codigo ?? string.Empty).Trim();
@@ -142,14 +118,14 @@ namespace CapaPresentacion.Controles
 
             if (txtCombo != null)
             {
-                txtCombo.Text = $"{Cantidad} x {Descripcion.ToUpperInvariant()} = S/ {Total:0.00}";
-                _tt.SetToolTip(txtCombo, $"PU: S/ {PrecioUnitario:0.00}");
+                txtCombo.Text = string.Format("{0} x {1} = S/ {2:0.00}", Cantidad, Descripcion.ToUpperInvariant(), Total);
+                _tt.SetToolTip(txtCombo, "PU: S/ " + PrecioUnitario.ToString("0.00"));
             }
 
             RecalcAutoGrowSafe();
         }
 
-        // ========= API JUGOS =========
+        // ===== API Jugos =====
         public void ClearJugos()
         {
             _jugos.Clear();
@@ -159,12 +135,6 @@ namespace CapaPresentacion.Controles
             RecalcAutoGrowSafe();
         }
 
-        /// <summary>
-        /// Agrega una unidad de jugo.
-        /// forzarIndividual = true  -> siempre crea un textbox nuevo
-        /// forzarIndividual = false -> intenta agrupar jugos iguales (descripcion+precio)
-        /// null -> usa AgruparJugosIguales
-        /// </summary>
         public void AddJugoUnidad(string descripcion, decimal precioExtra, string notas, bool? forzarIndividual)
         {
             if (flpJugos == null) return;
@@ -228,22 +198,23 @@ namespace CapaPresentacion.Controles
             return extraTotal / cantidadTotal;
         }
 
-        // ========= API BEBIDAS =========
+        // ===== API Bebidas =====
         public void ClearBebidas()
         {
             _bebidas.Clear();
             _ultimaBebida = null;
             _bloqueSeleccionado = null;
 
-            if (TryFindControl("flpBebCDesayuno", out FlowLayoutPanel flpBeb))
-                flpBeb.Controls.Clear();
+            FlowLayoutPanel flpB;
+            if (TryFindControl("flpBebCDesayuno", out flpB)) flpB.Controls.Clear();
 
             RecalcAutoGrowSafe();
         }
 
         public void AddBebidaUnidad(string descripcion, decimal precioExtra, string notas, bool? forzarIndividual)
         {
-            if (!TryFindControl("flpBebCDesayuno", out FlowLayoutPanel flpBeb)) return;
+            FlowLayoutPanel flpB;
+            if (!TryFindControl("flpBebCDesayuno", out flpB)) return;
 
             bool individual = (forzarIndividual.HasValue) ? forzarIndividual.Value : !AgruparBebidasIguales;
 
@@ -262,7 +233,7 @@ namespace CapaPresentacion.Controles
                     Descripcion = (descripcion ?? "").Trim(),
                     PrecioExtra = precioExtra,
                     Cantidad = 1,
-                    TextBox = CrearTextBoxDesdePlantilla(_tplBeb, flpBeb)
+                    TextBox = CrearTextBoxDesdePlantilla(_tplBeb, flpB)
                 };
 
                 if (!string.IsNullOrWhiteSpace(notas))
@@ -271,8 +242,8 @@ namespace CapaPresentacion.Controles
                 bloque.TextBox.Text = TextoDe(bloque);
                 VincularBloqueVisual(bloque);
 
-                flpBeb.Controls.Add(bloque.TextBox);
-                flpBeb.PerformLayout();
+                flpB.Controls.Add(bloque.TextBox);
+                flpB.PerformLayout();
 
                 _bebidas.Add(bloque);
             }
@@ -310,16 +281,13 @@ namespace CapaPresentacion.Controles
                    GetExtraPromedioBebidasPorUnidad(cantidadTotal);
         }
 
-        // ========= Selección =========
+        // ===== selección global =====
         private void WireSelectClick(Control root)
         {
             if (root == null) return;
-
             root.Click -= Any_Click_Select; root.Click += Any_Click_Select;
             root.MouseDown -= Any_Click_Select; root.MouseDown += Any_Click_Select;
-
-            foreach (Control c in root.Controls)
-                WireSelectClick(c);
+            foreach (Control c in root.Controls) WireSelectClick(c);
         }
 
         private void WireInnerTextBoxClicks(Control guna2TextBox)
@@ -335,59 +303,12 @@ namespace CapaPresentacion.Controles
             inner.MouseDown -= Any_Click_Select; inner.MouseDown += Any_Click_Select;
         }
 
-        private void Any_Click_Select(object sender, EventArgs e) => SeleccionarEste();
-
-        public void SeleccionarEste()
+        private void Any_Click_Select(object sender, EventArgs e)
         {
-            if (SeleccionActual == this) return;
-
-            var anterior = SeleccionActual;
-            SeleccionActual = this;
-
-            if (anterior != null) anterior.SetVisualSelected(false);
-            this.SetVisualSelected(true);
-
-            var scrollable = this.Parent as ScrollableControl;
-            scrollable?.ScrollControlIntoView(this);
-
-            SeleccionCambio?.Invoke(null, EventArgs.Empty);
+            LineaSelection.Select(this, true);   // << selección global única
         }
 
-        public void SetVisualSelected(bool selected)
-        {
-            this.BorderStyle = selected ? BorderStyle.FixedSingle : BorderStyle.None;
-        }
-
-        public static void Seleccionar(ComboPedidoItem item, bool scrollIntoView = true)
-        {
-            if (SeleccionActual == item) return;
-
-            if (SeleccionActual != null) SeleccionActual.SetVisualSelected(false);
-            SeleccionActual = item;
-
-            if (SeleccionActual != null)
-            {
-                SeleccionActual.SetVisualSelected(true);
-
-                if (scrollIntoView)
-                {
-                    ScrollableControl sc = GetScrollableAncestor(SeleccionActual);
-                    sc?.ScrollControlIntoView(SeleccionActual);
-                }
-            }
-
-            SeleccionCambio?.Invoke(null, EventArgs.Empty);
-        }
-
-        private static ScrollableControl GetScrollableAncestor(Control c)
-        {
-            for (Control p = c?.Parent; p != null; p = p.Parent)
-                if (p is ScrollableControl s && s.AutoScroll)
-                    return s;
-            return null;
-        }
-
-        // ========= AutoGrow / medidas =========
+        // ===== AutoGrow / medidas =====
         private void RecalcAutoGrowSafe()
         {
             if (IsHandleCreated) RecalcAutoGrow();
@@ -399,23 +320,21 @@ namespace CapaPresentacion.Controles
             if (!IsHandleCreated) return;
 
             AjustarAnchosContenedor(flpJugos);
-            if (TryFindControl("flpBebCDesayuno", out FlowLayoutPanel flpBeb))
-                AjustarAnchosContenedor(flpBeb);
+            FlowLayoutPanel flpB2;
+            if (TryFindControl("flpBebCDesayuno", out flpB2))
+                AjustarAnchosContenedor(flpB2);
 
             int hCombo = AltoNecesario(txtCombo);
             int hJugos = (flpJugos != null) ? flpJugos.Height : 0;
 
             int hBeb = 0;
-            if (TryFindControl("flpBebCDesayuno", out FlowLayoutPanel flpBeb2))
-                hBeb = flpBeb2.Height;
+            FlowLayoutPanel flpB3;
+            if (TryFindControl("flpBebCDesayuno", out flpB3))
+                hBeb = flpB3.Height;
 
             SuspendLayout();
-
-            if (txtCombo != null && txtCombo.Height != hCombo)
-                txtCombo.Height = hCombo;
-
+            if (txtCombo != null && txtCombo.Height != hCombo) txtCombo.Height = hCombo;
             this.Height = _baseHeight + hCombo + hJugos + hBeb;
-
             ResumeLayout();
         }
 
@@ -437,7 +356,7 @@ namespace CapaPresentacion.Controles
 
         private void AjustarAlturaControl(Control c)
         {
-            var tb = c as Guna2TextBox;   // ✅ C# 7.3
+            var tb = c as Guna2TextBox;
             if (tb == null) return;
 
             int w = Math.Max(1, tb.ClientSize.Width);
@@ -483,7 +402,7 @@ namespace CapaPresentacion.Controles
             }
         }
 
-        // ========= Helpers visuales / edición =========
+        // ===== Helpers visuales / edición =====
         private static void ConfigurarTextBoxSoloLectura(Guna2TextBox tb)
         {
             if (tb == null) return;
@@ -532,13 +451,18 @@ namespace CapaPresentacion.Controles
             tb.WordWrap = true;
             tb.AcceptsReturn = true;
             tb.ScrollBars = ScrollBars.None;
-            tb.ReadOnly = true;              // edición de notas via diálogo (no inline)
+            tb.ReadOnly = true;              // edición via diálogo
             tb.Enabled = true;
             tb.Cursor = Cursors.Hand;
             tb.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
 
             tb.TextChanged += (s, e) => RecalcAutoGrowSafe();
-            tb.Click += (s, e) => SeleccionarEste();
+            tb.Click += (s, e) =>
+            {
+                // marca bloque y selecciona item
+                _bloqueSeleccionado = (BloqueTexto)((Control)s).Tag;
+                LineaSelection.Select(this, true);
+            };
 
             return tb;
         }
@@ -565,18 +489,13 @@ namespace CapaPresentacion.Controles
         {
             var sb = new StringBuilder();
 
-            // Encabezado con cantidad
-            if (b.Cantidad <= 1)
-                sb.Append("1 x ").Append(b.Descripcion);
-            else
-                sb.Append(b.Cantidad).Append(" x ").Append(b.Descripcion);
+            if (b.Cantidad <= 1) sb.Append("1 x ").Append(b.Descripcion);
+            else sb.Append(b.Cantidad).Append(" x ").Append(b.Descripcion);
 
-            // 💡 Mostrar el TOTAL del recargo de ese bloque
             decimal totalExtra = b.PrecioExtra * b.Cantidad;
             if (totalExtra > 0m)
                 sb.Append(" = S/ ").Append(totalExtra.ToString("0.00", CultureInfo.InvariantCulture));
 
-            // Notas debajo
             foreach (string n in b.Notas)
                 sb.AppendLine().Append("  - ").Append(n);
 
@@ -592,10 +511,7 @@ namespace CapaPresentacion.Controles
                     "TextBox", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                 return prop != null ? prop.GetValue(guna2TextBox, null) as TextBox : null;
             }
-            catch
-            {
-                return null;
-            }
+            catch { return null; }
         }
 
         private static void PrepFlow(FlowLayoutPanel flp)
@@ -616,20 +532,17 @@ namespace CapaPresentacion.Controles
             return (ctrl != null);
         }
 
-        // === Vincular y edición de notas ===
         private void VincularBloqueVisual(BloqueTexto bloque)
         {
             var tb = bloque.TextBox;
             tb.Tag = bloque;
 
-            // Click: marca bloque y selecciona el item
             tb.Click += (s, e) =>
             {
                 _bloqueSeleccionado = (BloqueTexto)((Control)s).Tag;
-                SeleccionarEste();
+                LineaSelection.Select(this, true);
             };
 
-            // Doble clic: abre editor
             tb.DoubleClick += (s, e) =>
             {
                 _bloqueSeleccionado = (BloqueTexto)((Control)s).Tag;
@@ -639,18 +552,18 @@ namespace CapaPresentacion.Controles
 
         private static string FormatearNotas(IEnumerable<string> notas)
         {
-            var arr = (notas ?? Array.Empty<string>())
-                      .Select(n => n?.Trim() ?? string.Empty)
+            var arr = (notas ?? new List<string>())
+                      .Select(n => n == null ? "" : n.Trim())
                       .Where(n => n.Length > 0)
                       .Select(n => n.StartsWith("-") ? n : "- " + n);
             return string.Join(Environment.NewLine, arr);
         }
 
-        private static List<string> ParseNotas(string raw) => ToNotas(raw).ToList();
+        private static List<string> ParseNotas(string raw)
+        {
+            return ToNotas(raw).ToList();
+        }
 
-        /// <summary>
-        /// Abre frmComentarioLbr para editar SOLO las notas del bloque actualmente seleccionado.
-        /// </summary>
         public bool EditarNotasSeleccionadas(IWin32Window owner)
         {
             if (_bloqueSeleccionado == null) return false;
@@ -671,16 +584,13 @@ namespace CapaPresentacion.Controles
             return false;
         }
 
-        /// <summary>
-        /// Si no hay bloque seleccionado explícitamente, intenta editar el último jugo/bebida.
-        /// </summary>
         public bool EditarUltimoJugoOBebida(IWin32Window owner)
         {
             var b = _bloqueSeleccionado
                  ?? _ultimoJugo
                  ?? _ultimaBebida
-                 ?? _jugos.LastOrDefault()
-                 ?? _bebidas.LastOrDefault();
+                 ?? (_jugos.Count > 0 ? _jugos[_jugos.Count - 1] : null)
+                 ?? (_bebidas.Count > 0 ? _bebidas[_bebidas.Count - 1] : null);
 
             if (b == null) return false;
 
