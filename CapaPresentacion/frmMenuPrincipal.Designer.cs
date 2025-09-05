@@ -56,9 +56,12 @@
             this.label1 = new System.Windows.Forms.Label();
             this.pnlCCentral = new System.Windows.Forms.Panel();
             this.pnlCSup = new System.Windows.Forms.Panel();
+            this.lblSubTotal = new Guna.UI2.WinForms.Guna2HtmlLabel();
+            this.txtSubtotal = new Guna.UI2.WinForms.Guna2TextBox();
             this.pnlTop.SuspendLayout();
             this.pnlSidePanel.SuspendLayout();
             this.pnlSCentral.SuspendLayout();
+            this.pnlCantidadT.SuspendLayout();
             this.pnlCentral.SuspendLayout();
             this.pnlCDown.SuspendLayout();
             this.SuspendLayout();
@@ -237,6 +240,8 @@
             // pnlCantidadT
             // 
             this.pnlCantidadT.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(228)))), ((int)(((byte)(214)))));
+            this.pnlCantidadT.Controls.Add(this.txtSubtotal);
+            this.pnlCantidadT.Controls.Add(this.lblSubTotal);
             this.pnlCantidadT.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pnlCantidadT.Location = new System.Drawing.Point(0, 668);
             this.pnlCantidadT.Name = "pnlCantidadT";
@@ -434,6 +439,41 @@
             this.pnlCSup.Size = new System.Drawing.Size(1249, 151);
             this.pnlCSup.TabIndex = 9;
             // 
+            // lblSubTotal
+            // 
+            this.lblSubTotal.BackColor = System.Drawing.Color.Transparent;
+            this.lblSubTotal.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblSubTotal.Font = new System.Drawing.Font("Segoe UI Semibold", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblSubTotal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(92)))), ((int)(((byte)(93)))), ((int)(((byte)(88)))));
+            this.lblSubTotal.Location = new System.Drawing.Point(0, 0);
+            this.lblSubTotal.Name = "lblSubTotal";
+            this.lblSubTotal.Size = new System.Drawing.Size(310, 34);
+            this.lblSubTotal.TabIndex = 1;
+            this.lblSubTotal.Text = "VALOR VENTA:";
+            // 
+            // txtSubtotal
+            // 
+            this.txtSubtotal.BorderRadius = 12;
+            this.txtSubtotal.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.txtSubtotal.DefaultText = "";
+            this.txtSubtotal.DisabledState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(208)))), ((int)(((byte)(208)))), ((int)(((byte)(208)))));
+            this.txtSubtotal.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(226)))), ((int)(((byte)(226)))));
+            this.txtSubtotal.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
+            this.txtSubtotal.DisabledState.PlaceholderForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
+            this.txtSubtotal.Dock = System.Windows.Forms.DockStyle.Top;
+            this.txtSubtotal.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(228)))), ((int)(((byte)(214)))));
+            this.txtSubtotal.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.txtSubtotal.Font = new System.Drawing.Font("Segoe UI Semibold", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtSubtotal.ForeColor = System.Drawing.Color.Maroon;
+            this.txtSubtotal.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.txtSubtotal.Location = new System.Drawing.Point(0, 34);
+            this.txtSubtotal.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.txtSubtotal.Name = "txtSubtotal";
+            this.txtSubtotal.PlaceholderText = "";
+            this.txtSubtotal.SelectedText = "";
+            this.txtSubtotal.Size = new System.Drawing.Size(310, 77);
+            this.txtSubtotal.TabIndex = 2;
+            // 
             // frmMenuPrincipal
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -453,6 +493,8 @@
             this.pnlTop.PerformLayout();
             this.pnlSidePanel.ResumeLayout(false);
             this.pnlSCentral.ResumeLayout(false);
+            this.pnlCantidadT.ResumeLayout(false);
+            this.pnlCantidadT.PerformLayout();
             this.pnlCentral.ResumeLayout(false);
             this.pnlCDown.ResumeLayout(false);
             this.pnlCDown.PerformLayout();
@@ -490,5 +532,7 @@
         private Guna.UI2.WinForms.Guna2HtmlLabel guna2HtmlLabel2;
         private Guna.UI2.WinForms.Guna2HtmlLabel guna2HtmlLabel4;
         private System.Windows.Forms.FlowLayoutPanel flpLineas;
+        private Guna.UI2.WinForms.Guna2HtmlLabel lblSubTotal;
+        private Guna.UI2.WinForms.Guna2TextBox txtSubtotal;
     }
 }

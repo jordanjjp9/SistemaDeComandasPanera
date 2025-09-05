@@ -1,294 +1,265 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Runtime.InteropServices;
 using System.Reflection;
-//using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Windows.Forms;
+using Guna.UI2.WinForms;
 
 namespace CapaPresentacion.Controles
 {
     public partial class LineaPedidoItem : UserControl
     {
-        // ======== Selección global (exclusiva) ========
         public static LineaPedidoItem SeleccionActual { get; private set; }
         public static event EventHandler SeleccionCambio;
 
-        // ======== Datos de la línea ========
-        public string Codigo { get; private set; } = "";
-        public string Descripcion { get; private set; } = "";
+        public string Codigo { get; private set; } = string.Empty;
+        public string Descripcion { get; private set; } = string.Empty;
         public int Cantidad { get; private set; } = 1;
         public decimal PrecioUnitario { get; private set; } = 0m;
-        public decimal Importe { get { return Cantidad * PrecioUnitario; } }
+        public decimal Importe => Cantidad * PrecioUnitario;
 
-        // ======== UI / estado ========
+        private readonly List<string> _notas = new List<string>();
         private readonly ToolTip _tt = new ToolTip();
-        private int _baseHeight;                 // alto del control sin el alto de producto+nota
-        private bool _pendingGrow = false;       // para recalcular cuando aún no hay handle
+        private bool _pendingGrow = false;
+        public string Notas { get; private set; } = string.Empty;
 
         public LineaPedidoItem()
         {
             InitializeComponent();
 
-            // Apariencia base
-            this.BorderStyle = BorderStyle.None;
-            this.BackColor = Color.WhiteSmoke;
-
-            // ---- txtProducto (Guna2TextBox) ----
+            // Un único textbox
             txtProducto.Multiline = true;
             txtProducto.WordWrap = true;
             txtProducto.AcceptsReturn = true;
             txtProducto.ScrollBars = ScrollBars.None;
-            txtProducto.ReadOnly = true;
-            txtProducto.Enabled = true;               // ¡no lo deshabilites!
+            txtProducto.ReadOnly = true;          // se edita por diálogo
+            txtProducto.Enabled = true;          // ¡importante para medir!
             txtProducto.Cursor = Cursors.Hand;
+            txtProducto.Dock = DockStyle.Top;
+            txtProducto.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
 
-            // ---- txtNote (Guna2TextBox) ----
-            txtNote.Multiline = true;
-            txtNote.WordWrap = true;
-            txtNote.AcceptsReturn = true;
-            txtNote.ScrollBars = ScrollBars.None;
-            txtNote.ReadOnly = true;
-         //   txtNote.Enabled = true;                   // ¡no lo deshabilites!
-            txtNote.Cursor = Cursors.Hand;
+            Load += (s, e) => RequestAutoGrow();
+            txtProducto.TextChanged += (s, e) => RequestAutoGrow();
+            SizeChanged += (s, e) => RequestAutoGrow();
 
-            // Calcula base una vez que el layout sea real
-            this.Load += (s, e) =>
-            {
-                _baseHeight = this.Height - txtProducto.Height - txtNote.Height;
-                BeginInvoke(new Action(RecalcAutoGrow));
-            };
-
-            // AutoGrow al cambiar textos o tamaño del control
-            txtProducto.TextChanged += (s, e) => RecalcAutoGrow();
-            txtNote.TextChanged += (s, e) => RecalcAutoGrow();
-            this.SizeChanged += (s, e) => RecalcAutoGrow();
-
-            // Selección: clic en cualquier parte del control o de sus hijos
+            // selección con click
             WireSelectClick(this);
+            var inner = TryGetInnerTextBox(txtProducto);
+            if (inner != null)
+            {
+                inner.Click -= Any_Click_Select; inner.Click += Any_Click_Select;
+                inner.MouseDown -= Any_Click_Select; inner.MouseDown += Any_Click_Select;
+            }
         }
 
-        // ========= API =========
+        // ==== API ====
 
-        public void Configurar(string codigo, string descripcion, int cantidad, decimal precioUnitario, string notas)
+        public void Configurar(string codigo, string descripcion, int cantidad, decimal precioUnitario, string notasIniciales = "")
         {
             Codigo = (codigo ?? string.Empty).Trim();
             Descripcion = string.IsNullOrWhiteSpace(descripcion) ? Codigo : descripcion.Trim();
             Cantidad = Math.Max(1, cantidad);
             PrecioUnitario = Math.Max(0m, precioUnitario);
 
-            txtProducto.Text = string.Format("{0} x {1} = S/ {2:0.00}",
-                Cantidad, Descripcion.ToUpperInvariant(), Importe);
+            SetNotas(notasIniciales);
+            PintarTexto();
 
-            Notas = notas; // asigna y recalcula
-
-            _tt.SetToolTip(txtProducto, string.Format("PU: S/ {0:0.00}", PrecioUnitario));
+            _tt.SetToolTip(txtProducto, $"PU: S/ {PrecioUnitario:0.00}");
         }
 
-        public string Notas
+        public void SetNotas(string notas)
         {
-            get { return (txtNote != null ? txtNote.Text : string.Empty).TrimEnd(); }
-            set
-            {
-                if (txtNote == null) return;
+            //_notas.Clear();
+            //if (!string.IsNullOrWhiteSpace(notasRaw))
+            //    _notas.AddRange(ParseLines(notasRaw));
+            //PintarTexto();
+            Notas = NormalizarNotas(notas);
+            RedibujarTextoConNotas();
 
-                string s = (value ?? string.Empty)
-                           .Replace("\r\n", "\n")
-                           .Replace("\n", Environment.NewLine);
-
-                txtNote.Text = s;
-
-                if (IsHandleCreated)
-                {
-                    BeginInvoke(new Action(RecalcAutoGrow));
-                }
-                else
-                {
-                    _pendingGrow = true;
-                }
-            }
         }
 
-        protected override void OnHandleCreated(EventArgs e)
+        public void AppendNotas(string notas)
         {
-            base.OnHandleCreated(e);
-            if (_pendingGrow)
+            //if (!string.IsNullOrWhiteSpace(notasRaw))
+            //{
+            //    _notas.AddRange(ParseLines(notasRaw));
+            //    PintarTexto();
+            //}
+            var extra = NormalizarNotas(notas);
+            if (string.IsNullOrEmpty(extra)) return;
+
+            Notas = string.IsNullOrEmpty(Notas) ? extra : (Notas + Environment.NewLine + extra);
+            RedibujarTextoConNotas();
+        }
+        private static string NormalizarNotas(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
+            var lines = (raw ?? string.Empty)
+                .Replace("\r\n", "\n").Replace("\r", "\n")
+                .Split('\n')
+                .Select(l => (l ?? string.Empty).Trim())
+                .Where(l => l.Length > 0)
+                .Select(l => l.StartsWith("-") ? l : "- " + l);
+            return string.Join(Environment.NewLine, lines);
+        }
+        private void RedibujarTextoConNotas()
+        {
+            // Construye el encabezado tal como lo haces hoy:
+            string header = $"{Cantidad} x {Descripcion.ToUpperInvariant()} = S/ {Importe:0.00}";
+
+            // Si tienes 1 solo textbox:
+            if (txtProducto != null)
             {
-                _pendingGrow = false;
-                BeginInvoke(new Action(RecalcAutoGrow));
+                txtProducto.Text = string.IsNullOrEmpty(Notas)
+                    ? header
+                    : header + Environment.NewLine + Notas;
             }
+
+            // Si además manejas txtNote, puedes seguir manteniéndolo:
+            // if (txtNote != null) txtNote.Text = Notas;
+
+            // recalcula alto si tienes autogrow
+            try { BeginInvoke((Action)(() => RecalcAutoGrow())); } catch { }
         }
 
-        // ========= Selección =========
+        public string GetNotasRaw() => string.Join(Environment.NewLine, _notas);
 
+        // ==== selección ====
         private void WireSelectClick(Control root)
         {
-            root.Click -= Any_Click_Select;
-            root.Click += Any_Click_Select;
-
-            root.MouseDown -= Any_Click_Select;
-            root.MouseDown += Any_Click_Select;
-
-            // También engancha el TextBox interno de Guna2TextBox
-            var innerProd = TryGetInnerTextBox(txtProducto);
-            if (innerProd != null)
-            {
-                innerProd.Click -= Any_Click_Select;
-                innerProd.Click += Any_Click_Select;
-                innerProd.MouseDown -= Any_Click_Select;
-                innerProd.MouseDown += Any_Click_Select;
-            }
-
-            var innerNote = TryGetInnerTextBox(txtNote);
-            if (innerNote != null)
-            {
-                innerNote.Click -= Any_Click_Select;
-                innerNote.Click += Any_Click_Select;
-                innerNote.MouseDown -= Any_Click_Select;
-                innerNote.MouseDown += Any_Click_Select;
-            }
-
-            // Clic en hijos
-            foreach (Control c in root.Controls)
-                WireSelectClick(c);
+            root.Click -= Any_Click_Select; root.Click += Any_Click_Select;
+            root.MouseDown -= Any_Click_Select; root.MouseDown += Any_Click_Select;
+            foreach (Control c in root.Controls) WireSelectClick(c);
         }
-
-        private void Any_Click_Select(object sender, EventArgs e)
-        {
-            SeleccionarEste();
-        }
+        private void Any_Click_Select(object s, EventArgs e) => SeleccionarEste();
 
         private void SeleccionarEste()
         {
             if (SeleccionActual == this) return;
-
             var anterior = SeleccionActual;
             SeleccionActual = this;
-
-            if (anterior != null) anterior.SetVisualSelected(false);
-            this.SetVisualSelected(true);
-
-            var handler = SeleccionCambio;
-            if (handler != null) handler.Invoke(null, EventArgs.Empty);
+            anterior?.SetVisualSelected(false);
+            SetVisualSelected(true);
+            SeleccionCambio?.Invoke(null, EventArgs.Empty);
         }
+        public void SetVisualSelected(bool sel) => BorderStyle = sel ? BorderStyle.FixedSingle : BorderStyle.None;
 
-        public void SetVisualSelected(bool selected)
+        public static void Seleccionar(LineaPedidoItem item, bool scrollIntoView = true)
         {
-            this.BorderStyle = selected ? BorderStyle.FixedSingle : BorderStyle.None;
+            if (SeleccionActual == item) return;
+            SeleccionActual?.SetVisualSelected(false);
+            SeleccionActual = item;
+            if (SeleccionActual != null)
+            {
+                SeleccionActual.SetVisualSelected(true);
+                if (scrollIntoView)
+                    GetScrollableAncestor(SeleccionActual)?.ScrollControlIntoView(SeleccionActual);
+            }
+            SeleccionCambio?.Invoke(null, EventArgs.Empty);
+        }
+        private static ScrollableControl GetScrollableAncestor(Control c)
+        {
+            for (Control p = c?.Parent; p != null; p = p.Parent)
+                if (p is ScrollableControl s && s.AutoScroll) return s;
+            return null;
         }
 
-        // ========= AutoGrow (producto + notas) =========
+        // ==== texto ====
+        private void PintarTexto()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append(Cantidad).Append(" x ").Append(Descripcion.ToUpperInvariant())
+              .Append(" = S/ ").Append(Importe.ToString("0.00",
+                  System.Globalization.CultureInfo.InvariantCulture));
+
+            foreach (var n in _notas)
+                sb.AppendLine().Append("  - ").Append(n);
+
+            txtProducto.Text = sb.ToString();
+        }
+
+        private static IEnumerable<string> ParseLines(string raw)
+        {
+            var norm = (raw ?? string.Empty).Replace("\r\n", "\n");
+            foreach (var line in norm.Split('\n'))
+            {
+                var s = (line ?? string.Empty).Trim();
+                if (s.Length == 0) continue;
+                if (s.StartsWith("-")) s = s.TrimStart('-').Trim();
+                yield return s;
+            }
+        }
+
+        // ==== AutoGrow ====
+        private void RequestAutoGrow()
+        {
+            if (!IsHandleCreated) { _pendingGrow = true; return; }
+            try { BeginInvoke((Action)RecalcAutoGrow); }
+            catch (InvalidOperationException) { _pendingGrow = true; }
+        }
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            if (_pendingGrow) { _pendingGrow = false; RequestAutoGrow(); }
+        }
 
         private void RecalcAutoGrow()
         {
             if (!IsHandleCreated) return;
 
-            int hProd = AltoNecesario(txtProducto);
-            int hNote = AltoNecesario(txtNote);
+            int hTxt = AltoNecesario(txtProducto);
 
             SuspendLayout();
-            if (txtProducto.Height != hProd) txtProducto.Height = hProd;
-            if (txtNote.Height != hNote) txtNote.Height = hNote;
+            if (txtProducto.Height != hTxt) txtProducto.Height = hTxt;
 
-            this.Height = _baseHeight + hProd + hNote;
+            // 👇 clave: alto real del control según el Bottom del textbox
+            int nuevoAlto = txtProducto.Bottom + this.Padding.Bottom;
+            if (Height != nuevoAlto) Height = nuevoAlto;
             ResumeLayout();
         }
 
-        private int AltoNecesario(Control txt)
+        private static int AltoNecesario(Guna2TextBox tb)
         {
-            if (txt == null) return 0;
+            if (tb == null) return 0;
+            string t = tb.Text ?? string.Empty;
+            if (t.Length == 0) return Math.Max(28, tb.Font.Height + 8);
 
-            // Texto actual sin perder CR/LF
-            string t = Convert.ToString(txt.GetType().GetProperty("Text").GetValue(txt, null)) ?? string.Empty;
-
-            // Ancho disponible
-            int w = txt.ClientSize.Width > 0 ? txt.ClientSize.Width : Math.Max(1, txt.Width - 6);
-
-            // Si está vacío, mínimo
-            if (t.Length == 0)
-                return Math.Max(24, txt.Font.Height + 6);
-
-            // 1) Si es Guna2TextBox y podemos acceder al TextBox interno, contamos líneas exactas
-            TextBox inner = TryGetInnerTextBox(txt);
+            // 1) Preciso con el TextBox interno
+            var inner = TryGetInnerTextBox(tb);
             if (inner != null && inner.IsHandleCreated)
             {
+                try { inner.WordWrap = true; inner.ScrollBars = ScrollBars.None; } catch { }
                 int last = t.Length - 1;
-                // Evita medir CR/LF finales (subestima una línea)
                 while (last >= 0 && (t[last] == '\r' || t[last] == '\n')) last--;
                 if (last < 0) last = 0;
 
-                // Asegura wrap activado en el interno, por si acaso
-                try { inner.WordWrap = true; } catch { }
-
-                Point pt = inner.GetPositionFromCharIndex(last);
-                int needed = pt.Y + inner.Font.Height + 6; // padding inferior
-                return Math.Max(24, needed);
+                var pt = inner.GetPositionFromCharIndex(last);
+                // margen de seguridad más generoso (Guna suele tener padding/borde)
+                int needed = pt.Y + inner.Font.Height + 14;   // <-- antes 6–8, ahora 14
+                return Math.Max(28, needed);
             }
 
-            // 2) Fallback genérico midiendo el texto dibujado (+“\nA” para no perder la última línea)
-            using (Graphics g = txt.CreateGraphics())
+            // 2) Fallback con MeasureString
+            using (var g = tb.CreateGraphics())
             {
-                StringFormat sf = new StringFormat(StringFormatFlags.LineLimit | StringFormatFlags.NoClip);
-                sf.FormatFlags |= StringFormatFlags.MeasureTrailingSpaces;
-
-                SizeF size = g.MeasureString(t + "\nA", txt.Font, w, sf);
-                int needed = (int)Math.Ceiling(size.Height) + 4;
-                return Math.Max(24, needed);
+                var sf = new StringFormat(StringFormatFlags.LineLimit | StringFormatFlags.MeasureTrailingSpaces);
+                var size = g.MeasureString(t + "\nA", tb.Font, Math.Max(1, tb.ClientSize.Width), sf);
+                int needed = (int)Math.Ceiling(size.Height) + 10;   // margen extra
+                return Math.Max(28, needed);
             }
         }
 
         private static TextBox TryGetInnerTextBox(Control guna2TextBox)
         {
-            if (guna2TextBox == null) return null;
             try
             {
-                PropertyInfo prop = guna2TextBox.GetType().GetProperty(
+                var prop = guna2TextBox.GetType().GetProperty(
                     "TextBox", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                return prop != null ? prop.GetValue(guna2TextBox, null) as TextBox : null;
+                return prop?.GetValue(guna2TextBox, null) as TextBox;
             }
-            catch
-            {
-                return null;
-            }
+            catch { return null; }
         }
 
-        public static void Seleccionar(LineaPedidoItem item, bool scrollIntoView = true)
-        {
-            if (SeleccionActual == item) return;
-
-            // Desmarca el anterior
-            if (SeleccionActual != null)
-                SeleccionActual.SetVisualSelected(false);
-
-            // Marca el nuevo
-            SeleccionActual = item;
-            if (SeleccionActual != null)
-            {
-                SeleccionActual.SetVisualSelected(true);
-
-                if (scrollIntoView)
-                {
-                    // Busca el primer ancestro que sea ScrollableControl con AutoScroll
-                    ScrollableControl sc = GetScrollableAncestor(SeleccionActual);
-                    sc?.ScrollControlIntoView(SeleccionActual);
-                }
-            }
-
-            SeleccionCambio?.Invoke(null, EventArgs.Empty);
-        }
-
-        private static ScrollableControl GetScrollableAncestor(Control c)
-        {
-            for (Control p = c?.Parent; p != null; p = p.Parent)
-                if (p is ScrollableControl s && s.AutoScroll)
-                    return s;
-            return null;
-        }
     }
 }
-    

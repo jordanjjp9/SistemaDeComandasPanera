@@ -263,6 +263,7 @@
     </Compile>
     <Compile Include="Helpers\ISelectorProducto.cs" />
     <Compile Include="Helpers\LineaPedidoItemExtensions.cs" />
+    <Compile Include="Helpers\LineaSelection.cs" />
     <Compile Include="Helpers\NoFocusScrollFlowLayoutPanel.cs">
       <SubType>Component</SubType>
     </Compile>

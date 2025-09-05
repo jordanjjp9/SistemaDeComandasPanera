@@ -50,8 +50,8 @@
             this.txtNotasBCalient = new Guna.UI2.WinForms.Guna2TextBox();
             this.txtProductoSelect = new Guna.UI2.WinForms.Guna2TextBox();
             this.pnlCabecera = new System.Windows.Forms.Panel();
-            this.lblTitle = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.lblEstado = new System.Windows.Forms.Label();
+            this.lblTitle = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.pnlNBebCalient.SuspendLayout();
             this.flpBotoneraBebCaliente.SuspendLayout();
             this.pnlButton.SuspendLayout();
@@ -201,14 +201,14 @@
             this.btnProd0000000225.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnProd0000000225.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnProd0000000225.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000000225.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000000225.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(191)))), ((int)(((byte)(66)))));
             this.btnProd0000000225.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnProd0000000225.ForeColor = System.Drawing.Color.White;
             this.btnProd0000000225.Location = new System.Drawing.Point(211, 214);
             this.btnProd0000000225.Name = "btnProd0000000225";
             this.btnProd0000000225.Size = new System.Drawing.Size(202, 205);
             this.btnProd0000000225.TabIndex = 118;
-            this.btnProd0000000225.Text = "ADICIONAL DESCAFEINADO";
+            this.btnProd0000000225.Text = "DESCAFEINADO";
             this.btnProd0000000225.TextOffset = new System.Drawing.Point(0, 70);
             // 
             // btnProd0000000862
@@ -218,7 +218,7 @@
             this.btnProd0000000862.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnProd0000000862.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnProd0000000862.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000000862.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000000862.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(191)))), ((int)(((byte)(66)))));
             this.btnProd0000000862.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnProd0000000862.ForeColor = System.Drawing.Color.White;
             this.btnProd0000000862.Location = new System.Drawing.Point(419, 214);
@@ -235,7 +235,7 @@
             this.btnProd0000001252.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnProd0000001252.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnProd0000001252.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000001252.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000001252.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(191)))), ((int)(((byte)(66)))));
             this.btnProd0000001252.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnProd0000001252.ForeColor = System.Drawing.Color.White;
             this.btnProd0000001252.Location = new System.Drawing.Point(627, 214);
@@ -252,7 +252,7 @@
             this.btnProd0000000229.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnProd0000000229.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnProd0000000229.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000000229.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000000229.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(191)))), ((int)(((byte)(66)))));
             this.btnProd0000000229.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnProd0000000229.ForeColor = System.Drawing.Color.White;
             this.btnProd0000000229.Location = new System.Drawing.Point(835, 214);
@@ -269,7 +269,7 @@
             this.btnProd0000000230.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnProd0000000230.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnProd0000000230.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000000230.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000000230.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(191)))), ((int)(((byte)(66)))));
             this.btnProd0000000230.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnProd0000000230.ForeColor = System.Drawing.Color.White;
             this.btnProd0000000230.Location = new System.Drawing.Point(3, 425);
@@ -286,7 +286,7 @@
             this.btnAviso.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnAviso.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnAviso.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnAviso.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnAviso.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
             this.btnAviso.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAviso.ForeColor = System.Drawing.Color.White;
             this.btnAviso.Location = new System.Drawing.Point(211, 425);
@@ -303,7 +303,7 @@
             this.btnAviClint.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnAviClint.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnAviClint.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnAviClint.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnAviClint.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
             this.btnAviClint.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAviClint.ForeColor = System.Drawing.Color.White;
             this.btnAviClint.Location = new System.Drawing.Point(419, 425);
@@ -415,6 +415,15 @@
             this.pnlCabecera.Size = new System.Drawing.Size(1384, 58);
             this.pnlCabecera.TabIndex = 0;
             // 
+            // lblEstado
+            // 
+            this.lblEstado.AutoSize = true;
+            this.lblEstado.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblEstado.Location = new System.Drawing.Point(39, 23);
+            this.lblEstado.Name = "lblEstado";
+            this.lblEstado.Size = new System.Drawing.Size(0, 16);
+            this.lblEstado.TabIndex = 1;
+            // 
             // lblTitle
             // 
             this.lblTitle.BackColor = System.Drawing.Color.Transparent;
@@ -424,15 +433,6 @@
             this.lblTitle.Size = new System.Drawing.Size(228, 39);
             this.lblTitle.TabIndex = 0;
             this.lblTitle.Text = "Bebidas Calientes";
-            // 
-            // lblEstado
-            // 
-            this.lblEstado.AutoSize = true;
-            this.lblEstado.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblEstado.Location = new System.Drawing.Point(39, 23);
-            this.lblEstado.Name = "lblEstado";
-            this.lblEstado.Size = new System.Drawing.Size(0, 16);
-            this.lblEstado.TabIndex = 1;
             // 
             // frmCBebidasCalientes
             // 

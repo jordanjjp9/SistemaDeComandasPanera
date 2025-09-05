@@ -1,28 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CapaPresentacion.Notas
 {
     public partial class frmNBebidas : Form
     {
-        // --- Entrada ---
-        public string ProductoBaseTexto { get; set; } = string.Empty; // "2 x DESAYUNO AMERICANO"
-        public string TextoInicial { get; set; } = string.Empty; // lo que viene de frmCJugoDesayuno
-
-        // --- Salida ---
+        // ======== Entradas / salidas ========
+        public string ProductoBaseTexto { get; set; } = string.Empty;
+        public string TextoInicial { get; set; } = string.Empty;
         public string Notas { get; private set; } = string.Empty;
 
-        // Referencias a controles del diseñador (por nombre):
-        private TextBoxBase _txtNotas;     // txtNotasBebida como TextBox/RichTextBox
-        private Control _txtNotasCtrl;     // fallback si fuera un Guna2TextBox
-        private Control _txtProductoSelect;
+        /// <summary>Cuántas bebidas calientes se omiten porque aquí se eligió “GRANDE”. (0 o 1)</summary>
+        public int CuposCalienteConsumidos { get; private set; } = 0;
+
+        // ======== Internos ========
+        private TextBoxBase _txtNotas;     // TextBox / RichTextBox real si existe
+        private Control _txtNotasCtrl;     // fallback (p. ej., Guna2TextBox)
+        private readonly List<bool> _lineaConsumeCupo = new List<bool>(); // para deshacer “GRANDE” con Eliminar
+
+        // Identificación del botón "GRANDE"
+        private const string NAME_GRANDE = "btnGrd";
+        private const string TEXT_GRANDE = "GRANDE";
 
         public frmNBebidas()
         {
@@ -33,12 +33,12 @@ namespace CapaPresentacion.Notas
 
         private void frmNBebidas_Load(object sender, EventArgs e)
         {
-            // 1) Localiza el control de notas (agrego tus nombres reales)
-            _txtNotas = FindNotasTextBox();            // TextBoxBase si existe
+            // 1) Resolver el área de notas
+            _txtNotas = FindNotasTextBox();
             if (_txtNotas == null)
-                _txtNotasCtrl = FindNotasControl();    // Fallback (Guna2TextBox u otro)
+                _txtNotasCtrl = FindNotasControl();
 
-            // 2) Enlaza botones por nombre
+            // 2) Botones principales
             var btnContinuar = this.Controls.Find("btnContinuar", true).OfType<Button>().FirstOrDefault();
             var btnEliminar = this.Controls.Find("btnEliminar", true).OfType<Button>().FirstOrDefault();
 
@@ -54,20 +54,20 @@ namespace CapaPresentacion.Notas
                 btnEliminar.Click += btnEliminar_Click;
             }
 
-            // 3) Muestra el producto base arriba si tienes un txtProductoSelect en el diseño
+            // 3) Encabezado con producto base (opcional)
             var txtProd = this.Controls.Find("txtProductoSelect", true).FirstOrDefault();
             if (txtProd != null && !string.IsNullOrWhiteSpace(ProductoBaseTexto))
                 txtProd.Text = ProductoBaseTexto;
 
-            // 4) Precarga lo que venga del formulario anterior (las líneas de jugo)
+            // 4) Precarga de notas (opcional)
             if (!string.IsNullOrEmpty(TextoInicial))
                 TrySetNotasText(TextoInicial);
 
-            // 5) Engancha TODOS los botones “chips”: Button y Guna2Button
+            // 5) Enganchar TODOS los “chips” (botones), excluyendo Continuar/Eliminar
             WireQuickNoteButtons(this, btnContinuar, btnEliminar);
         }
 
-        // ============ Botones principales ============
+        // ================== Botones principales ==================
         private void btnContinuar_Click(object sender, EventArgs e)
         {
             Notas = ReadNotasText();
@@ -77,57 +77,80 @@ namespace CapaPresentacion.Notas
 
         private void btnEliminar_Click(object sender, EventArgs e)
         {
-            // elimina la última línea no vacía
+            // Elimina la última línea no vacía y, si consumía cupo (GRANDE), lo devuelve
             var lines = GetLines();
-            if (lines == null || lines.Length == 0) return;
+            if (lines.Length == 0) return;
 
             int i = lines.Length - 1;
             while (i >= 0 && string.IsNullOrWhiteSpace(lines[i])) i--;
+            if (i < 0) return;
 
-            var nuevas = (i <= 0) ? Array.Empty<string>() : lines.Take(i).ToArray();
+            bool consumia = false;
+            if (_lineaConsumeCupo.Count > 0)
+            {
+                consumia = _lineaConsumeCupo[_lineaConsumeCupo.Count - 1];
+                _lineaConsumeCupo.RemoveAt(_lineaConsumeCupo.Count - 1);
+            }
+
+            var nuevas = (i == 0) ? new string[0] : lines.Take(i).ToArray();
             SetLines(nuevas);
+
+            if (consumia && CuposCalienteConsumidos > 0)
+                CuposCalienteConsumidos--;
         }
 
-        // ============ “Chips” / botones rápidos ============
+        // ================== Chips (opciones rápidas) ==================
         private void WireQuickNoteButtons(Control root, Button btnContinuar, Button btnEliminar)
         {
             if (root == null) return;
 
             foreach (Control c in root.Controls)
             {
-                // Recursivo
                 WireQuickNoteButtons(c, btnContinuar, btnEliminar);
 
-                // Engancha cualquier control “tipo botón”
-                bool esChip =
+                bool esBoton =
                     (c is Button) ||
                     (c.GetType().Name.IndexOf("Button", StringComparison.OrdinalIgnoreCase) >= 0) ||
-                    (c.Name ?? "").StartsWith("btn", StringComparison.OrdinalIgnoreCase);
+                    ((c.Name ?? "").StartsWith("btn", StringComparison.OrdinalIgnoreCase));
 
-                if (!esChip) continue;
+                if (!esBoton) continue;
 
-                // Excluir los de acción
                 if (ReferenceEquals(c, btnContinuar) || ReferenceEquals(c, btnEliminar)) continue;
 
-                c.Click -= btnCerrar_Click;
-                c.Click += btnCerrar_Click;
+                c.Click -= Chip_Click;
+                c.Click += Chip_Click;
             }
         }
 
-        private void QuickButton_Click(object sender, EventArgs e)
+        private void Chip_Click(object sender, EventArgs e)
         {
-            var b = sender as Button;
-            if (b == null) return;
+            var c = sender as Control;
+            if (c == null) return;
+
+            bool esGrande = IsGrandeControl(c);
+            if (esGrande)
+            {
+                if (CuposCalienteConsumidos >= 1)
+                {
+                    System.Media.SystemSounds.Beep.Play();
+                    return; // solo se permite un GRANDE
+                }
+                CuposCalienteConsumidos += 1;
+            }
 
             string actual = ReadNotasText() ?? string.Empty;
             if (actual.Length > 0 && !actual.EndsWith(Environment.NewLine))
                 actual += Environment.NewLine;
 
-            actual += "- " + (b.Text ?? string.Empty).Trim();
-            TrySetNotasText(actual);
+            string textoChip = (c.Text ?? string.Empty).Trim();
+            string nuevaLinea = "- " + textoChip;
+
+            TrySetNotasText(actual + nuevaLinea + Environment.NewLine);
+
+            _lineaConsumeCupo.Add(esGrande);
         }
 
-        // ============ Helpers de texto ============
+        // ================== Helpers de texto ==================
         private string ReadNotasText()
         {
             if (_txtNotas != null) return _txtNotas.Text;
@@ -137,7 +160,8 @@ namespace CapaPresentacion.Notas
 
         private void TrySetNotasText(string s)
         {
-            s = s ?? string.Empty;
+            if (s == null) s = string.Empty;   // <- compatible con C# 7.3
+
             if (_txtNotas != null)
             {
                 _txtNotas.Text = s;
@@ -155,58 +179,63 @@ namespace CapaPresentacion.Notas
         private string[] GetLines()
         {
             var t = ReadNotasText() ?? string.Empty;
-            t = t.Replace("\r\n", "\n");
+            t = t.Replace("\r\n", "\n").Replace("\r", "\n");
             return t.Split('\n');
         }
 
         private void SetLines(string[] lines)
         {
-            string joined = string.Join(Environment.NewLine, lines ?? Array.Empty<string>());
+            string joined = string.Join(Environment.NewLine, lines ?? new string[0]);
             TrySetNotasText(joined);
         }
 
+        // ================== Localización de controles ==================
         private TextBoxBase FindNotasTextBox()
         {
-            // Incluyo tus nombres reales
-            var candidatos = new[] { "txtNotasBebida", "txtNotasBCalient", "txtNBebidas", "txtNotas", "txtNota", "txtComentarios", "txtComentLibr" };
+            var candidatos = new[]
+            {
+                "txtNotasBebida", "txtNotasBCalient", "txtNBebidas",
+                "txtNotas", "txtNota", "txtComentarios", "txtComentLibr"
+            };
+
             foreach (var name in candidatos)
             {
                 var tb = this.Controls.Find(name, true).OfType<TextBoxBase>().FirstOrDefault();
                 if (tb != null) return tb;
             }
-            // Si no encuentra por nombre, toma el primer TextBoxBase multilínea
-            var firstMulti = this.Controls.OfType<TextBoxBase>().FirstOrDefault(t => t.Multiline);
-            return firstMulti;
+
+            return this.Controls.OfType<TextBoxBase>().FirstOrDefault(t => t.Multiline);
         }
 
         private Control FindNotasControl()
         {
-            // Fallback para Guna2TextBox u otros (por nombre)
-            var candidatos = new[] { "txtNotasBebida", "txtNotasBCalient", "txtNBebidas", "txtNotas", "txtNota", "txtComentarios", "txtComentLibr" };
+            var candidatos = new[]
+            {
+                "txtNotasBebida", "txtNotasBCalient", "txtNBebidas",
+                "txtNotas", "txtNota", "txtComentarios", "txtComentLibr"
+            };
+
             foreach (var name in candidatos)
             {
                 var c = this.Controls.Find(name, true).FirstOrDefault();
                 if (c != null) return c;
             }
-            // Último recurso: cualquier control con propiedad Text
-            return this.Controls.Cast<Control>().FirstOrDefault(c => c.GetType().GetProperty("Text") != null);
+
+            return this.Controls.Cast<Control>().FirstOrDefault(ctrl => ctrl.GetType().GetProperty("Text") != null);
         }
 
-        private void btnCerrar_Click(object sender, EventArgs e)
+        // ================== Detección de “GRANDE” ==================
+        private static bool IsGrandeControl(Control c)
         {
-            var c = sender as Control;
-            if (c == null) return;
+            if (c == null) return false;
 
-            var texto = (c.Text ?? string.Empty).Trim();
-            if (string.IsNullOrEmpty(texto)) return;
+            if (string.Equals(c.Name, NAME_GRANDE, StringComparison.OrdinalIgnoreCase))
+                return true;
 
-            string actual = ReadNotasText() ?? string.Empty;
+            var txt = (c.Text ?? string.Empty).Trim().ToUpperInvariant();
+            if (txt == TEXT_GRANDE) return true;
 
-            if (actual.Length > 0 && !actual.EndsWith(Environment.NewLine))
-                actual += Environment.NewLine;
-
-            actual += "- " + texto + Environment.NewLine;
-            TrySetNotasText(actual);
+            return false;
         }
     }
 }

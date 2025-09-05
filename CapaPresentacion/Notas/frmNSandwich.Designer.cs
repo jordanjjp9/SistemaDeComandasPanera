@@ -40,6 +40,12 @@
             this.btnSSCrill = new Guna.UI2.WinForms.Guna2Button();
             this.btnSTChv = new Guna.UI2.WinForms.Guna2Button();
             this.btnEPCibtt = new Guna.UI2.WinForms.Guna2Button();
+            this.btnSHv = new Guna.UI2.WinForms.Guna2Button();
+            this.btnSTomt = new Guna.UI2.WinForms.Guna2Button();
+            this.btnEPItg = new Guna.UI2.WinForms.Guna2Button();
+            this.btnSMyns = new Guna.UI2.WinForms.Guna2Button();
+            this.btnSMtz = new Guna.UI2.WinForms.Guna2Button();
+            this.btnCMtz = new Guna.UI2.WinForms.Guna2Button();
             this.pnlButton = new System.Windows.Forms.Panel();
             this.btnEliminar = new Guna.UI2.WinForms.Guna2Button();
             this.btnContinuar = new Guna.UI2.WinForms.Guna2Button();
@@ -49,12 +55,6 @@
             this.pnlCabecera = new System.Windows.Forms.Panel();
             this.lblTitle = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.btnCerrar = new Guna.UI2.WinForms.Guna2Button();
-            this.btnSHv = new Guna.UI2.WinForms.Guna2Button();
-            this.btnSTomt = new Guna.UI2.WinForms.Guna2Button();
-            this.btnEPItg = new Guna.UI2.WinForms.Guna2Button();
-            this.btnSMyns = new Guna.UI2.WinForms.Guna2Button();
-            this.btnSMtz = new Guna.UI2.WinForms.Guna2Button();
-            this.btnCMtz = new Guna.UI2.WinForms.Guna2Button();
             this.pnlNBebidas.SuspendLayout();
             this.flpNSandwich.SuspendLayout();
             this.pnlButton.SuspendLayout();
@@ -107,7 +107,7 @@
             this.btnSLech.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnSLech.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnSLech.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnSLech.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnSLech.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
             this.btnSLech.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSLech.ForeColor = System.Drawing.Color.White;
             this.btnSLech.Location = new System.Drawing.Point(3, 3);
@@ -124,7 +124,7 @@
             this.btnCJmn.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnCJmn.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnCJmn.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnCJmn.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnCJmn.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
             this.btnCJmn.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCJmn.ForeColor = System.Drawing.Color.White;
             this.btnCJmn.Location = new System.Drawing.Point(3, 214);
@@ -141,7 +141,7 @@
             this.btnPcMyns.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnPcMyns.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnPcMyns.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnPcMyns.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnPcMyns.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
             this.btnPcMyns.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnPcMyns.ForeColor = System.Drawing.Color.White;
             this.btnPcMyns.Location = new System.Drawing.Point(3, 425);
@@ -158,7 +158,7 @@
             this.btnCLch.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnCLch.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnCLch.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnCLch.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnCLch.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
             this.btnCLch.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCLch.ForeColor = System.Drawing.Color.White;
             this.btnCLch.Location = new System.Drawing.Point(211, 3);
@@ -175,7 +175,7 @@
             this.btnCSCrill.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnCSCrill.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnCSCrill.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnCSCrill.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnCSCrill.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
             this.btnCSCrill.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCSCrill.ForeColor = System.Drawing.Color.White;
             this.btnCSCrill.Location = new System.Drawing.Point(211, 214);
@@ -192,7 +192,7 @@
             this.btnSTcn.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnSTcn.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnSTcn.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnSTcn.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnSTcn.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
             this.btnSTcn.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSTcn.ForeColor = System.Drawing.Color.White;
             this.btnSTcn.Location = new System.Drawing.Point(211, 425);
@@ -209,7 +209,7 @@
             this.btnEPMld.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnEPMld.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnEPMld.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnEPMld.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnEPMld.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
             this.btnEPMld.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnEPMld.ForeColor = System.Drawing.Color.White;
             this.btnEPMld.Location = new System.Drawing.Point(419, 3);
@@ -226,7 +226,7 @@
             this.btnSSCrill.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnSSCrill.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnSSCrill.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnSSCrill.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnSSCrill.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
             this.btnSSCrill.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSSCrill.ForeColor = System.Drawing.Color.White;
             this.btnSSCrill.Location = new System.Drawing.Point(419, 214);
@@ -243,7 +243,7 @@
             this.btnSTChv.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnSTChv.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnSTChv.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnSTChv.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnSTChv.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
             this.btnSTChv.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSTChv.ForeColor = System.Drawing.Color.White;
             this.btnSTChv.Location = new System.Drawing.Point(419, 425);
@@ -260,7 +260,7 @@
             this.btnEPCibtt.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnEPCibtt.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnEPCibtt.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnEPCibtt.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnEPCibtt.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
             this.btnEPCibtt.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnEPCibtt.ForeColor = System.Drawing.Color.White;
             this.btnEPCibtt.Location = new System.Drawing.Point(627, 3);
@@ -269,6 +269,108 @@
             this.btnEPCibtt.TabIndex = 118;
             this.btnEPCibtt.Text = "EN PAN CIABATTA";
             this.btnEPCibtt.TextOffset = new System.Drawing.Point(0, 70);
+            // 
+            // btnSHv
+            // 
+            this.btnSHv.BorderRadius = 22;
+            this.btnSHv.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnSHv.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnSHv.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnSHv.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnSHv.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
+            this.btnSHv.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSHv.ForeColor = System.Drawing.Color.White;
+            this.btnSHv.Location = new System.Drawing.Point(627, 214);
+            this.btnSHv.Name = "btnSHv";
+            this.btnSHv.Size = new System.Drawing.Size(202, 205);
+            this.btnSHv.TabIndex = 119;
+            this.btnSHv.Text = "SIN HUEVO";
+            this.btnSHv.TextOffset = new System.Drawing.Point(0, 70);
+            // 
+            // btnSTomt
+            // 
+            this.btnSTomt.BorderRadius = 22;
+            this.btnSTomt.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnSTomt.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnSTomt.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnSTomt.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnSTomt.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
+            this.btnSTomt.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSTomt.ForeColor = System.Drawing.Color.White;
+            this.btnSTomt.Location = new System.Drawing.Point(627, 425);
+            this.btnSTomt.Name = "btnSTomt";
+            this.btnSTomt.Size = new System.Drawing.Size(202, 205);
+            this.btnSTomt.TabIndex = 120;
+            this.btnSTomt.Text = "SIN TOMATE";
+            this.btnSTomt.TextOffset = new System.Drawing.Point(0, 70);
+            // 
+            // btnEPItg
+            // 
+            this.btnEPItg.BorderRadius = 22;
+            this.btnEPItg.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnEPItg.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnEPItg.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnEPItg.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnEPItg.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
+            this.btnEPItg.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnEPItg.ForeColor = System.Drawing.Color.White;
+            this.btnEPItg.Location = new System.Drawing.Point(835, 3);
+            this.btnEPItg.Name = "btnEPItg";
+            this.btnEPItg.Size = new System.Drawing.Size(202, 205);
+            this.btnEPItg.TabIndex = 121;
+            this.btnEPItg.Text = "EN PAN MOLDE INTEGRAL";
+            this.btnEPItg.TextOffset = new System.Drawing.Point(0, 70);
+            // 
+            // btnSMyns
+            // 
+            this.btnSMyns.BorderRadius = 22;
+            this.btnSMyns.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnSMyns.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnSMyns.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnSMyns.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnSMyns.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
+            this.btnSMyns.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSMyns.ForeColor = System.Drawing.Color.White;
+            this.btnSMyns.Location = new System.Drawing.Point(835, 214);
+            this.btnSMyns.Name = "btnSMyns";
+            this.btnSMyns.Size = new System.Drawing.Size(202, 205);
+            this.btnSMyns.TabIndex = 122;
+            this.btnSMyns.Text = "SIN MAYONESA";
+            this.btnSMyns.TextOffset = new System.Drawing.Point(0, 70);
+            // 
+            // btnSMtz
+            // 
+            this.btnSMtz.BorderRadius = 22;
+            this.btnSMtz.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnSMtz.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnSMtz.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnSMtz.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnSMtz.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
+            this.btnSMtz.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSMtz.ForeColor = System.Drawing.Color.White;
+            this.btnSMtz.Location = new System.Drawing.Point(835, 425);
+            this.btnSMtz.Name = "btnSMtz";
+            this.btnSMtz.Size = new System.Drawing.Size(202, 205);
+            this.btnSMtz.TabIndex = 123;
+            this.btnSMtz.Text = "SIN MOSTAZA";
+            this.btnSMtz.TextOffset = new System.Drawing.Point(0, 70);
+            // 
+            // btnCMtz
+            // 
+            this.btnCMtz.BorderRadius = 22;
+            this.btnCMtz.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnCMtz.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnCMtz.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnCMtz.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnCMtz.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnCMtz.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCMtz.ForeColor = System.Drawing.Color.White;
+            this.btnCMtz.Location = new System.Drawing.Point(1043, 3);
+            this.btnCMtz.Name = "btnCMtz";
+            this.btnCMtz.Size = new System.Drawing.Size(202, 205);
+            this.btnCMtz.TabIndex = 124;
+            this.btnCMtz.Text = "CON MOSTAZA";
+            this.btnCMtz.TextOffset = new System.Drawing.Point(0, 70);
             // 
             // pnlButton
             // 
@@ -401,108 +503,6 @@
             this.btnCerrar.Size = new System.Drawing.Size(81, 64);
             this.btnCerrar.TabIndex = 0;
             this.btnCerrar.Text = "X";
-            // 
-            // btnSHv
-            // 
-            this.btnSHv.BorderRadius = 22;
-            this.btnSHv.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnSHv.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnSHv.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnSHv.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnSHv.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnSHv.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSHv.ForeColor = System.Drawing.Color.White;
-            this.btnSHv.Location = new System.Drawing.Point(627, 214);
-            this.btnSHv.Name = "btnSHv";
-            this.btnSHv.Size = new System.Drawing.Size(202, 205);
-            this.btnSHv.TabIndex = 119;
-            this.btnSHv.Text = "SIN HUEVO";
-            this.btnSHv.TextOffset = new System.Drawing.Point(0, 70);
-            // 
-            // btnSTomt
-            // 
-            this.btnSTomt.BorderRadius = 22;
-            this.btnSTomt.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnSTomt.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnSTomt.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnSTomt.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnSTomt.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnSTomt.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSTomt.ForeColor = System.Drawing.Color.White;
-            this.btnSTomt.Location = new System.Drawing.Point(627, 425);
-            this.btnSTomt.Name = "btnSTomt";
-            this.btnSTomt.Size = new System.Drawing.Size(202, 205);
-            this.btnSTomt.TabIndex = 120;
-            this.btnSTomt.Text = "SIN TOMATE";
-            this.btnSTomt.TextOffset = new System.Drawing.Point(0, 70);
-            // 
-            // btnEPItg
-            // 
-            this.btnEPItg.BorderRadius = 22;
-            this.btnEPItg.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnEPItg.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnEPItg.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnEPItg.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnEPItg.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnEPItg.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnEPItg.ForeColor = System.Drawing.Color.White;
-            this.btnEPItg.Location = new System.Drawing.Point(835, 3);
-            this.btnEPItg.Name = "btnEPItg";
-            this.btnEPItg.Size = new System.Drawing.Size(202, 205);
-            this.btnEPItg.TabIndex = 121;
-            this.btnEPItg.Text = "EN PAN MOLDE INTEGRAL";
-            this.btnEPItg.TextOffset = new System.Drawing.Point(0, 70);
-            // 
-            // btnSMyns
-            // 
-            this.btnSMyns.BorderRadius = 22;
-            this.btnSMyns.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnSMyns.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnSMyns.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnSMyns.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnSMyns.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnSMyns.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSMyns.ForeColor = System.Drawing.Color.White;
-            this.btnSMyns.Location = new System.Drawing.Point(835, 214);
-            this.btnSMyns.Name = "btnSMyns";
-            this.btnSMyns.Size = new System.Drawing.Size(202, 205);
-            this.btnSMyns.TabIndex = 122;
-            this.btnSMyns.Text = "SIN MAYONESA";
-            this.btnSMyns.TextOffset = new System.Drawing.Point(0, 70);
-            // 
-            // btnSMtz
-            // 
-            this.btnSMtz.BorderRadius = 22;
-            this.btnSMtz.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnSMtz.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnSMtz.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnSMtz.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnSMtz.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnSMtz.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSMtz.ForeColor = System.Drawing.Color.White;
-            this.btnSMtz.Location = new System.Drawing.Point(835, 425);
-            this.btnSMtz.Name = "btnSMtz";
-            this.btnSMtz.Size = new System.Drawing.Size(202, 205);
-            this.btnSMtz.TabIndex = 123;
-            this.btnSMtz.Text = "SIN MOSTAZA";
-            this.btnSMtz.TextOffset = new System.Drawing.Point(0, 70);
-            // 
-            // btnCMtz
-            // 
-            this.btnCMtz.BorderRadius = 22;
-            this.btnCMtz.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnCMtz.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnCMtz.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnCMtz.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnCMtz.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnCMtz.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCMtz.ForeColor = System.Drawing.Color.White;
-            this.btnCMtz.Location = new System.Drawing.Point(1043, 3);
-            this.btnCMtz.Name = "btnCMtz";
-            this.btnCMtz.Size = new System.Drawing.Size(202, 205);
-            this.btnCMtz.TabIndex = 124;
-            this.btnCMtz.Text = "CON MOSTAZA";
-            this.btnCMtz.TextOffset = new System.Drawing.Point(0, 70);
             // 
             // frmNSandwich
             // 

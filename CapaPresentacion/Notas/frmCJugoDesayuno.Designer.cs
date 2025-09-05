@@ -36,20 +36,17 @@
             this.btnProd0000001529 = new Guna.UI2.WinForms.Guna2Button();
             this.btnJugPapay = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000001528 = new Guna.UI2.WinForms.Guna2Button();
-            this.btnProd0000001530 = new Guna.UI2.WinForms.Guna2Button();
-            this.btnProd0000001531 = new Guna.UI2.WinForms.Guna2Button();
-            this.btnProd0000001532 = new Guna.UI2.WinForms.Guna2Button();
             this.btnSnJug = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000000232 = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000000233 = new Guna.UI2.WinForms.Guna2Button();
             this.pnlPrev = new System.Windows.Forms.Panel();
+            this.lstResumen = new System.Windows.Forms.ListView();
             this.txtNotasJugoDes = new Guna.UI2.WinForms.Guna2TextBox();
             this.txtProductoSelect = new Guna.UI2.WinForms.Guna2TextBox();
             this.pnlTitle = new System.Windows.Forms.Panel();
+            this.lblEstado = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.lblTitle = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.btnCerrar = new Guna.UI2.WinForms.Guna2Button();
-            this.lblEstado = new Guna.UI2.WinForms.Guna2HtmlLabel();
-            this.lstResumen = new System.Windows.Forms.ListView();
             this.pnlNJugoDesayuno.SuspendLayout();
             this.pnlButton.SuspendLayout();
             this.flpCJugoDes.SuspendLayout();
@@ -118,9 +115,6 @@
             this.flpCJugoDes.Controls.Add(this.btnProd0000001529);
             this.flpCJugoDes.Controls.Add(this.btnJugPapay);
             this.flpCJugoDes.Controls.Add(this.btnProd0000001528);
-            this.flpCJugoDes.Controls.Add(this.btnProd0000001530);
-            this.flpCJugoDes.Controls.Add(this.btnProd0000001531);
-            this.flpCJugoDes.Controls.Add(this.btnProd0000001532);
             this.flpCJugoDes.Controls.Add(this.btnSnJug);
             this.flpCJugoDes.Controls.Add(this.btnProd0000000232);
             this.flpCJugoDes.Controls.Add(this.btnProd0000000233);
@@ -181,57 +175,6 @@
             this.btnProd0000001528.Text = "JUGO DE PAPAYA CON PIÑA";
             this.btnProd0000001528.TextOffset = new System.Drawing.Point(0, 70);
             // 
-            // btnProd0000001530
-            // 
-            this.btnProd0000001530.BorderRadius = 22;
-            this.btnProd0000001530.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000001530.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000001530.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnProd0000001530.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000001530.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnProd0000001530.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnProd0000001530.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000001530.Location = new System.Drawing.Point(627, 3);
-            this.btnProd0000001530.Name = "btnProd0000001530";
-            this.btnProd0000001530.Size = new System.Drawing.Size(202, 205);
-            this.btnProd0000001530.TabIndex = 113;
-            this.btnProd0000001530.Text = "JUGO DE PAPAYA CON NARANJA";
-            this.btnProd0000001530.TextOffset = new System.Drawing.Point(0, 70);
-            // 
-            // btnProd0000001531
-            // 
-            this.btnProd0000001531.BorderRadius = 22;
-            this.btnProd0000001531.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000001531.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000001531.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnProd0000001531.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000001531.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnProd0000001531.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnProd0000001531.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000001531.Location = new System.Drawing.Point(835, 3);
-            this.btnProd0000001531.Name = "btnProd0000001531";
-            this.btnProd0000001531.Size = new System.Drawing.Size(202, 205);
-            this.btnProd0000001531.TabIndex = 114;
-            this.btnProd0000001531.Text = "JUGO DE PIÑA CON NARANJA";
-            this.btnProd0000001531.TextOffset = new System.Drawing.Point(0, 70);
-            // 
-            // btnProd0000001532
-            // 
-            this.btnProd0000001532.BorderRadius = 22;
-            this.btnProd0000001532.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000001532.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000001532.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnProd0000001532.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000001532.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnProd0000001532.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnProd0000001532.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000001532.Location = new System.Drawing.Point(3, 214);
-            this.btnProd0000001532.Name = "btnProd0000001532";
-            this.btnProd0000001532.Size = new System.Drawing.Size(202, 205);
-            this.btnProd0000001532.TabIndex = 115;
-            this.btnProd0000001532.Text = "JUGO DE NARANJA";
-            this.btnProd0000001532.TextOffset = new System.Drawing.Point(0, 70);
-            // 
             // btnSnJug
             // 
             this.btnSnJug.BorderRadius = 22;
@@ -242,7 +185,7 @@
             this.btnSnJug.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
             this.btnSnJug.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSnJug.ForeColor = System.Drawing.Color.White;
-            this.btnSnJug.Location = new System.Drawing.Point(211, 214);
+            this.btnSnJug.Location = new System.Drawing.Point(627, 3);
             this.btnSnJug.Name = "btnSnJug";
             this.btnSnJug.Size = new System.Drawing.Size(202, 205);
             this.btnSnJug.TabIndex = 116;
@@ -256,10 +199,10 @@
             this.btnProd0000000232.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnProd0000000232.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnProd0000000232.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000000232.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000000232.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(191)))), ((int)(((byte)(66)))));
             this.btnProd0000000232.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnProd0000000232.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000000232.Location = new System.Drawing.Point(419, 214);
+            this.btnProd0000000232.Location = new System.Drawing.Point(835, 3);
             this.btnProd0000000232.Name = "btnProd0000000232";
             this.btnProd0000000232.Size = new System.Drawing.Size(202, 205);
             this.btnProd0000000232.TabIndex = 117;
@@ -273,10 +216,10 @@
             this.btnProd0000000233.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnProd0000000233.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnProd0000000233.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000000233.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000000233.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(191)))), ((int)(((byte)(66)))));
             this.btnProd0000000233.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnProd0000000233.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000000233.Location = new System.Drawing.Point(627, 214);
+            this.btnProd0000000233.Location = new System.Drawing.Point(3, 214);
             this.btnProd0000000233.Name = "btnProd0000000233";
             this.btnProd0000000233.Size = new System.Drawing.Size(202, 205);
             this.btnProd0000000233.TabIndex = 118;
@@ -293,6 +236,16 @@
             this.pnlPrev.Name = "pnlPrev";
             this.pnlPrev.Size = new System.Drawing.Size(341, 811);
             this.pnlPrev.TabIndex = 1;
+            // 
+            // lstResumen
+            // 
+            this.lstResumen.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lstResumen.HideSelection = false;
+            this.lstResumen.Location = new System.Drawing.Point(0, 651);
+            this.lstResumen.Name = "lstResumen";
+            this.lstResumen.Size = new System.Drawing.Size(341, 160);
+            this.lstResumen.TabIndex = 4;
+            this.lstResumen.UseCompatibleStateImageBehavior = false;
             // 
             // txtNotasJugoDes
             // 
@@ -348,6 +301,16 @@
             this.pnlTitle.Size = new System.Drawing.Size(1384, 64);
             this.pnlTitle.TabIndex = 0;
             // 
+            // lblEstado
+            // 
+            this.lblEstado.BackColor = System.Drawing.Color.Transparent;
+            this.lblEstado.Font = new System.Drawing.Font("Segoe UI Semibold", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblEstado.Location = new System.Drawing.Point(26, 26);
+            this.lblEstado.Name = "lblEstado";
+            this.lblEstado.Size = new System.Drawing.Size(3, 2);
+            this.lblEstado.TabIndex = 4;
+            this.lblEstado.Text = null;
+            // 
             // lblTitle
             // 
             this.lblTitle.BackColor = System.Drawing.Color.Transparent;
@@ -374,25 +337,6 @@
             this.btnCerrar.TabIndex = 2;
             this.btnCerrar.Text = "X";
             this.btnCerrar.Click += new System.EventHandler(this.btnCerrar_Click);
-            // 
-            // lblEstado
-            // 
-            this.lblEstado.BackColor = System.Drawing.Color.Transparent;
-            this.lblEstado.Font = new System.Drawing.Font("Segoe UI Semibold", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblEstado.Location = new System.Drawing.Point(26, 26);
-            this.lblEstado.Name = "lblEstado";
-            this.lblEstado.Size = new System.Drawing.Size(3, 2);
-            this.lblEstado.TabIndex = 4;
-            // 
-            // lstResumen
-            // 
-            this.lstResumen.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lstResumen.HideSelection = false;
-            this.lstResumen.Location = new System.Drawing.Point(0, 651);
-            this.lstResumen.Name = "lstResumen";
-            this.lstResumen.Size = new System.Drawing.Size(341, 160);
-            this.lstResumen.TabIndex = 4;
-            this.lstResumen.UseCompatibleStateImageBehavior = false;
             // 
             // frmCJugoDesayuno
             // 
@@ -431,9 +375,6 @@
         private Guna.UI2.WinForms.Guna2Button btnProd0000001529;
         private Guna.UI2.WinForms.Guna2Button btnJugPapay;
         private Guna.UI2.WinForms.Guna2Button btnProd0000001528;
-        private Guna.UI2.WinForms.Guna2Button btnProd0000001530;
-        private Guna.UI2.WinForms.Guna2Button btnProd0000001531;
-        private Guna.UI2.WinForms.Guna2Button btnProd0000001532;
         private Guna.UI2.WinForms.Guna2Button btnSnJug;
         private Guna.UI2.WinForms.Guna2Button btnProd0000000232;
         private Guna.UI2.WinForms.Guna2Button btnProd0000000233;
