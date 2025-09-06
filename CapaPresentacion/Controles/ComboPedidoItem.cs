@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
-using CapaPresentacion.Helpers;   // <-- para ILineaSeleccionable y LineaSelection
+using CapaPresentacion.Helpers;   // ILineaSeleccionable y LineaSelection
 
 namespace CapaPresentacion.Controles
 {
@@ -20,17 +20,22 @@ namespace CapaPresentacion.Controles
         public decimal PrecioUnitario { get; private set; } = 0m;   // PU final
         public decimal Total { get { return Cantidad * PrecioUnitario; } }
 
+        // Preferencias de agrupación
         public bool AgruparJugosIguales { get; set; } = true;
         public bool AgruparBebidasIguales { get; set; } = true;
+        public bool AgruparTamalesIguales { get; set; } = true;
 
+        // ===== Estado UI general =====
         private readonly ToolTip _tt = new ToolTip();
         private int _baseHeight;
         private bool _pendingGrow = false;
 
+        // Plantillas opcionales
         private Guna2TextBox _tplJugo;
         private Guna2TextBox _tplBeb;
+        private Guna2TextBox _tplTamal;
 
-        // ===== Modelo interno =====
+        // ===== Modelo interno genérico =====
         private sealed class BloqueTexto
         {
             public string Key;
@@ -41,32 +46,53 @@ namespace CapaPresentacion.Controles
             public Guna2TextBox TextBox;
         }
 
+        // Listas por tipo
         private readonly List<BloqueTexto> _jugos = new List<BloqueTexto>();
         private readonly List<BloqueTexto> _bebidas = new List<BloqueTexto>();
+        private readonly List<BloqueTexto> _tamales = new List<BloqueTexto>();
+
+        // Últimos agregados (para edición rápida)
         private BloqueTexto _ultimoJugo;
         private BloqueTexto _ultimaBebida;
+        private BloqueTexto _ultimoTamal;
 
+        // Bloque actualmente seleccionado para editar notas
         private BloqueTexto _bloqueSeleccionado;
+
+        // Notas del ENCABEZADO del combo (debajo de "N x DESCRIPCION = S/ …")
+        private readonly List<string> _notasEncabezado = new List<string>();
 
         // ===== ILineaSeleccionable =====
         public Control View { get { return this; } }
-        public void SetVisualSelected(bool selected) { this.BorderStyle = selected ? BorderStyle.FixedSingle : BorderStyle.None; }
+        public void SetVisualSelected(bool selected)
+        {
+            this.BorderStyle = selected ? BorderStyle.FixedSingle : BorderStyle.None;
+        }
 
         public ComboPedidoItem()
         {
             InitializeComponent();
 
+            // Tomar plantillas (si existen) y sacarlas de sus contenedores
             _tplJugo = this.Controls.Find("txtJugoDesayuno", true).OfType<Guna2TextBox>().FirstOrDefault();
             _tplBeb = this.Controls.Find("txtBebCDesay", true).OfType<Guna2TextBox>().FirstOrDefault();
+            _tplTamal = this.Controls.Find("txtTamal", true).OfType<Guna2TextBox>().FirstOrDefault();
 
             if (_tplJugo != null) { _tplJugo.Visible = false; if (_tplJugo.Parent is FlowLayoutPanel pj) pj.Controls.Remove(_tplJugo); }
             if (_tplBeb != null) { _tplBeb.Visible = false; if (_tplBeb.Parent is FlowLayoutPanel pb) pb.Controls.Remove(_tplBeb); }
+            if (_tplTamal != null) { _tplTamal.Visible = false; if (_tplTamal.Parent is FlowLayoutPanel pt) pt.Controls.Remove(_tplTamal); }
 
+            // Encabezado
             ConfigurarTextBoxSoloLectura(txtCombo);
+
+            // Preparar contenedores
             PrepFlow(flpJugos);
             FlowLayoutPanel flpB;
             if (TryFindControl("flpBebCDesayuno", out flpB)) PrepFlow(flpB);
+            FlowLayoutPanel flpT;
+            if (TryFindControl("flpTamal", out flpT)) PrepFlow(flpT);
 
+            // AutoGrow
             if (txtCombo != null) txtCombo.TextChanged += (s, e) => RecalcAutoGrowSafe();
             if (flpJugos != null)
             {
@@ -80,10 +106,16 @@ namespace CapaPresentacion.Controles
                 flpB.ControlAdded += (s, e) => RecalcAutoGrowSafe();
                 flpB.ControlRemoved += (s, e) => RecalcAutoGrowSafe();
             }
+            if (flpT != null)
+            {
+                flpT.SizeChanged += (s, e) => RecalcAutoGrowSafe();
+                flpT.ControlAdded += (s, e) => RecalcAutoGrowSafe();
+                flpT.ControlRemoved += (s, e) => RecalcAutoGrowSafe();
+            }
 
             this.SizeChanged += (s, e) => RecalcAutoGrowSafe();
 
-            // selección global
+            // Selección global
             WireSelectClick(this);
             WireInnerTextBoxClicks(txtCombo);
         }
@@ -98,7 +130,10 @@ namespace CapaPresentacion.Controles
             FlowLayoutPanel flpB;
             int hBeb = (TryFindControl("flpBebCDesayuno", out flpB)) ? flpB.Height : 0;
 
-            _baseHeight = this.Height - (hCombo + hJugos + hBeb);
+            FlowLayoutPanel flpT;
+            int hTam = (TryFindControl("flpTamal", out flpT)) ? flpT.Height : 0;
+
+            _baseHeight = this.Height - (hCombo + hJugos + hBeb + hTam);
             RecalcAutoGrowSafe();
         }
 
@@ -108,7 +143,7 @@ namespace CapaPresentacion.Controles
             if (_pendingGrow) { _pendingGrow = false; RecalcAutoGrow(); }
         }
 
-        // ===== API Encabezado =====
+        // ======= Encabezado =======
         public void SetCombo(string codigo, string descripcion, int cantidad, decimal precioUnitarioFinal)
         {
             Codigo = (codigo ?? string.Empty).Trim();
@@ -116,16 +151,114 @@ namespace CapaPresentacion.Controles
             Cantidad = Math.Max(1, cantidad);
             PrecioUnitario = Math.Max(0m, precioUnitarioFinal);
 
-            if (txtCombo != null)
-            {
-                txtCombo.Text = string.Format("{0} x {1} = S/ {2:0.00}", Cantidad, Descripcion.ToUpperInvariant(), Total);
-                _tt.SetToolTip(txtCombo, "PU: S/ " + PrecioUnitario.ToString("0.00"));
-            }
+            RepintarEncabezado();
+        }
+
+        private void RepintarEncabezado()
+        {
+            if (txtCombo == null) return;
+
+            var sb = new StringBuilder();
+            sb.AppendFormat("{0} x {1} = S/ {2:0.00}", Cantidad, Descripcion.ToUpperInvariant(), Total);
+
+            // Notas del encabezado (p.ej. "FRITOS" para continental)
+            foreach (var n in _notasEncabezado)
+                sb.AppendLine().Append("  - ").Append(n);
+
+            txtCombo.Text = sb.ToString();
+            _tt.SetToolTip(txtCombo, "PU: S/ " + PrecioUnitario.ToString("0.00"));
+            RecalcAutoGrowSafe();
+        }
+
+        /// <summary>Agrega líneas de notas debajo del encabezado del combo.</summary>
+        public void AppendNotasEncabezado(string notas)
+        {
+            if (string.IsNullOrWhiteSpace(notas)) return;
+            foreach (var n in ToNotas(notas))
+                _notasEncabezado.Add(n);
+            RepintarEncabezado();
+        }
+
+        /// <summary>Reemplaza todas las notas del encabezado del combo.</summary>
+        public void SetNotasEncabezado(string notas)
+        {
+            _notasEncabezado.Clear();
+            if (!string.IsNullOrWhiteSpace(notas))
+                foreach (var n in ToNotas(notas))
+                    _notasEncabezado.Add(n);
+            RepintarEncabezado();
+        }
+
+        // ======= TAMALES =======
+        public void ClearTamales()
+        {
+            _tamales.Clear();
+            _ultimoTamal = null;
+            _bloqueSeleccionado = null;
+
+            FlowLayoutPanel flpT;
+            if (TryFindControl("flpTamal", out flpT)) flpT.Controls.Clear();
 
             RecalcAutoGrowSafe();
         }
 
-        // ===== API Jugos =====
+        public void AddTamalUnidad(string descripcion, decimal precioExtra, string notas, bool? forzarIndividual)
+        {
+            FlowLayoutPanel flpT;
+            if (!TryFindControl("flpTamal", out flpT)) return;
+
+            bool individual = (forzarIndividual.HasValue) ? forzarIndividual.Value : !AgruparTamalesIguales;
+
+            BloqueTexto bloque = null;
+            if (!individual)
+            {
+                string key = KeyDe(descripcion, precioExtra);
+                bloque = _tamales.FirstOrDefault(x => x.Key == key);
+            }
+
+            if (bloque == null)
+            {
+                bloque = new BloqueTexto
+                {
+                    Key = KeyDe(descripcion, precioExtra),
+                    Descripcion = (descripcion ?? "").Trim(),
+                    PrecioExtra = precioExtra,
+                    Cantidad = 1,
+                    TextBox = CrearTextBoxDesdePlantilla(_tplTamal, flpT)
+                };
+
+                if (!string.IsNullOrWhiteSpace(notas))
+                    bloque.Notas.AddRange(ToNotas(notas));
+
+                bloque.TextBox.Text = TextoDe(bloque);
+                VincularBloqueVisual(bloque);
+
+                flpT.Controls.Add(bloque.TextBox);
+                flpT.PerformLayout();
+
+                _tamales.Add(bloque);
+            }
+            else
+            {
+                bloque.Cantidad += 1;
+                if (!string.IsNullOrWhiteSpace(notas))
+                    bloque.Notas.AddRange(ToNotas(notas));
+                bloque.TextBox.Text = TextoDe(bloque);
+            }
+
+            _ultimoTamal = bloque;
+            RecalcAutoGrowSafe();
+        }
+
+        public void AppendNotasAlUltimoTamal(string notas)
+        {
+            if (_ultimoTamal == null || string.IsNullOrWhiteSpace(notas)) return;
+            _ultimoTamal.Notas.AddRange(ToNotas(notas));
+            _ultimoTamal.TextBox.Text = TextoDe(_ultimoTamal);
+            RecalcAutoGrowSafe();
+        }
+
+        // ======= JUGOS =======
         public void ClearJugos()
         {
             _jugos.Clear();
@@ -198,7 +331,7 @@ namespace CapaPresentacion.Controles
             return extraTotal / cantidadTotal;
         }
 
-        // ===== API Bebidas =====
+        // ======= BEBIDAS CALIENTES =======
         public void ClearBebidas()
         {
             _bebidas.Clear();
@@ -281,7 +414,7 @@ namespace CapaPresentacion.Controles
                    GetExtraPromedioBebidasPorUnidad(cantidadTotal);
         }
 
-        // ===== selección global =====
+        // ===== Selección global =====
         private void WireSelectClick(Control root)
         {
             if (root == null) return;
@@ -305,7 +438,7 @@ namespace CapaPresentacion.Controles
 
         private void Any_Click_Select(object sender, EventArgs e)
         {
-            LineaSelection.Select(this, true);   // << selección global única
+            LineaSelection.Select(this, true);   // selección global única
         }
 
         // ===== AutoGrow / medidas =====
@@ -320,21 +453,31 @@ namespace CapaPresentacion.Controles
             if (!IsHandleCreated) return;
 
             AjustarAnchosContenedor(flpJugos);
-            FlowLayoutPanel flpB2;
-            if (TryFindControl("flpBebCDesayuno", out flpB2))
-                AjustarAnchosContenedor(flpB2);
+
+            FlowLayoutPanel flpB;
+            if (TryFindControl("flpBebCDesayuno", out flpB))
+                AjustarAnchosContenedor(flpB);
+
+            FlowLayoutPanel flpT;
+            if (TryFindControl("flpTamal", out flpT))
+                AjustarAnchosContenedor(flpT);
 
             int hCombo = AltoNecesario(txtCombo);
             int hJugos = (flpJugos != null) ? flpJugos.Height : 0;
 
             int hBeb = 0;
-            FlowLayoutPanel flpB3;
-            if (TryFindControl("flpBebCDesayuno", out flpB3))
-                hBeb = flpB3.Height;
+            FlowLayoutPanel flpB2;
+            if (TryFindControl("flpBebCDesayuno", out flpB2))
+                hBeb = flpB2.Height;
+
+            int hTam = 0;
+            FlowLayoutPanel flpT2;
+            if (TryFindControl("flpTamal", out flpT2))
+                hTam = flpT2.Height;
 
             SuspendLayout();
             if (txtCombo != null && txtCombo.Height != hCombo) txtCombo.Height = hCombo;
-            this.Height = _baseHeight + hCombo + hJugos + hBeb;
+            this.Height = _baseHeight + hCombo + hJugos + hBeb + hTam;
             ResumeLayout();
         }
 
@@ -457,11 +600,19 @@ namespace CapaPresentacion.Controles
             tb.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
 
             tb.TextChanged += (s, e) => RecalcAutoGrowSafe();
+
+            // Click: marca bloque y selecciona el item
             tb.Click += (s, e) =>
             {
-                // marca bloque y selecciona item
                 _bloqueSeleccionado = (BloqueTexto)((Control)s).Tag;
                 LineaSelection.Select(this, true);
+            };
+
+            // Doble clic: editor de notas por bloque
+            tb.DoubleClick += (s, e) =>
+            {
+                _bloqueSeleccionado = (BloqueTexto)((Control)s).Tag;
+                EditarNotasSeleccionadas(this.FindForm());
             };
 
             return tb;
@@ -564,6 +715,7 @@ namespace CapaPresentacion.Controles
             return ToNotas(raw).ToList();
         }
 
+        /// <summary>Edita SOLO las notas del bloque seleccionado.</summary>
         public bool EditarNotasSeleccionadas(IWin32Window owner)
         {
             if (_bloqueSeleccionado == null) return false;
@@ -584,11 +736,14 @@ namespace CapaPresentacion.Controles
             return false;
         }
 
+        /// <summary>Si no hay bloque marcado, intenta editar el último jugo/bebida/tamal.</summary>
         public bool EditarUltimoJugoOBebida(IWin32Window owner)
         {
             var b = _bloqueSeleccionado
+                 ?? _ultimoTamal
                  ?? _ultimoJugo
                  ?? _ultimaBebida
+                 ?? (_tamales.Count > 0 ? _tamales[_tamales.Count - 1] : null)
                  ?? (_jugos.Count > 0 ? _jugos[_jugos.Count - 1] : null)
                  ?? (_bebidas.Count > 0 ? _bebidas[_bebidas.Count - 1] : null);
 

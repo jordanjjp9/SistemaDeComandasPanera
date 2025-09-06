@@ -166,6 +166,12 @@
     <Compile Include="Controles\LineaPedidoItem.Designer.cs">
       <DependentUpon>LineaPedidoItem.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controles\MenuPedidoItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controles\MenuPedidoItem.Designer.cs">
+      <DependentUpon>MenuPedidoItem.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmARappi.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -286,11 +292,11 @@
     <Compile Include="Notas\frmNDesayunoContinental.Designer.cs">
       <DependentUpon>frmNDesayunoContinental.cs</DependentUpon>
     </Compile>
-    <Compile Include="Notas\frmNDesayunoTamal.cs">
+    <Compile Include="Notas\frmCDesayunoTamal.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Notas\frmNDesayunoTamal.Designer.cs">
-      <DependentUpon>frmNDesayunoTamal.cs</DependentUpon>
+    <Compile Include="Notas\frmCDesayunoTamal.Designer.cs">
+      <DependentUpon>frmCDesayunoTamal.cs</DependentUpon>
     </Compile>
     <Compile Include="Notas\frmNHelados.cs">
       <SubType>Form</SubType>
@@ -381,6 +387,9 @@
     <EmbeddedResource Include="Controles\LineaPedidoItem.resx">
       <DependentUpon>LineaPedidoItem.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Controles\MenuPedidoItem.resx">
+      <DependentUpon>MenuPedidoItem.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmARappi.resx">
       <DependentUpon>frmARappi.cs</DependentUpon>
     </EmbeddedResource>
@@ -435,8 +444,8 @@
     <EmbeddedResource Include="Notas\frmNDesayunoContinental.resx">
       <DependentUpon>frmNDesayunoContinental.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Notas\frmNDesayunoTamal.resx">
-      <DependentUpon>frmNDesayunoTamal.cs</DependentUpon>
+    <EmbeddedResource Include="Notas\frmCDesayunoTamal.resx">
+      <DependentUpon>frmCDesayunoTamal.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Notas\frmNHelados.resx">
       <DependentUpon>frmNHelados.cs</DependentUpon>
@@ -568,6 +577,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\logo pan.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\logo pan1.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

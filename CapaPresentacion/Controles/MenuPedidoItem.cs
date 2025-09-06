@@ -8,11 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace CapaPresentacion.Notas
+namespace CapaPresentacion.Controles
 {
-    public partial class frmNDesayunoTamal : Form
+    public partial class MenuPedidoItem : UserControl
     {
-        public frmNDesayunoTamal()
+        public MenuPedidoItem()
         {
             InitializeComponent();
         }

@@ -390,7 +390,7 @@
             this.btnCerrar.Size = new System.Drawing.Size(81, 64);
             this.btnCerrar.TabIndex = 0;
             this.btnCerrar.Text = "X";
-       //     this.btnCerrar.Click += new System.EventHandler(this.btnCerrar_Click);
+            this.btnCerrar.Click += new System.EventHandler(this.btnCerrar_Click);
             // 
             // frmNBebidas
             // 

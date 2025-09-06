@@ -233,6 +233,16 @@ namespace CapaPresentacion.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap logo_pan1 {
+            get {
+                object obj = ResourceManager.GetObject("logo pan1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap LOGOLAPANERA31072025 {
             get {
                 object obj = ResourceManager.GetObject("LOGOLAPANERA31072025", resourceCulture);

@@ -48,7 +48,6 @@ C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Botoneras.frmTortasEnteras.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Notas.frmNBebidas.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Notas.frmNDesayunoContinental.resources
-C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Notas.frmNDesayunoTamal.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Notas.frmNHelados.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Notas.frmNSandwich.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Notas.frmNWaffles.resources
@@ -58,3 +57,5 @@ C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Notas.frmCBebidasCalientes.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Notas.frmCJugoDesayuno.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Controles.ComboPedidoItem.resources
+C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Notas.frmCDesayunoTamal.resources
+C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Controles.MenuPedidoItem.resources

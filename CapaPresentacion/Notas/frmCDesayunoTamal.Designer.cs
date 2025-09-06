@@ -1,6 +1,6 @@
 ﻿namespace CapaPresentacion.Notas
 {
-    partial class frmNDesayunoTamal
+    partial class frmCDesayunoTamal
     {
         /// <summary>
         /// Required designer variable.
@@ -131,6 +131,7 @@
             this.btnEliminar.Size = new System.Drawing.Size(180, 72);
             this.btnEliminar.TabIndex = 1;
             this.btnEliminar.Text = "Eliminar";
+            this.btnEliminar.Click += new System.EventHandler(this.btnEliminar_Click);
             // 
             // btnContinuar
             // 
@@ -147,6 +148,7 @@
             this.btnContinuar.Size = new System.Drawing.Size(180, 72);
             this.btnContinuar.TabIndex = 0;
             this.btnContinuar.Text = "Continuar";
+            this.btnContinuar.Click += new System.EventHandler(this.btnContinuar_Click);
             // 
             // pnlNotasBebidas
             // 
@@ -236,15 +238,16 @@
             this.btnCerrar.Size = new System.Drawing.Size(81, 64);
             this.btnCerrar.TabIndex = 0;
             this.btnCerrar.Text = "X";
+            this.btnCerrar.Click += new System.EventHandler(this.btnCerrar_Click);
             // 
-            // frmNDesayunoTamal
+            // frmCDesayunoTamal
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1384, 875);
             this.Controls.Add(this.pnlNBebidas);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "frmNDesayunoTamal";
+            this.Name = "frmCDesayunoTamal";
             this.Text = "frmNDesayunoTamal";
             this.pnlNBebidas.ResumeLayout(false);
             this.flpNDesayTaml.ResumeLayout(false);

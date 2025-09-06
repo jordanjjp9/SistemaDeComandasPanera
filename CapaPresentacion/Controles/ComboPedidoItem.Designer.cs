@@ -30,11 +30,14 @@
         {
             this.txtCombo = new Guna.UI2.WinForms.Guna2TextBox();
             this.flpJugos = new System.Windows.Forms.FlowLayoutPanel();
-            this.txtJugoDesayuno = new Guna.UI2.WinForms.Guna2TextBox();
             this.flpBebCDesayuno = new System.Windows.Forms.FlowLayoutPanel();
             this.txtBebCDesay = new Guna.UI2.WinForms.Guna2TextBox();
+            this.txtJugoDesayuno = new Guna.UI2.WinForms.Guna2TextBox();
+            this.flpTamal = new System.Windows.Forms.FlowLayoutPanel();
+            this.txtTamal = new Guna.UI2.WinForms.Guna2TextBox();
             this.flpJugos.SuspendLayout();
             this.flpBebCDesayuno.SuspendLayout();
+            this.flpTamal.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtCombo
@@ -71,32 +74,6 @@
             this.flpJugos.Size = new System.Drawing.Size(310, 40);
             this.flpJugos.TabIndex = 1;
             this.flpJugos.WrapContents = false;
-            // 
-            // txtJugoDesayuno
-            // 
-            this.txtJugoDesayuno.AcceptsReturn = true;
-            this.txtJugoDesayuno.BorderRadius = 12;
-            this.txtJugoDesayuno.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.txtJugoDesayuno.DefaultText = "";
-            this.txtJugoDesayuno.DisabledState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(208)))), ((int)(((byte)(208)))), ((int)(((byte)(208)))));
-            this.txtJugoDesayuno.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(226)))), ((int)(((byte)(226)))));
-            this.txtJugoDesayuno.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
-            this.txtJugoDesayuno.DisabledState.PlaceholderForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
-            this.txtJugoDesayuno.FillColor = System.Drawing.Color.Silver;
-            this.txtJugoDesayuno.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.txtJugoDesayuno.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtJugoDesayuno.ForeColor = System.Drawing.Color.Black;
-            this.txtJugoDesayuno.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.txtJugoDesayuno.Location = new System.Drawing.Point(0, 4);
-            this.txtJugoDesayuno.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
-            this.txtJugoDesayuno.Multiline = true;
-            this.txtJugoDesayuno.Name = "txtJugoDesayuno";
-            this.txtJugoDesayuno.PlaceholderText = "";
-            this.txtJugoDesayuno.ReadOnly = true;
-            this.txtJugoDesayuno.SelectedText = "";
-            this.txtJugoDesayuno.Size = new System.Drawing.Size(310, 36);
-            this.txtJugoDesayuno.TabIndex = 0;
-            this.txtJugoDesayuno.Visible = false;
             // 
             // flpBebCDesayuno
             // 
@@ -137,17 +114,84 @@
             this.txtBebCDesay.TabIndex = 0;
             this.txtBebCDesay.Visible = false;
             // 
+            // txtJugoDesayuno
+            // 
+            this.txtJugoDesayuno.AcceptsReturn = true;
+            this.txtJugoDesayuno.BorderRadius = 12;
+            this.txtJugoDesayuno.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.txtJugoDesayuno.DefaultText = "";
+            this.txtJugoDesayuno.DisabledState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(208)))), ((int)(((byte)(208)))), ((int)(((byte)(208)))));
+            this.txtJugoDesayuno.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(226)))), ((int)(((byte)(226)))));
+            this.txtJugoDesayuno.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
+            this.txtJugoDesayuno.DisabledState.PlaceholderForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
+            this.txtJugoDesayuno.FillColor = System.Drawing.Color.Silver;
+            this.txtJugoDesayuno.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.txtJugoDesayuno.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtJugoDesayuno.ForeColor = System.Drawing.Color.Black;
+            this.txtJugoDesayuno.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.txtJugoDesayuno.Location = new System.Drawing.Point(0, 4);
+            this.txtJugoDesayuno.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
+            this.txtJugoDesayuno.Multiline = true;
+            this.txtJugoDesayuno.Name = "txtJugoDesayuno";
+            this.txtJugoDesayuno.PlaceholderText = "";
+            this.txtJugoDesayuno.ReadOnly = true;
+            this.txtJugoDesayuno.SelectedText = "";
+            this.txtJugoDesayuno.Size = new System.Drawing.Size(310, 36);
+            this.txtJugoDesayuno.TabIndex = 0;
+            this.txtJugoDesayuno.Visible = false;
+            // 
+            // flpTamal
+            // 
+            this.flpTamal.AutoSize = true;
+            this.flpTamal.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.flpTamal.Controls.Add(this.txtTamal);
+            this.flpTamal.Dock = System.Windows.Forms.DockStyle.Top;
+            this.flpTamal.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
+            this.flpTamal.Location = new System.Drawing.Point(0, 122);
+            this.flpTamal.Name = "flpTamal";
+            this.flpTamal.Size = new System.Drawing.Size(310, 40);
+            this.flpTamal.TabIndex = 4;
+            this.flpTamal.WrapContents = false;
+            // 
+            // txtTamal
+            // 
+            this.txtTamal.AcceptsReturn = true;
+            this.txtTamal.BorderRadius = 12;
+            this.txtTamal.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.txtTamal.DefaultText = "";
+            this.txtTamal.DisabledState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(208)))), ((int)(((byte)(208)))), ((int)(((byte)(208)))));
+            this.txtTamal.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(226)))), ((int)(((byte)(226)))));
+            this.txtTamal.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
+            this.txtTamal.DisabledState.PlaceholderForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
+            this.txtTamal.FillColor = System.Drawing.Color.Silver;
+            this.txtTamal.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.txtTamal.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtTamal.ForeColor = System.Drawing.Color.Black;
+            this.txtTamal.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.txtTamal.Location = new System.Drawing.Point(0, 4);
+            this.txtTamal.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
+            this.txtTamal.Multiline = true;
+            this.txtTamal.Name = "txtTamal";
+            this.txtTamal.PlaceholderText = "";
+            this.txtTamal.ReadOnly = true;
+            this.txtTamal.SelectedText = "";
+            this.txtTamal.Size = new System.Drawing.Size(310, 36);
+            this.txtTamal.TabIndex = 1;
+            this.txtTamal.Visible = false;
+            // 
             // ComboPedidoItem
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.flpTamal);
             this.Controls.Add(this.flpBebCDesayuno);
             this.Controls.Add(this.flpJugos);
             this.Controls.Add(this.txtCombo);
             this.Name = "ComboPedidoItem";
-            this.Size = new System.Drawing.Size(310, 129);
+            this.Size = new System.Drawing.Size(310, 170);
             this.flpJugos.ResumeLayout(false);
             this.flpBebCDesayuno.ResumeLayout(false);
+            this.flpTamal.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -157,8 +201,10 @@
 
         private Guna.UI2.WinForms.Guna2TextBox txtCombo;
         private System.Windows.Forms.FlowLayoutPanel flpJugos;
-        private Guna.UI2.WinForms.Guna2TextBox txtJugoDesayuno;
         private System.Windows.Forms.FlowLayoutPanel flpBebCDesayuno;
+        private Guna.UI2.WinForms.Guna2TextBox txtJugoDesayuno;
         private Guna.UI2.WinForms.Guna2TextBox txtBebCDesay;
+        private System.Windows.Forms.FlowLayoutPanel flpTamal;
+        private Guna.UI2.WinForms.Guna2TextBox txtTamal;
     }
 }

@@ -34,7 +34,6 @@
             this.guna2HtmlLabel3 = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.guna2HtmlLabel2 = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.guna2HtmlLabel1 = new Guna.UI2.WinForms.Guna2HtmlLabel();
-            this.btnCerrar = new System.Windows.Forms.Button();
             this.txtVendedor = new System.Windows.Forms.TextBox();
             this.txtMesa = new System.Windows.Forms.TextBox();
             this.txtAmb = new System.Windows.Forms.TextBox();
@@ -46,18 +45,19 @@
             this.pnlCantidadT = new System.Windows.Forms.Panel();
             this.txtSubtotal = new Guna.UI2.WinForms.Guna2TextBox();
             this.lblSubTotal = new Guna.UI2.WinForms.Guna2HtmlLabel();
-            this.pnlSTop = new System.Windows.Forms.Panel();
             this.pnlCentral = new System.Windows.Forms.Panel();
             this.pnlCDown = new System.Windows.Forms.Panel();
             this.txtCantidad = new Guna.UI2.WinForms.Guna2TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.pnlCCentral = new System.Windows.Forms.Panel();
+            this.pnlCSup = new System.Windows.Forms.Panel();
             this.btnActualizar = new Guna.UI2.WinForms.Guna2Button();
             this.btnPrecuenta = new Guna.UI2.WinForms.Guna2Button();
             this.btnComentarioLbr = new Guna.UI2.WinForms.Guna2Button();
             this.btnEliminar = new Guna.UI2.WinForms.Guna2Button();
             this.btnListarProductos = new Guna.UI2.WinForms.Guna2Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.pnlCCentral = new System.Windows.Forms.Panel();
-            this.pnlCSup = new System.Windows.Forms.Panel();
+            this.pnlSTop = new System.Windows.Forms.Panel();
+            this.btnCerrar = new System.Windows.Forms.Button();
             this.pnlTop.SuspendLayout();
             this.pnlSidePanel.SuspendLayout();
             this.pnlSCentral.SuspendLayout();
@@ -149,20 +149,6 @@
             this.guna2HtmlLabel1.Size = new System.Drawing.Size(70, 18);
             this.guna2HtmlLabel1.TabIndex = 13;
             this.guna2HtmlLabel1.Text = "AMBIENTE";
-            // 
-            // btnCerrar
-            // 
-            this.btnCerrar.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnCerrar.FlatAppearance.BorderSize = 0;
-            this.btnCerrar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCerrar.Image = global::CapaPresentacion.Properties.Resources.cerrar;
-            this.btnCerrar.Location = new System.Drawing.Point(1506, 0);
-            this.btnCerrar.Name = "btnCerrar";
-            this.btnCerrar.Size = new System.Drawing.Size(53, 52);
-            this.btnCerrar.TabIndex = 12;
-            this.btnCerrar.Text = "X";
-            this.btnCerrar.UseVisualStyleBackColor = true;
-            this.btnCerrar.Click += new System.EventHandler(this.btnCerrar_Click);
             // 
             // txtVendedor
             // 
@@ -265,7 +251,7 @@
             this.txtSubtotal.ForeColor = System.Drawing.Color.Black;
             this.txtSubtotal.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.txtSubtotal.Location = new System.Drawing.Point(0, 34);
-            this.txtSubtotal.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.txtSubtotal.Margin = new System.Windows.Forms.Padding(6);
             this.txtSubtotal.Name = "txtSubtotal";
             this.txtSubtotal.PlaceholderText = "";
             this.txtSubtotal.SelectedText = "";
@@ -280,18 +266,9 @@
             this.lblSubTotal.ForeColor = System.Drawing.Color.White;
             this.lblSubTotal.Location = new System.Drawing.Point(0, 0);
             this.lblSubTotal.Name = "lblSubTotal";
-            this.lblSubTotal.Size = new System.Drawing.Size(166, 34);
+            this.lblSubTotal.Size = new System.Drawing.Size(310, 34);
             this.lblSubTotal.TabIndex = 1;
             this.lblSubTotal.Text = "VALOR VENTA:";
-            // 
-            // pnlSTop
-            // 
-            this.pnlSTop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(228)))), ((int)(((byte)(214)))));
-            this.pnlSTop.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlSTop.Location = new System.Drawing.Point(0, 0);
-            this.pnlSTop.Name = "pnlSTop";
-            this.pnlSTop.Size = new System.Drawing.Size(310, 151);
-            this.pnlSTop.TabIndex = 0;
             // 
             // pnlCentral
             // 
@@ -341,6 +318,35 @@
             this.txtCantidad.TabIndex = 5;
             this.txtCantidad.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtCantidad_KeyDown);
             this.txtCantidad.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtCantidad_KeyPress);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.label1.Location = new System.Drawing.Point(1006, 52);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(194, 24);
+            this.label1.TabIndex = 6;
+            this.label1.Text = "Cantidad / Producto";
+            // 
+            // pnlCCentral
+            // 
+            this.pnlCCentral.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(228)))), ((int)(((byte)(214)))));
+            this.pnlCCentral.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlCCentral.Location = new System.Drawing.Point(0, 151);
+            this.pnlCCentral.Name = "pnlCCentral";
+            this.pnlCCentral.Size = new System.Drawing.Size(1249, 667);
+            this.pnlCCentral.TabIndex = 14;
+            // 
+            // pnlCSup
+            // 
+            this.pnlCSup.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(228)))), ((int)(((byte)(214)))));
+            this.pnlCSup.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlCSup.Location = new System.Drawing.Point(0, 0);
+            this.pnlCSup.Name = "pnlCSup";
+            this.pnlCSup.Size = new System.Drawing.Size(1249, 151);
+            this.pnlCSup.TabIndex = 9;
             // 
             // btnActualizar
             // 
@@ -446,34 +452,28 @@
             this.btnListarProductos.TextOffset = new System.Drawing.Point(-10, 35);
             this.btnListarProductos.Click += new System.EventHandler(this.btnListarProductos_Click);
             // 
-            // label1
+            // pnlSTop
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.label1.Location = new System.Drawing.Point(1006, 52);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(194, 24);
-            this.label1.TabIndex = 6;
-            this.label1.Text = "Cantidad / Producto";
+            this.pnlSTop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(228)))), ((int)(((byte)(214)))));
+            this.pnlSTop.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlSTop.Location = new System.Drawing.Point(0, 0);
+            this.pnlSTop.Name = "pnlSTop";
+            this.pnlSTop.Size = new System.Drawing.Size(310, 151);
+            this.pnlSTop.TabIndex = 0;
             // 
-            // pnlCCentral
+            // btnCerrar
             // 
-            this.pnlCCentral.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(228)))), ((int)(((byte)(214)))));
-            this.pnlCCentral.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlCCentral.Location = new System.Drawing.Point(0, 151);
-            this.pnlCCentral.Name = "pnlCCentral";
-            this.pnlCCentral.Size = new System.Drawing.Size(1249, 667);
-            this.pnlCCentral.TabIndex = 14;
-            // 
-            // pnlCSup
-            // 
-            this.pnlCSup.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(228)))), ((int)(((byte)(214)))));
-            this.pnlCSup.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlCSup.Location = new System.Drawing.Point(0, 0);
-            this.pnlCSup.Name = "pnlCSup";
-            this.pnlCSup.Size = new System.Drawing.Size(1249, 151);
-            this.pnlCSup.TabIndex = 9;
+            this.btnCerrar.Dock = System.Windows.Forms.DockStyle.Right;
+            this.btnCerrar.FlatAppearance.BorderSize = 0;
+            this.btnCerrar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCerrar.Image = global::CapaPresentacion.Properties.Resources.cerrar;
+            this.btnCerrar.Location = new System.Drawing.Point(1506, 0);
+            this.btnCerrar.Name = "btnCerrar";
+            this.btnCerrar.Size = new System.Drawing.Size(53, 52);
+            this.btnCerrar.TabIndex = 12;
+            this.btnCerrar.Text = "X";
+            this.btnCerrar.UseVisualStyleBackColor = true;
+            this.btnCerrar.Click += new System.EventHandler(this.btnCerrar_Click);
             // 
             // frmMenuPrincipal
             // 
