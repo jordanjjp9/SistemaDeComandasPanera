@@ -120,66 +120,91 @@ namespace CapaPresentacion.Notas
         {
             if (root == null) return;
 
+            // Recorre hijos primero
             foreach (Control c in root.Controls)
                 WireQuickNoteButtonsRecursive(c);
 
-            if (EsAccion(root)) return;                // Excluye Continuar / Eliminar
+            // 🔒 No tocar nunca el área de notas
+            if (ReferenceEquals(root, _txtNotas) || ReferenceEquals(root, _txtNotasCtrl)) return;
+            if (root is TextBoxBase) return;
+            if ((root.GetType().Name ?? "").IndexOf("TextBox", StringComparison.OrdinalIgnoreCase) >= 0) return;
 
+            // Excluir botones de acción (Continuar/Eliminar)
+            if (EsAccion(root)) return;
+
+            // ¿Es un chip/opción rápida?
             if (EsBotonOpcion(root))
             {
-                root.Click -= Chip_Click;
-                root.Click += Chip_Click;
+                if (_chipsWired.Add(root))        // evita múltiples Click +=
+                    root.Click += Chip_Click;
             }
         }
 
-        private void WireQuickNoteButtons(Control root, Button btnContinuar, Button btnEliminar)
-        {
-            if (root == null) return;
+        //private void WireQuickNoteButtons(Control root, Button btnContinuar, Button btnEliminar)
+        //{
+        //    if (root == null) return;
 
-            foreach (Control c in root.Controls)
-            {
-                // Recursivo
-                WireQuickNoteButtons(c, btnContinuar, btnEliminar);
+        //    foreach (Control c in root.Controls)
+        //    {
+        //        // Recursivo
+        //        WireQuickNoteButtons(c, btnContinuar, btnEliminar);
 
-                // 🔴 NO tocar nunca el textbox de notas (en cualquiera de las dos variantes)
-                if (ReferenceEquals(c, _txtNotas) || ReferenceEquals(c, _txtNotasCtrl)) continue;
-                if (c is TextBoxBase) continue; // por si el nombre cambia
-                if ((c.Name ?? "").StartsWith("txt", StringComparison.OrdinalIgnoreCase)) continue;
+        //        // 🔴 NO tocar nunca el textbox de notas (en cualquiera de las dos variantes)
+        //        if (ReferenceEquals(c, _txtNotas) || ReferenceEquals(c, _txtNotasCtrl)) continue;
+        //        if (c is TextBoxBase) continue; // por si el nombre cambia
+        //        if ((c.Name ?? "").StartsWith("txt", StringComparison.OrdinalIgnoreCase)) continue;
 
-                // Solo cablear botones/chips reales
-                bool esChip =
-                    (c is Button) ||
-                    (c.GetType().Name.IndexOf("Button", StringComparison.OrdinalIgnoreCase) >= 0) ||
-                    ((c.Name ?? "").StartsWith("btn", StringComparison.OrdinalIgnoreCase));
+        //        // Solo cablear botones/chips reales
+        //        bool esChip =
+        //            (c is Button) ||
+        //            (c.GetType().Name.IndexOf("Button", StringComparison.OrdinalIgnoreCase) >= 0) ||
+        //            ((c.Name ?? "").StartsWith("btn", StringComparison.OrdinalIgnoreCase));
 
-                if (!esChip) continue;
+        //        if (!esChip) continue;
 
-                // Excluir Continuar / Eliminar
-                if (ReferenceEquals(c, btnContinuar) || ReferenceEquals(c, btnEliminar)) continue;
+        //        // Excluir Continuar / Eliminar
+        //        if (ReferenceEquals(c, btnContinuar) || ReferenceEquals(c, btnEliminar)) continue;
 
-                // ⚠️ Evitar MULTI-ENGANCHE
-                if (_chipsWired.Contains(c)) continue;
+        //        // ⚠️ Evitar MULTI-ENGANCHE
+        //        if (_chipsWired.Contains(c)) continue;
 
-                c.Click += Chip_Click;
-                _chipsWired.Add(c);
-            }
-        }
+        //        c.Click += Chip_Click;
+        //        _chipsWired.Add(c);
+        //    }
+        //}
 
 
+        //private static bool EsBotonOpcion(Control c)
+        //{
+        //    if (c == null) return false;
+
+        //    // Tipos comunes: Button, Guna2Button, etc.
+        //    if (c is Button) return true;
+        //    if ((c.GetType().Name ?? "").IndexOf("Button", StringComparison.OrdinalIgnoreCase) >= 0) return true;
+
+        //    // Heurística adicional: nombre tipo "btnXXX"
+        //    if ((c.Name ?? "").StartsWith("btn", StringComparison.OrdinalIgnoreCase)) return true;
+
+        //    // Cualquier control con propiedad Text y evento Click
+        //    return c.GetType().GetProperty("Text") != null;
+        //}
         private static bool EsBotonOpcion(Control c)
         {
             if (c == null) return false;
 
-            // Tipos comunes: Button, Guna2Button, etc.
+            // Nunca un textbox
+            if (c is TextBoxBase) return false;
+            var tn = c.GetType().Name ?? "";
+            if (tn.IndexOf("TextBox", StringComparison.OrdinalIgnoreCase) >= 0) return false;
+
+            // Botones típicos (Button, Guna2Button, etc.)
             if (c is Button) return true;
-            if ((c.GetType().Name ?? "").IndexOf("Button", StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            if (tn.IndexOf("Button", StringComparison.OrdinalIgnoreCase) >= 0) return true;
 
-            // Heurística adicional: nombre tipo "btnXXX"
-            if ((c.Name ?? "").StartsWith("btn", StringComparison.OrdinalIgnoreCase)) return true;
-
-            // Cualquier control con propiedad Text y evento Click
-            return c.GetType().GetProperty("Text") != null;
+            // Heurística final por nombre
+            return (c.Name ?? "").StartsWith("btn", StringComparison.OrdinalIgnoreCase);
         }
+
 
         private bool EsAccion(Control c)
         {
@@ -205,6 +230,8 @@ namespace CapaPresentacion.Notas
         {
             var c = sender as Control;
             if (c == null || EsAccion(c)) return; // seguridad extra
+
+            if (ReferenceEquals(c, _txtNotas) || ReferenceEquals(c, _txtNotasCtrl)) return;
 
             bool esGrande = IsGrandeControl(c);
             if (esGrande)

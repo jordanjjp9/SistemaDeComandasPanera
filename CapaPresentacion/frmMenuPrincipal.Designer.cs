@@ -41,7 +41,8 @@
             this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
             this.pnlSidePanel = new System.Windows.Forms.Panel();
             this.pnlSCentral = new System.Windows.Forms.Panel();
-            this.flpLineas = new System.Windows.Forms.FlowLayoutPanel();
+            this.flpLineas = new CapaPresentacion.Helpers.FlowLayoutPanelSinScroll();
+            //this.flpLineas = new System.Windows.Forms.FlowLayoutPanel();
             this.pnlCantidadT = new System.Windows.Forms.Panel();
             this.txtSubtotal = new Guna.UI2.WinForms.Guna2TextBox();
             this.lblSubTotal = new Guna.UI2.WinForms.Guna2HtmlLabel();
@@ -532,7 +533,8 @@
         private Guna.UI2.WinForms.Guna2HtmlLabel guna2HtmlLabel3;
         private Guna.UI2.WinForms.Guna2HtmlLabel guna2HtmlLabel2;
         private Guna.UI2.WinForms.Guna2HtmlLabel guna2HtmlLabel4;
-        private System.Windows.Forms.FlowLayoutPanel flpLineas;
+        //private System.Windows.Forms.FlowLayoutPanel flpLineas;
+        private Helpers.FlowLayoutPanelSinScroll flpLineas;
         private Guna.UI2.WinForms.Guna2HtmlLabel lblSubTotal;
         private Guna.UI2.WinForms.Guna2TextBox txtSubtotal;
     }

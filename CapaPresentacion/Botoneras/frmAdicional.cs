@@ -55,19 +55,36 @@ namespace CapaPresentacion.Botoneras
 
         private void frmAdicional_Load(object sender, EventArgs e)
         {
+            //foreach (var b in EnumerarBotones(this))
+            //{
+            //    if (b.Name.StartsWith("btnProd", StringComparison.OrdinalIgnoreCase))
+            //    {
+            //        // Obtiene el código desde el Name o desde el Tag si ya lo pusiste
+            //        var cod = b.Tag as string;
+            //        if (string.IsNullOrWhiteSpace(cod))
+            //        {
+            //            var m = Regex.Match(b.Name, @"\d+"); // ejemplo: btnProd0000000225 -> 0000000225
+            //            if (m.Success) cod = m.Value;
+            //        }
+
+            //        b.Tag = cod; // guarda en Tag
+            //        b.Click -= BtnProducto_Click;
+            //        b.Click += BtnProducto_Click;
+            //    }
+            //}
             foreach (var b in EnumerarBotones(this))
             {
                 if (b.Name.StartsWith("btnProd", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Obtiene el código desde el Name o desde el Tag si ya lo pusiste
+                    // Código desde el Name (btnProd0000000225 → 0000000225)
                     var cod = b.Tag as string;
                     if (string.IsNullOrWhiteSpace(cod))
                     {
-                        var m = Regex.Match(b.Name, @"\d+"); // ejemplo: btnProd0000000225 -> 0000000225
+                        var m = Regex.Match(b.Name, @"\d+");
                         if (m.Success) cod = m.Value;
                     }
 
-                    b.Tag = cod; // guarda en Tag
+                    b.Tag = cod;              // guarda el código en Tag
                     b.Click -= BtnProducto_Click;
                     b.Click += BtnProducto_Click;
                 }
@@ -104,6 +121,21 @@ namespace CapaPresentacion.Botoneras
             }
         }
 
+        //private void BtnProducto_Click(object sender, EventArgs e)
+        //{
+        //    var btn = sender as Button;
+        //    var cod = btn?.Tag as string;
+
+        //    if (string.IsNullOrWhiteSpace(cod))
+        //    {
+        //        // fallback por si no hubiera Tag
+        //        var m = Regex.Match(btn?.Name ?? "", @"\d+");
+        //        if (m.Success) cod = m.Value;
+        //    }
+
+        //    if (!string.IsNullOrWhiteSpace(cod))
+        //        ProductoSeleccionado?.Invoke(cod); // ← avisa al padre
+        //}
         private void BtnProducto_Click(object sender, EventArgs e)
         {
             var btn = sender as Button;
@@ -111,13 +143,12 @@ namespace CapaPresentacion.Botoneras
 
             if (string.IsNullOrWhiteSpace(cod))
             {
-                // fallback por si no hubiera Tag
                 var m = Regex.Match(btn?.Name ?? "", @"\d+");
                 if (m.Success) cod = m.Value;
             }
 
             if (!string.IsNullOrWhiteSpace(cod))
-                ProductoSeleccionado?.Invoke(cod); // ← avisa al padre
+                ProductoSeleccionado?.Invoke(cod);
         }
 
         private void WireChild(Control c)

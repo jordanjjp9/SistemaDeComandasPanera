@@ -23,6 +23,8 @@ namespace CapaPresentacion.Controles
 
         private int _baseHeight;
         private bool _pendingGrow;
+        public enum ZonaNotas { Ninguna = 0, Menu = 1, Chicha = 2 }
+        public ZonaNotas ZonaActiva { get; private set; } = ZonaNotas.Menu;
 
         // ==== selección global ====
         public Control View => this;
@@ -38,8 +40,19 @@ namespace CapaPresentacion.Controles
             Prep(_txtMenu);
             Prep(_txtChich);
 
-            if (_txtMenu != null) _txtMenu.TextChanged += (_, __) => Recalc();
-            if (_txtChich != null) _txtChich.TextChanged += (_, __) => Recalc();
+            //if (_txtMenu != null) _txtMenu.TextChanged += (_, __) => Recalc();
+            //if (_txtChich != null) _txtChich.TextChanged += (_, __) => Recalc();
+            if (_txtMenu != null)
+            {
+                _txtMenu.Click += (_, __) => { ZonaActiva = ZonaNotas.Menu; LineaSelection.Select(this, true); };
+                _txtMenu.MouseDown += (_, __) => { ZonaActiva = ZonaNotas.Menu; LineaSelection.Select(this, true); };
+            }
+            if (_txtChich != null)
+            {
+                _txtChich.Click += (_, __) => { ZonaActiva = ZonaNotas.Chicha; LineaSelection.Select(this, true); };
+                _txtChich.MouseDown += (_, __) => { ZonaActiva = ZonaNotas.Chicha; LineaSelection.Select(this, true); };
+            }
+
             this.SizeChanged += (_, __) => Recalc();
 
             // seleccionar con click en cualquier parte
@@ -183,5 +196,64 @@ namespace CapaPresentacion.Controles
             }
             catch { return null; }
         }
+        // --- NOTAS MENU ---
+        public string GetNotasMenuRaw()
+        {
+            if (_txtMenu == null) return string.Empty;
+            var t = _txtMenu.Text ?? string.Empty;
+            t = t.Replace("\r\n", "\n").Replace("\r", "\n");
+            var lines = t.Split('\n');
+            return (lines.Length <= 1) ? string.Empty
+                                       : string.Join(Environment.NewLine, lines.Skip(1));
+        }
+        public void SetNotasMenu(string notas)
+        {
+            if (_txtMenu == null) return;
+            var header = ObtenerPrimeraLinea(_txtMenu.Text);
+            var norm = NormalizeNotes(notas);
+            _txtMenu.Text = string.IsNullOrEmpty(norm) ? header : header + Environment.NewLine + norm;
+            Recalc();
+        }
+
+        // --- NOTAS CHICHA ---
+        public string GetNotasChichaRaw()
+        {
+            if (_txtChich == null) return string.Empty;
+            var t = _txtChich.Text ?? string.Empty;
+            t = t.Replace("\r\n", "\n").Replace("\r", "\n");
+            var lines = t.Split('\n');
+            return (lines.Length <= 1) ? string.Empty
+                                       : string.Join(Environment.NewLine, lines.Skip(1));
+        }
+        public void SetNotasChicha(string notas)
+        {
+            if (_txtChich == null) return;
+            var header = ObtenerPrimeraLinea(_txtChich.Text);
+            var norm = NormalizeNotes(notas);
+            _txtChich.Text = string.IsNullOrEmpty(norm) ? header : header + Environment.NewLine + norm;
+            Recalc();
+        }
+
+        // helper para tomar la primera línea de un textbox multilínea
+        private static string ObtenerPrimeraLinea(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return string.Empty;
+            var t = text.Replace("\r\n", "\n").Replace("\r", "\n");
+            int nl = t.IndexOf('\n');
+            return (nl < 0) ? t : t.Substring(0, nl);
+        }
+
+        // API genérica según zona activa (útil desde el formulario)
+        public string GetNotasRaw(ZonaNotas zona)
+            => zona == ZonaNotas.Chicha ? GetNotasChichaRaw()
+               : zona == ZonaNotas.Menu ? GetNotasMenuRaw()
+               : string.Empty;
+
+        public void SetNotas(ZonaNotas zona, string notas)
+        {
+            if (zona == ZonaNotas.Chicha) SetNotasChicha(notas);
+            else if (zona == ZonaNotas.Menu) SetNotasMenu(notas);
+        }
+
     }
 }

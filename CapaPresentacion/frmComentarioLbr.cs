@@ -38,7 +38,7 @@ namespace CapaPresentacion
         public frmComentarioLbr()
         {
             InitializeComponent();
-
+            StartPosition = FormStartPosition.CenterParent;
             // Enter enviará el formulario
             this.AcceptButton = btnEnviar;
 

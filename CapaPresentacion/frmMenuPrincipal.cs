@@ -417,6 +417,32 @@ namespace CapaPresentacion
             //    }
             //}
 
+            ////var sel = LineaSelection.Actual;
+            ////if (sel == null)
+            ////{
+            ////    MessageBox.Show("Selecciona primero un ítem.", "Comentario",
+            ////                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ////    return;
+            ////}
+
+            ////if (sel is LineaPedidoItem lp)
+            ////{
+            ////    using (var dlg = new frmComentarioLbr())
+            ////    {
+            ////        dlg.Texto = lp.Notas ?? string.Empty;
+            ////        dlg.TextoInicial = dlg.Texto;
+
+            ////        if (dlg.ShowDialog(this) == DialogResult.OK)
+            ////            lp.SetNotas(dlg.Comentario);
+            ////    }
+            ////}
+            ////else if (sel is ComboPedidoItem ci)
+            ////{
+            ////    if (!ci.EditarUltimoJugoOBebida(this))
+            ////        MessageBox.Show("No hay jugo/bebida para editar notas.", "Comentario",
+            ////                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ////}
+
             var sel = LineaSelection.Actual;
             if (sel == null)
             {
@@ -429,9 +455,8 @@ namespace CapaPresentacion
             {
                 using (var dlg = new frmComentarioLbr())
                 {
-                    dlg.Texto = lp.Notas ?? string.Empty;
+                    dlg.Texto = lp.Notas ?? string.Empty;   // o lp.GetNotasRaw() si lo tienes
                     dlg.TextoInicial = dlg.Texto;
-
                     if (dlg.ShowDialog(this) == DialogResult.OK)
                         lp.SetNotas(dlg.Comentario);
                 }
@@ -441,6 +466,27 @@ namespace CapaPresentacion
                 if (!ci.EditarUltimoJugoOBebida(this))
                     MessageBox.Show("No hay jugo/bebida para editar notas.", "Comentario",
                                     MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else if (sel is MenuPedidoItem mi)
+            {
+                // Edita la zona que tocaste por última vez: Menu o Chicha
+                var zona = mi.ZonaActiva;
+                if (zona == MenuPedidoItem.ZonaNotas.Ninguna)
+                    zona = MenuPedidoItem.ZonaNotas.Chicha; // por si acaso
+
+                using (var dlg = new frmComentarioLbr())
+                {
+                    dlg.Texto = mi.GetNotasRaw(zona);
+                    dlg.TextoInicial = dlg.Texto;
+
+                    // Título informativo (opcional)
+                    dlg.Text = (zona == MenuPedidoItem.ZonaNotas.Menu)
+                               ? "Comentario del Menú"
+                               : "Comentario de la Chicha";
+
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                        mi.SetNotas(zona, dlg.Comentario);   // reemplaza notas de esa zona
+                }
             }
         }
 
@@ -937,10 +983,13 @@ namespace CapaPresentacion
             foreach (Control c in flpLineas.Controls)
             {
                 if (c is CapaPresentacion.Controles.LineaPedidoItem li)
-                    total += li.Importe;                 // Cantidad * PU
+                    total += li.Importe;
 
                 else if (c is CapaPresentacion.Controles.ComboPedidoItem ci)
-                    total += ci.Total;                   // Cantidad * PU (con extras promediados)
+                    total += ci.Total;
+
+                else if (c is CapaPresentacion.Controles.MenuPedidoItem mi)   // 👈 NUEVO
+                    total += mi.Total;
             }
 
             txtSubtotal.Text = $"S/ {total:0.00}";
@@ -1076,47 +1125,81 @@ namespace CapaPresentacion
 
         private void AgregarMenuPasta(ceProductos menuProd, int cantidad)
         {
-            // 1) Resolver “chicha almuerzo”
+            ////// 1) Resolver “chicha almuerzo”
+            ////var chicha = _svcProductos.Obtener(CHICHA_ALMUERZO_CODE, "001")
+            ////             ?? new ceProductos { Codigo = CHICHA_ALMUERZO_CODE, Descripcion = "CHICHA ALMUERZO", PrecioUnitario = 0m };
+
+            ////// 2) Pedir notas de bebida en frmNBebidas
+            ////string notas = string.Empty;
+            ////using (var frm = new frmNBebidas())
+            ////{
+            ////    frm.ProductoBaseTexto = $"{cantidad} x {chicha.Descripcion}";
+            ////    frm.TextoInicial = string.Empty;
+
+            ////    if (frm.ShowDialog(this) != DialogResult.OK)
+            ////        return; // cancelado
+
+            ////    notas = frm.Notas ?? string.Empty;
+            ////}
+
+            ////// 3) Crear y poblar el MenuPedidoItem
+            ////var item = new MenuPedidoItem();
+
+            ////var txtMenu = item.Controls.Find("txtMenu", true).FirstOrDefault();
+            ////var txtChich = item.Controls.Find("txtChich", true).FirstOrDefault();
+
+            ////// Encabezado del menú
+            ////TrySetText(txtMenu, $"{cantidad} x {menuProd.Descripcion?.ToUpperInvariant()}");
+
+            ////// Línea de chicha + notas
+            ////var sb = new StringBuilder()
+            ////    .Append($"{cantidad} x {chicha.Descripcion?.ToUpperInvariant()}");
+            ////string normNotas = NormalizarNotas(notas);
+            ////if (!string.IsNullOrEmpty(normNotas))
+            ////    sb.AppendLine().Append(normNotas);
+            ////TrySetText(txtChich, sb.ToString());
+
+            ////// 4) Insertar en el FlowLayoutPanel
+            ////AjustarAnchoItem(item);
+            ////flpLineas.SuspendLayout();
+            ////flpLineas.Controls.Add(item);
+            ////flpLineas.ResumeLayout(true);
+
+            ////// 5) Seleccionar, scroll y total
+            ////LineaSelection.Select(item, true);
+            ////btnEliminar.Enabled = btnComentarioLbr.Enabled = (LineaSelection.Actual != null);
+            ////ActualizarSubtotal();
+
+            // 1) Resolver chicha
             var chicha = _svcProductos.Obtener(CHICHA_ALMUERZO_CODE, "001")
                          ?? new ceProductos { Codigo = CHICHA_ALMUERZO_CODE, Descripcion = "CHICHA ALMUERZO", PrecioUnitario = 0m };
 
-            // 2) Pedir notas de bebida en frmNBebidas
+            // 2) Notas de NBebidas
             string notas = string.Empty;
             using (var frm = new frmNBebidas())
             {
                 frm.ProductoBaseTexto = $"{cantidad} x {chicha.Descripcion}";
                 frm.TextoInicial = string.Empty;
 
-                if (frm.ShowDialog(this) != DialogResult.OK)
-                    return; // cancelado
-
+                if (frm.ShowDialog(this) != DialogResult.OK) return;
                 notas = frm.Notas ?? string.Empty;
             }
 
-            // 3) Crear y poblar el MenuPedidoItem
+            // 3) Crear y poblar el control
             var item = new MenuPedidoItem();
 
-            var txtMenu = item.Controls.Find("txtMenu", true).FirstOrDefault();
-            var txtChich = item.Controls.Find("txtChich", true).FirstOrDefault();
+            // 👉 AQUÍ está la diferencia: usa la API del control para que pinte el precio
+            decimal puMenu = PrecioDe(menuProd);                 // PRE_SOL (o VAL_SOL de respaldo)
+            item.SetMenu(menuProd.Codigo, menuProd.Descripcion, cantidad, puMenu);
+            item.SetChicha(chicha.Descripcion, notas, cantidad); // cantidad y notas normalizadas
 
-            // Encabezado del menú
-            TrySetText(txtMenu, $"{cantidad} x {menuProd.Descripcion?.ToUpperInvariant()}");
-
-            // Línea de chicha + notas
-            var sb = new StringBuilder()
-                .Append($"{cantidad} x {chicha.Descripcion?.ToUpperInvariant()}");
-            string normNotas = NormalizarNotas(notas);
-            if (!string.IsNullOrEmpty(normNotas))
-                sb.AppendLine().Append(normNotas);
-            TrySetText(txtChich, sb.ToString());
-
-            // 4) Insertar en el FlowLayoutPanel
+            // 4) Insertar en el panel
             AjustarAnchoItem(item);
             flpLineas.SuspendLayout();
             flpLineas.Controls.Add(item);
             flpLineas.ResumeLayout(true);
 
-            // 5) Seleccionar, scroll y total
+            // 5) Selección y total
             LineaSelection.Select(item, true);
             btnEliminar.Enabled = btnComentarioLbr.Enabled = (LineaSelection.Actual != null);
             ActualizarSubtotal();
