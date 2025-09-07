@@ -11,6 +11,9 @@ namespace CapaPresentacion.Notas
         public string ProductoBaseTexto { get; set; } = string.Empty;
         public string TextoInicial { get; set; } = string.Empty;
         public string Notas { get; private set; } = string.Empty;
+        // frmNBebidas (campos privados)
+        private readonly HashSet<Control> _chipsWired = new HashSet<Control>();
+
 
         /// <summary>Cuántas bebidas calientes se omiten porque aquí se eligió “GRANDE”. (0 o 1)</summary>
         public int CuposCalienteConsumidos { get; private set; } = 0;
@@ -19,6 +22,10 @@ namespace CapaPresentacion.Notas
         private TextBoxBase _txtNotas;     // TextBox / RichTextBox real si existe
         private Control _txtNotasCtrl;     // fallback (p. ej., Guna2TextBox)
         private readonly List<bool> _lineaConsumeCupo = new List<bool>(); // para deshacer “GRANDE” con Eliminar
+
+        // Botones de acción (pueden ser Guna2Button, etc.)
+        private Control _btnContinuar;
+        private Control _btnEliminar;
 
         // Identificación del botón "GRANDE"
         private const string NAME_GRANDE = "btnGrd";
@@ -38,33 +45,42 @@ namespace CapaPresentacion.Notas
             if (_txtNotas == null)
                 _txtNotasCtrl = FindNotasControl();
 
-            // 2) Botones principales
-            var btnContinuar = this.Controls.Find("btnContinuar", true).OfType<Button>().FirstOrDefault();
-            var btnEliminar = this.Controls.Find("btnEliminar", true).OfType<Button>().FirstOrDefault();
+            // 2) Botones principales (resolver como Control, no OfType<Button>())
+            _btnContinuar = this.Controls.Find("btnContinuar", true).FirstOrDefault();
+            _btnEliminar = this.Controls.Find("btnEliminar", true).FirstOrDefault();
 
-            if (btnContinuar != null)
+            if (_btnContinuar != null)
             {
-                btnContinuar.Click -= btnContinuar_Click;
-                btnContinuar.Click += btnContinuar_Click;
-                this.AcceptButton = btnContinuar;
+                // Asegura que NO quede cableado como chip
+                _btnContinuar.Click -= Chip_Click;
+
+                _btnContinuar.Click -= btnContinuar_Click;
+                _btnContinuar.Click += btnContinuar_Click;
+
+                // Si implementa IButtonControl (Guna2Button lo hace), úsalo como AcceptButton
+                if (_btnContinuar is IButtonControl ib)
+                    this.AcceptButton = ib;
             }
-            if (btnEliminar != null)
+            if (_btnEliminar != null)
             {
-                btnEliminar.Click -= btnEliminar_Click;
-                btnEliminar.Click += btnEliminar_Click;
+                // Asegura que NO quede cableado como chip
+                _btnEliminar.Click -= Chip_Click;
+
+                _btnEliminar.Click -= btnEliminar_Click;
+                _btnEliminar.Click += btnEliminar_Click;
             }
 
             // 3) Encabezado con producto base (opcional)
             var txtProd = this.Controls.Find("txtProductoSelect", true).FirstOrDefault();
             if (txtProd != null && !string.IsNullOrWhiteSpace(ProductoBaseTexto))
-                txtProd.Text = ProductoBaseTexto;
+                TrySetText(txtProd, ProductoBaseTexto);
 
             // 4) Precarga de notas (opcional)
             if (!string.IsNullOrEmpty(TextoInicial))
                 TrySetNotasText(TextoInicial);
 
             // 5) Enganchar TODOS los “chips” (botones), excluyendo Continuar/Eliminar
-            WireQuickNoteButtons(this, btnContinuar, btnEliminar);
+            WireQuickNoteButtonsRecursive(this);
         }
 
         // ================== Botones principales ==================
@@ -92,7 +108,7 @@ namespace CapaPresentacion.Notas
                 _lineaConsumeCupo.RemoveAt(_lineaConsumeCupo.Count - 1);
             }
 
-            var nuevas = (i == 0) ? new string[0] : lines.Take(i).ToArray();
+            var nuevas = (i == 0) ? Array.Empty<string>() : lines.Take(i).ToArray();
             SetLines(nuevas);
 
             if (consumia && CuposCalienteConsumidos > 0)
@@ -100,32 +116,95 @@ namespace CapaPresentacion.Notas
         }
 
         // ================== Chips (opciones rápidas) ==================
+        private void WireQuickNoteButtonsRecursive(Control root)
+        {
+            if (root == null) return;
+
+            foreach (Control c in root.Controls)
+                WireQuickNoteButtonsRecursive(c);
+
+            if (EsAccion(root)) return;                // Excluye Continuar / Eliminar
+
+            if (EsBotonOpcion(root))
+            {
+                root.Click -= Chip_Click;
+                root.Click += Chip_Click;
+            }
+        }
+
         private void WireQuickNoteButtons(Control root, Button btnContinuar, Button btnEliminar)
         {
             if (root == null) return;
 
             foreach (Control c in root.Controls)
             {
+                // Recursivo
                 WireQuickNoteButtons(c, btnContinuar, btnEliminar);
 
-                bool esBoton =
+                // 🔴 NO tocar nunca el textbox de notas (en cualquiera de las dos variantes)
+                if (ReferenceEquals(c, _txtNotas) || ReferenceEquals(c, _txtNotasCtrl)) continue;
+                if (c is TextBoxBase) continue; // por si el nombre cambia
+                if ((c.Name ?? "").StartsWith("txt", StringComparison.OrdinalIgnoreCase)) continue;
+
+                // Solo cablear botones/chips reales
+                bool esChip =
                     (c is Button) ||
                     (c.GetType().Name.IndexOf("Button", StringComparison.OrdinalIgnoreCase) >= 0) ||
                     ((c.Name ?? "").StartsWith("btn", StringComparison.OrdinalIgnoreCase));
 
-                if (!esBoton) continue;
+                if (!esChip) continue;
 
+                // Excluir Continuar / Eliminar
                 if (ReferenceEquals(c, btnContinuar) || ReferenceEquals(c, btnEliminar)) continue;
 
-                c.Click -= Chip_Click;
+                // ⚠️ Evitar MULTI-ENGANCHE
+                if (_chipsWired.Contains(c)) continue;
+
                 c.Click += Chip_Click;
+                _chipsWired.Add(c);
             }
+        }
+
+
+        private static bool EsBotonOpcion(Control c)
+        {
+            if (c == null) return false;
+
+            // Tipos comunes: Button, Guna2Button, etc.
+            if (c is Button) return true;
+            if ((c.GetType().Name ?? "").IndexOf("Button", StringComparison.OrdinalIgnoreCase) >= 0) return true;
+
+            // Heurística adicional: nombre tipo "btnXXX"
+            if ((c.Name ?? "").StartsWith("btn", StringComparison.OrdinalIgnoreCase)) return true;
+
+            // Cualquier control con propiedad Text y evento Click
+            return c.GetType().GetProperty("Text") != null;
+        }
+
+        private bool EsAccion(Control c)
+        {
+            if (c == null) return false;
+
+            // Por referencia
+            if (ReferenceEquals(c, _btnContinuar) || ReferenceEquals(c, _btnEliminar))
+                return true;
+
+            // Por nombre (respaldo si no los encontró)
+            var n = (c.Name ?? "").ToLowerInvariant();
+            if (n == "btncontinuar" || n == "btneliminar")
+                return true;
+
+            // Por Tag (si quieres marcarlo en el diseñador)
+            if (string.Equals(c.Tag as string, "accion", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return false;
         }
 
         private void Chip_Click(object sender, EventArgs e)
         {
             var c = sender as Control;
-            if (c == null) return;
+            if (c == null || EsAccion(c)) return; // seguridad extra
 
             bool esGrande = IsGrandeControl(c);
             if (esGrande)
@@ -143,6 +222,8 @@ namespace CapaPresentacion.Notas
                 actual += Environment.NewLine;
 
             string textoChip = (c.Text ?? string.Empty).Trim();
+            if (textoChip.Length == 0) return;
+
             string nuevaLinea = "- " + textoChip;
 
             TrySetNotasText(actual + nuevaLinea + Environment.NewLine);
@@ -160,20 +241,60 @@ namespace CapaPresentacion.Notas
 
         private void TrySetNotasText(string s)
         {
-            if (s == null) s = string.Empty;   // <- compatible con C# 7.3
+            if (s == null) s = string.Empty;
 
             if (_txtNotas != null)
             {
+                // TextBoxBase (TextBox / RichTextBox)
                 _txtNotas.Text = s;
+
+                // ⚠️ limpiar selección y colocar caret al final
                 _txtNotas.SelectionStart = _txtNotas.TextLength;
+                _txtNotas.SelectionLength = 0;        // <--- clave
+                _txtNotas.HideSelection = true;       // opcional: no mostrar selección cuando pierde el foco
                 _txtNotas.ScrollToCaret();
                 _txtNotas.Focus();
             }
             else if (_txtNotasCtrl != null)
             {
+                // Otros (p.ej. Guna2TextBox)
                 _txtNotasCtrl.Text = s;
+                SetCaretToEnd(_txtNotasCtrl);         // <--- coloca caret y deselecciona
                 _txtNotasCtrl.Focus();
             }
+        }
+        private static void SetCaretToEnd(Control c)
+        {
+            try
+            {
+                // Si el control ya expone SelectionStart/SelectionLength, úsalos
+                var pSelStart = c.GetType().GetProperty("SelectionStart");
+                var pSelLen = c.GetType().GetProperty("SelectionLength");
+                var pText = c.GetType().GetProperty("Text");
+
+                if (pSelStart != null && pSelLen != null && pText != null)
+                {
+                    int len = ((string)pText.GetValue(c))?.Length ?? 0;
+                    pSelStart.SetValue(c, len, null);
+                    pSelLen.SetValue(c, 0, null);
+                    return;
+                }
+
+                // Guna2TextBox tiene un TextBox interno accesible como propiedad "TextBox"
+                var innerProp = c.GetType().GetProperty("TextBox",
+                    System.Reflection.BindingFlags.Instance |
+                    System.Reflection.BindingFlags.Public |
+                    System.Reflection.BindingFlags.NonPublic);
+
+                var inner = innerProp?.GetValue(c) as TextBoxBase;
+                if (inner != null)
+                {
+                    inner.SelectionStart = inner.TextLength;
+                    inner.SelectionLength = 0;
+                    inner.ScrollToCaret();
+                }
+            }
+            catch { /* ignore */ }
         }
 
         private string[] GetLines()
@@ -185,8 +306,18 @@ namespace CapaPresentacion.Notas
 
         private void SetLines(string[] lines)
         {
-            string joined = string.Join(Environment.NewLine, lines ?? new string[0]);
+            string joined = string.Join(Environment.NewLine, lines ?? Array.Empty<string>());
             TrySetNotasText(joined);
+        }
+
+        private static void TrySetText(Control any, string text)
+        {
+            try
+            {
+                var p = any.GetType().GetProperty("Text");
+                p?.SetValue(any, text, null);
+            }
+            catch { }
         }
 
         // ================== Localización de controles ==================
@@ -221,7 +352,9 @@ namespace CapaPresentacion.Notas
                 if (c != null) return c;
             }
 
-            return this.Controls.Cast<Control>().FirstOrDefault(ctrl => ctrl.GetType().GetProperty("Text") != null);
+            // Fallback: primer control con propiedad Text
+            return this.Controls.Cast<Control>()
+                                .FirstOrDefault(ctrl => ctrl.GetType().GetProperty("Text") != null);
         }
 
         // ================== Detección de “GRANDE” ==================

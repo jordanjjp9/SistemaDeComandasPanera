@@ -265,6 +265,7 @@
             this.txtNotasJugoDes.Multiline = true;
             this.txtNotasJugoDes.Name = "txtNotasJugoDes";
             this.txtNotasJugoDes.PlaceholderText = "";
+            this.txtNotasJugoDes.ReadOnly = true;
             this.txtNotasJugoDes.SelectedText = "";
             this.txtNotasJugoDes.Size = new System.Drawing.Size(341, 588);
             this.txtNotasJugoDes.TabIndex = 3;

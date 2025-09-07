@@ -443,6 +443,7 @@
             this.txtNotasSandwich.Multiline = true;
             this.txtNotasSandwich.Name = "txtNotasSandwich";
             this.txtNotasSandwich.PlaceholderText = "";
+            this.txtNotasSandwich.ReadOnly = true;
             this.txtNotasSandwich.SelectedText = "";
             this.txtNotasSandwich.Size = new System.Drawing.Size(341, 760);
             this.txtNotasSandwich.TabIndex = 3;

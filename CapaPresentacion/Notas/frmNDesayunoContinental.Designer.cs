@@ -311,6 +311,7 @@
             this.txtNotasContinental.Multiline = true;
             this.txtNotasContinental.Name = "txtNotasContinental";
             this.txtNotasContinental.PlaceholderText = "";
+            this.txtNotasContinental.ReadOnly = true;
             this.txtNotasContinental.SelectedText = "";
             this.txtNotasContinental.Size = new System.Drawing.Size(341, 760);
             this.txtNotasContinental.TabIndex = 3;

@@ -178,6 +178,7 @@
             this.txtNotasTamal.Multiline = true;
             this.txtNotasTamal.Name = "txtNotasTamal";
             this.txtNotasTamal.PlaceholderText = "";
+            this.txtNotasTamal.ReadOnly = true;
             this.txtNotasTamal.SelectedText = "";
             this.txtNotasTamal.Size = new System.Drawing.Size(341, 760);
             this.txtNotasTamal.TabIndex = 3;

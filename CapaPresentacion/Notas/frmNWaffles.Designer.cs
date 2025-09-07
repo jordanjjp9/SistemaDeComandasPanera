@@ -233,6 +233,7 @@
             this.txtNotasWaffles.Multiline = true;
             this.txtNotasWaffles.Name = "txtNotasWaffles";
             this.txtNotasWaffles.PlaceholderText = "";
+            this.txtNotasWaffles.ReadOnly = true;
             this.txtNotasWaffles.SelectedText = "";
             this.txtNotasWaffles.Size = new System.Drawing.Size(341, 760);
             this.txtNotasWaffles.TabIndex = 3;

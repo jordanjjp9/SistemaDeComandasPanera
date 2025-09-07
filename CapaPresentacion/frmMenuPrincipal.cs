@@ -1,21 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using CapaDatos;
 using CapaEntidad;
-using CapaPresentacion.Helpers;
 using CapaNegocio;
-using System.Text.RegularExpressions;
-using System.Globalization;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using CapaPresentacion.Botoneras;
 using CapaPresentacion.Controles;
+using CapaPresentacion.Helpers;
 using CapaPresentacion.Notas;
 
 namespace CapaPresentacion
@@ -31,7 +25,7 @@ namespace CapaPresentacion
         private Form _categoriaActual;
         private Point? _dragStart = null;
 
-        private DragScroller _lineasScroller;   
+        private DragScroller _lineasScroller;
 
         public int CantidadActualPublic => CantidadActual();
         private const bool CodigoSoloNumerico = true;
@@ -43,6 +37,19 @@ namespace CapaPresentacion
 
         private const string COD_DESAYUNO_CRIOLLO = "0000000458";
         private const string COD_DESAYUNO_PANERA = "0000000461";
+
+        private const string CHICHA_ALMUERZO_CODE = "0000000868";
+
+        // === PASTAS que disparan MenuPedidoItem ===
+        private static readonly string[] COD_PASTAS =
+        {
+            "0000000273", // ALFREDO
+            "0000000274", // HONGOS PORCÓN
+            "0000000275", // PESTO CON MILANESA
+            "0000000276"  // BOLOGNESA
+        };
+        private static bool EsCodigoPasta(string cod10)
+            => COD_PASTAS.Contains((cod10 ?? "").Trim(), StringComparer.Ordinal);
 
         private sealed class UnidadJugo
         {
@@ -90,7 +97,7 @@ namespace CapaPresentacion
                 sel.ProductoSeleccionado += Hijo_ProductoSeleccionado;
         }
 
-      //  private DragScroller _lineasScroller;
+        //  private DragScroller _lineasScroller;
 
         private void frmMenuPrincipal_Load(object sender, EventArgs e)
         {
@@ -185,6 +192,8 @@ namespace CapaPresentacion
             // Recalcular total al agregar/quitar controles
             flpLineas.ControlAdded += (_, __) => ActualizarSubtotal();
             flpLineas.ControlRemoved += (_, __) => ActualizarSubtotal();
+
+            MostrarEnCentral(new CapaPresentacion.Botoneras.frmPastas());
         }
 
         private int CantidadActual()
@@ -243,32 +252,78 @@ namespace CapaPresentacion
             return null;
         }
 
+        //private void Hijo_ProductoSeleccionado(string codigo)
+        //{
+        //    if (string.IsNullOrWhiteSpace(codigo)) return;
+
+        //    string cod10 = codigo.Trim().PadLeft(LARGO_CODIGO, '0');
+
+        //    ceProductos prod;
+        //    if (!_cachePorCodigo.TryGetValue(cod10, out prod) || prod == null)
+        //    {
+        //        prod = _svcProductos.Obtener(cod10, "001");
+        //        if (prod != null) _cachePorCodigo[cod10] = prod;
+        //    }
+        //    if (prod == null)
+        //    {
+        //        MessageBox.Show($"Producto {cod10} no encontrado.", "Productos",
+        //                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        //        return;
+        //    }
+
+        //    int cantidad = CantidadActual();
+        //    if (cantidad <= 0) cantidad = 1;
+
+        //    // 👉 delega todo aquí (combos, helados, normal)
+        //    SeleccionarProducto(prod, cantidad);
+        //}
         private void Hijo_ProductoSeleccionado(string codigo)
         {
             if (string.IsNullOrWhiteSpace(codigo)) return;
 
             string cod10 = codigo.Trim().PadLeft(LARGO_CODIGO, '0');
 
-            ceProductos prod;
-            if (!_cachePorCodigo.TryGetValue(cod10, out prod) || prod == null)
+            // 1) Si es una de las PASTAS -> flujo MenuPedidoItem
+            if (EsCodigoPasta(cod10))
             {
-                prod = _svcProductos.Obtener(cod10, "001");
-                if (prod != null) _cachePorCodigo[cod10] = prod;
+                if (!_cachePorCodigo.TryGetValue(cod10, out var prod) || prod == null)
+                {
+                    prod = _svcProductos.Obtener(cod10, "001");
+                    if (prod != null) _cachePorCodigo[cod10] = prod;
+                }
+                if (prod == null)
+                {
+                    MessageBox.Show($"Producto {cod10} no encontrado.", "Pastas",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                int cantidad = CantidadActual();
+                if (cantidad <= 0) cantidad = 1;
+
+                AgregarMenuPasta(prod, cantidad);   // ← NBebidas + pinta MenuPedidoItem
+                return;
             }
-            if (prod == null)
+
+            // 2) Resto de productos (desayunos / helados / normales)
+            ceProductos prod2;
+            if (!_cachePorCodigo.TryGetValue(cod10, out prod2) || prod2 == null)
+            {
+                prod2 = _svcProductos.Obtener(cod10, "001");
+                if (prod2 != null) _cachePorCodigo[cod10] = prod2;
+            }
+            if (prod2 == null)
             {
                 MessageBox.Show($"Producto {cod10} no encontrado.", "Productos",
                                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            int cantidad = CantidadActual();
-            if (cantidad <= 0) cantidad = 1;
+            int cantidad2 = CantidadActual();
+            if (cantidad2 <= 0) cantidad2 = 1;
 
-            // 👉 delega todo aquí (combos, helados, normal)
-            SeleccionarProducto(prod, cantidad);
+            SeleccionarProducto(prod2, cantidad2);
         }
-
 
         private void RecargarCache(string listaPrecio = "001")
         {
@@ -374,7 +429,7 @@ namespace CapaPresentacion
             {
                 using (var dlg = new frmComentarioLbr())
                 {
-                    dlg.Texto = lp.GetNotasRaw();
+                    dlg.Texto = lp.Notas ?? string.Empty;
                     dlg.TextoInicial = dlg.Texto;
 
                     if (dlg.ShowDialog(this) == DialogResult.OK)
@@ -672,358 +727,107 @@ namespace CapaPresentacion
 
         // Orquesta NBebidas -> (opcional) CBebidasCalientes según N o N-1.
         // El callback "appendNotas" te deja anexar las notas a la línea que acabas de crear.
-        private void EjecutarFlujoBebidasParaDesayuno(
-            int cantidadDesayunos,
-            string descripcionDesayuno,
-            string listaPrecio,
-            Action<string> appendNotas)
-        {
-            int calientesPendientes = cantidadDesayunos; // N
+        //private void EjecutarFlujoBebidasParaDesayuno(
+        //    int cantidadDesayunos,
+        //    string descripcionDesayuno,
+        //    string listaPrecio,
+        //    Action<string> appendNotas)
+        //{
+        //    int calientesPendientes = cantidadDesayunos; // N
 
-            // 1) Primero NBebidas (si tocan "GRANDE", consume 1 caliente)
-            using (var nb = new frmNBebidas
-            {
-                ProductoBaseTexto = $"{cantidadDesayunos} x {descripcionDesayuno}",
-                TextoInicial = ""
-            })
-            {
-                if (nb.ShowDialog(this) == DialogResult.OK)
-                {
-                    calientesPendientes -= Math.Min(1, nb.CuposCalienteConsumidos);
-                    var notasFria = (nb.Notas ?? "").Trim();
-                    if (notasFria.Length > 0) appendNotas?.Invoke(notasFria);
-                }
-            }
+        //    // 1) Primero NBebidas (si tocan "GRANDE", consume 1 caliente)
+        //    using (var nb = new frmNBebidas
+        //    {
+        //        ProductoBaseTexto = $"{cantidadDesayunos} x {descripcionDesayuno}",
+        //        TextoInicial = ""
+        //    })
+        //    {
+        //        if (nb.ShowDialog(this) == DialogResult.OK)
+        //        {
+        //            calientesPendientes -= Math.Min(1, nb.CuposCalienteConsumidos);
+        //            var notasFria = (nb.Notas ?? "").Trim();
+        //            if (notasFria.Length > 0) appendNotas?.Invoke(notasFria);
+        //        }
+        //    }
 
-            // 2) Si aún faltan calientes, abre el de calientes por "calientesPendientes"
-            if (calientesPendientes > 0)
-            {
-                using (var bc = new frmCBebidasCalientes
-                {
-                    ListaPrecio = listaPrecio,
-                    Titulo = "Bebidas Calientes",
-                    ProductoBaseTexto = $"{cantidadDesayunos} x {descripcionDesayuno}",
-                    CantidadRequerida = calientesPendientes,
-                    ReglaAdicionalLecheActiva = true
-                })
-                {
-                    if (bc.ShowDialog(this) == DialogResult.OK)
-                    {
-                        var notasCaliente = BuildNotasDesdeSelecciones(bc.Selecciones);
-                        if (notasCaliente.Length > 0) appendNotas?.Invoke(notasCaliente);
-                    }
-                }
-            }
-        }
+        //    // 2) Si aún faltan calientes, abre el de calientes por "calientesPendientes"
+        //    if (calientesPendientes > 0)
+        //    {
+        //        using (var bc = new frmCBebidasCalientes
+        //        {
+        //            ListaPrecio = listaPrecio,
+        //            Titulo = "Bebidas Calientes",
+        //            ProductoBaseTexto = $"{cantidadDesayunos} x {descripcionDesayuno}",
+        //            CantidadRequerida = calientesPendientes,
+        //            ReglaAdicionalLecheActiva = true
+        //        })
+        //        {
+        //            if (bc.ShowDialog(this) == DialogResult.OK)
+        //            {
+        //                var notasCaliente = BuildNotasDesdeSelecciones(bc.Selecciones);
+        //                if (notasCaliente.Length > 0) appendNotas?.Invoke(notasCaliente);
+        //            }
+        //        }
+        //    }
+        //}
 
         // Formatea selecciones como:
         // - 2 x DESCAFEINADO = S/ 2.00
         // - AMERICANO
-        private string BuildNotasDesdeSelecciones(
-            System.Collections.Generic.List<frmCBebidasCalientes.SeleccionSimple> sels)
-        {
-            if (sels == null || sels.Count == 0) return string.Empty;
-
-            var grupos = sels
-                .GroupBy(s => new { s.Codigo, Descripcion = (s.Descripcion ?? "").Trim().ToUpperInvariant(), s.PrecioExtra })
-                .Select(g => new
-                {
-                    Cant = g.Count(),
-                    g.Key.Descripcion,
-                    g.Key.PrecioExtra,
-                    Total = g.Count() * g.Key.PrecioExtra
-                })
-                .ToList();
-
-            var sb = new System.Text.StringBuilder();
-            foreach (var x in grupos)
-            {
-                if (sb.Length > 0) sb.AppendLine();
-                if (x.Cant <= 1)
-                {
-                    if (x.PrecioExtra > 0m)
-                        sb.Append("- ").Append(x.Descripcion).Append(" = S/ ").Append(x.Total.ToString("0.00"));
-                    else
-                        sb.Append("- ").Append(x.Descripcion);
-                }
-                else
-                {
-                    if (x.PrecioExtra > 0m)
-                        sb.Append("- ").Append(x.Cant).Append(" x ").Append(x.Descripcion).Append(" = S/ ").Append(x.Total.ToString("0.00"));
-                    else
-                        sb.Append("- ").Append(x.Cant).Append(" x ").Append(x.Descripcion);
-                }
-            }
-            return sb.ToString();
-        }
-        private void AgregarProducto(string cod, string desc, int cantidad, decimal precioUnit)
-        {
-            var item = flpLineas.AddLinea(cod, desc, cantidad, precioUnit, notas: "");
-
-            bool esDesayuno = desc.IndexOf("DESAYUNO", StringComparison.OrdinalIgnoreCase) >= 0;
-            if (esDesayuno)
-            {
-                EjecutarFlujoBebidasParaDesayuno(cantidad, desc, "001", notas =>
-                {
-                    item.AppendNotas(notas);
-                });
-            }
-
-            // RecalcularSubtotal();
-        }
-
-
-        //}
-        //private void EjecutarWizardDesayunoPorUnidad(ceProductos prod, int cantidad)
+        //private string BuildNotasDesdeSelecciones(
+        //    System.Collections.Generic.List<frmCBebidasCalientes.SeleccionSimple> sels)
         //{
-        //    if (prod == null || cantidad <= 0) return;
+        //    if (sels == null || sels.Count == 0) return string.Empty;
 
-        //    // 0) Crear item visual y configurar preferencias de agrupado
-        //    var item = new CapaPresentacion.Controles.ComboPedidoItem
-        //    {
-        //        AgruparJugosIguales = true,   // <<— clave para que salga: 2 x JUGO DE PIÑA + notas
-        //        AgruparBebidasIguales = true
-        //    };
-
-        //    // 1) Por cada unidad: un jugo + (opcional) notas libres para ese jugo
-        //    for (int i = 1; i <= cantidad; i++)
-        //    {
-        //        List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple> sel = null;
-
-        //        using (var frmJ = new CapaPresentacion.Notas.frmCJugoDesayuno())
+        //    var grupos = sels
+        //        .GroupBy(s => new { s.Codigo, Descripcion = (s.Descripcion ?? "").Trim().ToUpperInvariant(), s.PrecioExtra })
+        //        .Select(g => new
         //        {
-        //            frmJ.CantidadRequerida = 1;
-        //            frmJ.ListaPrecio = "001";
-        //            frmJ.ProductoBaseTexto = $"1 x {prod.Descripcion}  ({i}/{cantidad})";
+        //            Cant = g.Count(),
+        //            g.Key.Descripcion,
+        //            g.Key.PrecioExtra,
+        //            Total = g.Count() * g.Key.PrecioExtra
+        //        })
+        //        .ToList();
 
-        //            if (frmJ.ShowDialog(this) != DialogResult.OK) return;
-
-        //            sel = frmJ.Selecciones ?? new List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple>();
-        //            if (sel.Count == 0) return;
-        //        }
-
-        //        var jugo = sel[0];
-
-        //        string notasJugo = string.Empty;
-        //        using (var frmN = new CapaPresentacion.Notas.frmNBebidas())
-        //        {
-        //            // si quieres precargar algo en el cuadro, ponlo aquí:
-        //            // frmN.TextoInicial = "";
-        //            if (frmN.ShowDialog(this) == DialogResult.OK)
-        //                notasJugo = frmN.Notas ?? string.Empty;
-        //        }
-
-        //        // NO forzar individual: así respeta AgruparJugosIguales = true
-        //        item.AddJugoUnidad(jugo.Descripcion, jugo.PrecioExtra, notasJugo, /*forzarIndividual*/ null);
-        //    }
-
-        //    // 2) Elegir Bebidas calientes para el total (bloque)
-        //    using (var frmB = new CapaPresentacion.Notas.frmCBebidasCalientes())
+        //    var sb = new System.Text.StringBuilder();
+        //    foreach (var x in grupos)
         //    {
-        //        frmB.CantidadRequerida = cantidad;
-        //        frmB.ListaPrecio = "001";
-        //        frmB.ProductoBaseTexto = $"{cantidad} x {prod.Descripcion}";
-
-        //        if (frmB.ShowDialog(this) == DialogResult.OK)
+        //        if (sb.Length > 0) sb.AppendLine();
+        //        if (x.Cant <= 1)
         //        {
-        //            // Asegura tipos compatibles (por si la clase de SeleccionSimple difiere)
-        //            var seleB = frmB.Selecciones ?? new List<CapaPresentacion.Notas.frmCBebidasCalientes.SeleccionSimple>();
-        //            foreach (var b in seleB)
-        //            {
-        //                item.AddBebidaUnidad(b.Descripcion, b.PrecioExtra, /*notas*/ string.Empty, /*forzarIndividual*/ false);
-        //            }
+        //            if (x.PrecioExtra > 0m)
+        //                sb.Append("- ").Append(x.Descripcion).Append(" = S/ ").Append(x.Total.ToString("0.00"));
+        //            else
+        //                sb.Append("- ").Append(x.Descripcion);
         //        }
         //        else
         //        {
-        //            // Si las bebidas son obligatorias, puedes abortar aquí.
-        //            // return;
+        //            if (x.PrecioExtra > 0m)
+        //                sb.Append("- ").Append(x.Cant).Append(" x ").Append(x.Descripcion).Append(" = S/ ").Append(x.Total.ToString("0.00"));
+        //            else
+        //                sb.Append("- ").Append(x.Cant).Append(" x ").Append(x.Descripcion);
         //        }
         //    }
-
-        //    // 3) Precio final por unidad = base + promedio de extras (jugos + bebidas)
-        //    decimal puBase = PrecioDe(prod);
-        //    decimal puFinal = puBase + item.GetExtraPromedioTotalPorUnidad(cantidad);
-
-        //    // 4) Encabezado del combo y pintar en el panel izquierdo
-        //    item.SetCombo(prod.Codigo, prod.Descripcion, cantidad, puFinal);
-
-        //    flpLineas.SuspendLayout();
-        //    flpLineas.Controls.Add(item);
-        //    flpLineas.ResumeLayout();
-
-        //    CapaPresentacion.Controles.ComboPedidoItem.Seleccionar(item, true);
-        //    btnEliminar.Enabled = (CapaPresentacion.Controles.ComboPedidoItem.SeleccionActual != null);
+        //    return sb.ToString();
         //}
-        //private void EjecutarWizardDesayunoPorUnidad(ceProductos prod, int cantidad)
+        //private void AgregarProducto(string cod, string desc, int cantidad, decimal precioUnit)
         //{
-        //    if (prod == null || cantidad <= 0) return;
+        //    var item = flpLineas.AddLinea(cod, desc, cantidad, precioUnit, notas: "");
 
-        //    var item = new CapaPresentacion.Controles.ComboPedidoItem
+        //    bool esDesayuno = desc.IndexOf("DESAYUNO", StringComparison.OrdinalIgnoreCase) >= 0;
+        //    if (esDesayuno)
         //    {
-        //        AgruparJugosIguales = true,
-        //        AgruparBebidasIguales = true
-        //    };
-
-        //    // 🔸 al inicio: tantos calientes como desayunos
-        //    int calientesPendientes = cantidad;
-
-        //    // 1) Por cada unidad: elegir jugo y (opcional) notas; si tocan GRANDE, consume 1 caliente
-        //    for (int i = 1; i <= cantidad; i++)
-        //    {
-        //        List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple> sel = null;
-
-        //        using (var frmJ = new CapaPresentacion.Notas.frmCJugoDesayuno())
+        //        EjecutarFlujoBebidasParaDesayuno(cantidad, desc, "001", notas =>
         //        {
-        //            frmJ.CantidadRequerida = 1;
-        //            frmJ.ListaPrecio = "001";
-        //            frmJ.ProductoBaseTexto = $"1 x {prod.Descripcion}  ({i}/{cantidad})";
-
-        //            if (frmJ.ShowDialog(this) != DialogResult.OK) return;
-
-        //            sel = frmJ.Selecciones ?? new List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple>();
-        //            if (sel.Count == 0) return;
-        //        }
-
-        //        var jugo = sel[0];
-
-        //        string notasJugo = string.Empty;
-        //        using (var frmN = new CapaPresentacion.Notas.frmNBebidas())
-        //        {
-        //            // (opcional) precarga: frmN.TextoInicial = "";
-        //            if (frmN.ShowDialog(this) == DialogResult.OK)
-        //            {
-        //                notasJugo = frmN.Notas ?? string.Empty;
-
-        //                // 🔸 si tocaron GRANDE en este NBebidas, consume 1 caliente
-        //                if (frmN.CuposCalienteConsumidos > 0 && calientesPendientes > 0)
-        //                    calientesPendientes -= 1;
-        //            }
-        //        }
-
-        //        // Respetar agrupación de jugos (no forzar individual)
-        //        item.AddJugoUnidad(jugo.Descripcion, jugo.PrecioExtra, notasJugo, null);
+        //            item.AppendNotas(notas);
+        //        });
         //    }
 
-        //    // 2) Elegir bebidas calientes SOLO si aún faltan
-        //    if (calientesPendientes > 0)
-        //    {
-        //        using (var frmB = new CapaPresentacion.Notas.frmCBebidasCalientes())
-        //        {
-        //            frmB.CantidadRequerida = calientesPendientes;   // 🔸 antes usabas 'cantidad'
-        //            frmB.ListaPrecio = "001";
-        //            frmB.ProductoBaseTexto = $"{cantidad} x {prod.Descripcion}";
-
-        //            if (frmB.ShowDialog(this) == DialogResult.OK)
-        //            {
-        //                var seleB = frmB.Selecciones ?? new List<CapaPresentacion.Notas.frmCBebidasCalientes.SeleccionSimple>();
-        //                foreach (var b in seleB)
-        //                    item.AddBebidaUnidad(b.Descripcion, b.PrecioExtra, string.Empty, false);
-        //            }
-        //        }
-        //    }
-
-        //    // 3) PU final = base + promedio de extras
-        //    decimal puBase = PrecioDe(prod);
-        //    decimal puFinal = puBase + item.GetExtraPromedioTotalPorUnidad(cantidad);
-
-        //    // 4) Pintar combo en panel izquierdo
-        //    item.SetCombo(prod.Codigo, prod.Descripcion, cantidad, puFinal);
-
-        //    flpLineas.SuspendLayout();
-        //    flpLineas.Controls.Add(item);
-        //    flpLineas.ResumeLayout();
-
-        //    CapaPresentacion.Controles.ComboPedidoItem.Seleccionar(item, true);
-        //    btnEliminar.Enabled = (CapaPresentacion.Controles.ComboPedidoItem.SeleccionActual != null);
+        //    // RecalcularSubtotal();
         //}
-        //private void EjecutarWizardDesayunoPorUnidad(ceProductos prod, int cantidad)
-        //{
-        //    if (prod == null || cantidad <= 0) return;
 
-        //    var item = new CapaPresentacion.Controles.ComboPedidoItem
-        //    {
-        //        AgruparJugosIguales = true,
-        //        AgruparBebidasIguales = true
-        //    };
 
-        //    // Al inicio: tantas calientes como desayunos
-        //    int calientesPendientes = cantidad;
-
-        //    // 1) Por cada unidad: elegir jugo y (opcional) notas; si tocan GRANDE, consume 1 caliente
-        //    for (int i = 1; i <= cantidad; i++)
-        //    {
-        //        List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple> sel = null;
-
-        //        using (var frmJ = new CapaPresentacion.Notas.frmCJugoDesayuno())
-        //        {
-        //            frmJ.CantidadRequerida = 1;
-        //            frmJ.ListaPrecio = "001";
-        //            frmJ.ProductoBaseTexto = $"1 x {prod.Descripcion}  ({i}/{cantidad})";
-
-        //            if (frmJ.ShowDialog(this) != DialogResult.OK) return;
-
-        //            sel = frmJ.Selecciones ?? new List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple>();
-        //            if (sel.Count == 0) return;
-        //        }
-
-        //        var jugo = sel[0]; // la única selección de jugo para esta unidad
-
-        //        string notasJugo = string.Empty;
-        //        using (var frmN = new CapaPresentacion.Notas.frmNBebidas()
-        //        {
-        //            // >>> Mostrar el jugo elegido en el encabezado del NBebidas
-        //            ProductoBaseTexto = $"1 x {jugo.Descripcion} ({i}/{cantidad})",
-        //            // TextoInicial = ""   // si quisieras precargar algo
-        //        })
-        //        {
-        //            if (frmN.ShowDialog(this) == DialogResult.OK)
-        //            {
-        //                notasJugo = frmN.Notas ?? string.Empty;
-
-        //                // Si tocaron "GRANDE" en este NBebidas, consume 1 caliente (máx. 1)
-        //                if (frmN.CuposCalienteConsumidos > 0 && calientesPendientes > 0)
-        //                    calientesPendientes -= 1;
-        //            }
-        //        }
-
-        //        // Respetar la agrupación de jugos (no forzar individual)
-        //        item.AddJugoUnidad(jugo.Descripcion, jugo.PrecioExtra, notasJugo, /*forzarIndividual*/ null);
-        //    }
-
-        //    // 2) Elegir bebidas calientes SOLO si aún faltan
-        //    if (calientesPendientes > 0)
-        //    {
-        //        using (var frmB = new CapaPresentacion.Notas.frmCBebidasCalientes())
-        //        {
-        //            frmB.CantidadRequerida = calientesPendientes;   // antes: cantidad
-        //            frmB.ListaPrecio = "001";
-        //            frmB.ProductoBaseTexto = $"{cantidad} x {prod.Descripcion}";
-
-        //            if (frmB.ShowDialog(this) == DialogResult.OK)
-        //            {
-        //                var seleB = frmB.Selecciones ?? new List<CapaPresentacion.Notas.frmCBebidasCalientes.SeleccionSimple>();
-        //                foreach (var b in seleB)
-        //                    item.AddBebidaUnidad(b.Descripcion, b.PrecioExtra, /*notas*/ string.Empty, /*forzarIndividual*/ false);
-        //            }
-        //        }
-        //    }
-
-        //    // 3) PU final = base + promedio de extras (jugos + bebidas)
-        //    decimal puBase = PrecioDe(prod);
-        //    decimal puFinal = puBase + item.GetExtraPromedioTotalPorUnidad(cantidad);
-
-        //    // 4) Pintar combo en el panel izquierdo
-        //    item.SetCombo(prod.Codigo, prod.Descripcion, cantidad, puFinal);
-
-        //    flpLineas.SuspendLayout();
-        //    flpLineas.Controls.Add(item);
-        //    flpLineas.ResumeLayout();
-
-        //    //CapaPresentacion.Controles.ComboPedidoItem.Seleccionar(item, true);
-        //    //btnEliminar.Enabled = (CapaPresentacion.Controles.ComboPedidoItem.SeleccionActual != null);
-        //    LineaSelection.Select(item, true);   // <<< selección única
-        //    btnEliminar.Enabled = (LineaSelection.Actual != null);
-        //}
         private void EjecutarWizardDesayunoPorUnidad(ceProductos prod, int cantidad)
         {
             if (prod == null || cantidad <= 0) return;
@@ -1121,8 +925,8 @@ namespace CapaPresentacion
             flpLineas.Controls.Add(item);
             flpLineas.ResumeLayout();
 
-                LineaSelection.Select(item, true);   // <<< selección única
-                btnEliminar.Enabled = (LineaSelection.Actual != null);
+            LineaSelection.Select(item, true);   // <<< selección única
+            btnEliminar.Enabled = (LineaSelection.Actual != null);
         }
 
 
@@ -1243,11 +1047,179 @@ namespace CapaPresentacion
 
             // Seleccionar y habilitar botones conforme a la selección global
             LineaSelection.Select(item, true);
-            btnEliminar.Enabled = (LineaSelection.Current != null);
-            btnComentarioLbr.Enabled = (LineaSelection.Current != null);
+            btnEliminar.Enabled = (LineaSelection.Actual != null);
+            btnComentarioLbr.Enabled = (LineaSelection.Actual != null);
 
             ActualizarSubtotal();
         }
 
+        //const string COD_CHICHA_ALMUERZO = "0000000868";
+        //private void EjecutarPastaAlmuerzo(string codigoProducto)
+        //{
+        //    var prod = _svcProductos.Obtener(codigoProducto, "001");
+        //    if (prod == null)
+        //    {
+        //        MessageBox.Show("Producto no encontrado.", "Pastas",
+        //                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        //        return;
+        //    }
+
+        //    int cantidad = LeerCantidad(); // lee de tu textbox de cantidad
+        //    if (cantidad <= 0) cantidad = 1;
+
+        //    AgregarMenuPasta(prod, cantidad);
+        //}
+
+        // =============================================================
+        // =================== Flujo MenuPedidoItem ====================
+        // =============================================================
+
+        private void AgregarMenuPasta(ceProductos menuProd, int cantidad)
+        {
+            // 1) Resolver “chicha almuerzo”
+            var chicha = _svcProductos.Obtener(CHICHA_ALMUERZO_CODE, "001")
+                         ?? new ceProductos { Codigo = CHICHA_ALMUERZO_CODE, Descripcion = "CHICHA ALMUERZO", PrecioUnitario = 0m };
+
+            // 2) Pedir notas de bebida en frmNBebidas
+            string notas = string.Empty;
+            using (var frm = new frmNBebidas())
+            {
+                frm.ProductoBaseTexto = $"{cantidad} x {chicha.Descripcion}";
+                frm.TextoInicial = string.Empty;
+
+                if (frm.ShowDialog(this) != DialogResult.OK)
+                    return; // cancelado
+
+                notas = frm.Notas ?? string.Empty;
+            }
+
+            // 3) Crear y poblar el MenuPedidoItem
+            var item = new MenuPedidoItem();
+
+            var txtMenu = item.Controls.Find("txtMenu", true).FirstOrDefault();
+            var txtChich = item.Controls.Find("txtChich", true).FirstOrDefault();
+
+            // Encabezado del menú
+            TrySetText(txtMenu, $"{cantidad} x {menuProd.Descripcion?.ToUpperInvariant()}");
+
+            // Línea de chicha + notas
+            var sb = new StringBuilder()
+                .Append($"{cantidad} x {chicha.Descripcion?.ToUpperInvariant()}");
+            string normNotas = NormalizarNotas(notas);
+            if (!string.IsNullOrEmpty(normNotas))
+                sb.AppendLine().Append(normNotas);
+            TrySetText(txtChich, sb.ToString());
+
+            // 4) Insertar en el FlowLayoutPanel
+            AjustarAnchoItem(item);
+            flpLineas.SuspendLayout();
+            flpLineas.Controls.Add(item);
+            flpLineas.ResumeLayout(true);
+
+            // 5) Seleccionar, scroll y total
+            LineaSelection.Select(item, true);
+            btnEliminar.Enabled = btnComentarioLbr.Enabled = (LineaSelection.Actual != null);
+            ActualizarSubtotal();
+        }
+        //private int LeerCantidad()
+        //{
+        //    // Cambia "txtCantidad" por tu control real
+        //    var text = txtCantidad?.Text?.Trim();
+        //    if (int.TryParse(text, out int n) && n > 0) return n;
+        //    return 1;
+        //}
+        private static void TrySetText(Control c, string text)
+        {
+            if (c == null) return;
+            try
+            {
+                var p = c.GetType().GetProperty("Text");
+                p?.SetValue(c, text ?? string.Empty, null);
+            }
+            catch { /* ignore */ }
+        }
+        private static string NormalizarNotas(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
+
+            var lines = (raw ?? string.Empty)
+                        .Replace("\r\n", "\n")
+                        .Replace("\r", "\n")
+                        .Split('\n')
+                        .Select(l => (l ?? string.Empty).Trim())
+                        .Where(l => l.Length > 0)
+                        .Select(l => l.StartsWith("-") ? l : "- " + l);
+
+            return string.Join(Environment.NewLine, lines);
+        }
+        //private void AjustarAnchosMenuItems()
+        //{
+        //    if (flpLineas == null) return;
+
+        //    foreach (Control c in flpLineas.Controls)
+        //        AjustarAnchoItem(c);
+        //}
+        private void AjustarAnchoItem(Control item)
+        {
+            if (item == null || flpLineas == null) return;
+
+            int usable = flpLineas.ClientSize.Width
+                       - flpLineas.Padding.Left
+                       - flpLineas.Padding.Right
+                       - item.Margin.Horizontal;
+
+            if (usable < 80) usable = 80;
+            item.Width = usable;
+        }
+        //private void EjecutarPastaAlmuerzo(ceProductos prodPasta, int cantidad)
+        //{
+        //    if (prodPasta == null || cantidad <= 0) return;
+
+        //    // 1) Traer la “Chicha almuerzo”
+        //    var prodChicha = BuscarProductoPorCodigo(COD_CHICHA_ALMUERZO);
+        //    string descChicha = prodChicha?.Descripcion?.Trim() ?? "CHICHA ALMUERZO";
+
+        //    // 2) Notas de bebida (para la chicha)
+        //    string notasBebida = string.Empty;
+        //    using (var frmN = new CapaPresentacion.Notas.frmNBebidas())
+        //    {
+        //        frmN.ProductoBaseTexto = $"1 x {descChicha}";
+        //        frmN.TextoInicial = ""; // opcional
+        //        if (frmN.ShowDialog(this) == DialogResult.OK)
+        //            notasBebida = frmN.Notas ?? string.Empty;
+        //        else
+        //            return; // cancelado
+        //    }
+
+        //    // 3) Crear el control y pintarlo
+        //    var item = new CapaPresentacion.Controles.MenuPedidoItem();
+        //    decimal puBase = PrecioDe(prodPasta); // tu helper existente
+
+        //    item.SetMenu(prodPasta.Codigo, prodPasta.Descripcion, cantidad, puBase);
+        //    item.SetChicha(descChicha, notasBebida);
+
+        //    flpLineas.SuspendLayout();
+        //    flpLineas.Controls.Add(item);
+        //    flpLineas.ResumeLayout();
+
+        //    // seleccionar y habilitar botones
+        //    LineaSelection.Select(item, true);
+        //    btnEliminar.Enabled = (LineaSelection.Actual != null);
+        //    btnComentarioLbr.Enabled = (LineaSelection.Actual != null);
+
+        //    ActualizarSubtotal();
+        //}
+        //private ceProductos BuscarProductoPorCodigo(string codigo)
+        //{
+        //    // Ejemplos según tu arquitectura:
+        //    // return _cacheProductos.FirstOrDefault(p => p.Codigo == codigo);
+        //    // o
+        //    // return _svcProductos.BuscarPorCodigo(codigo, "001");
+        //    return _svcProductos?.BuscarCod(codigo); // ajusta al método real que ya tienes
+        //}
+        // Código fijo de la “chicha almuerzo”
+        //private const string COD_CHICHA_ALMUERZO = "0000000868";
+
+        //private ceProductos TraerChicha() => _svcProductos.Obtener(COD_CHICHA_ALMUERZO, "001");   // usa tu lista “001”
     }
 }

@@ -4,15 +4,14 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using CapaNegocio; // si prefieres resolver precio por código
+using CapaNegocio;
 
 namespace CapaPresentacion.Notas
 {
     public partial class frmCDesayunoTamal : Form
     {
-        // ============ DTO ============
+        // ===== DTO =====
         public class SeleccionSimple
         {
             public string Codigo { get; set; }
@@ -20,39 +19,30 @@ namespace CapaPresentacion.Notas
             public decimal PrecioExtra { get; set; }
         }
 
-        // ============ ENTRADAS ============
-        /// <summary>Cuántos tamales en total debe elegir el usuario (por ejemplo, 1 por Criollo, 2 por Panera, multiplicado por la cantidad de desayunos si aplica).</summary>
+        // ===== Entradas =====
         public int CantidadRequerida { get; set; } = 1;
-
-        /// <summary>Texto que se muestra arriba como referencia (ej: "1 x DESAYUNO CRIOLLO").</summary>
         public string ProductoBaseTexto { get; set; } = string.Empty;
-
-        /// <summary>Lista de precio a consultar cuando se pasa solo el código en Tag.</summary>
         public string ListaPrecio { get; set; } = "001";
-
-        /// <summary>Título del formulario (por defecto “Elige tamales”).</summary>
         public string Titulo { get; set; } = "Elige tamales";
 
-        // ============ SALIDA ============
+        // ===== Salida =====
         public List<SeleccionSimple> Selecciones { get; private set; } = new List<SeleccionSimple>();
 
-        // ============ INTERNOS ============
+        // ===== Internos =====
         private int _seleccionados = 0;
         private readonly cnProducto _svcProductos = new cnProducto();
 
-        // Controles comunes (si existen en tu diseñador)
-        private Control _txtProducto;     // txtProductoSelect (readonly)
-        private TextBoxBase _txtResumen;  // multiline para ver lo elegido (ej: txtNotasTamal / txtResumen)
-        private Button _btnContinuar;
-        private Button _btnEliminar;
-
-        // Si tienes un FlowLayoutPanel donde están SOLO las opciones (chips), nómbralo flpOpciones
+        private Control _txtProducto;      // txtProductoSelect
+        private Control _txtNotasTamal;    // txtNotasTamal (puede ser Guna2TextBox o TextBox)
+        //private Button _btnContinuar;
+        //private Button _btnEliminar;
+        private Control _btnContinuar;
+        private Control _btnEliminar;
         private FlowLayoutPanel _flpOpciones;
 
         public frmCDesayunoTamal()
         {
             InitializeComponent();
-
             StartPosition = FormStartPosition.CenterParent;
             Load += Frm_Load;
         }
@@ -60,91 +50,118 @@ namespace CapaPresentacion.Notas
         // ==================== LOAD ====================
         private void Frm_Load(object sender, EventArgs e)
         {
-            // 1) Título
-            var lblTitle = this.Controls.Find("lblTitle", true).FirstOrDefault();
-            if (lblTitle != null) lblTitle.Text = Titulo;
+            Text = string.IsNullOrWhiteSpace(Titulo) ? "Seleccionar Tamal" : Titulo;
 
-            // 2) Encabezado con el producto base
-            _txtProducto = this.Controls.Find("txtProductoSelect", true).FirstOrDefault();
+            // 1) Resolver controles
+            _txtProducto = Controls.Find("txtProductoSelect", true).FirstOrDefault();
             if (_txtProducto != null && !string.IsNullOrWhiteSpace(ProductoBaseTexto))
                 TrySetText(_txtProducto, ProductoBaseTexto);
 
-            // 3) Resolver controles de acción
-            _btnContinuar = this.Controls.Find("btnContinuar", true).OfType<Button>().FirstOrDefault();
-            _btnEliminar = this.Controls.Find("btnEliminar", true).OfType<Button>().FirstOrDefault();
+            // IMPORTANTE: buscar como Control (Guna2TextBox no es TextBoxBase)
+            _txtNotasTamal = Controls.Find("txtNotasTamal", true).FirstOrDefault();
+
+            _btnContinuar = Controls.Find("btnContinuar", true).FirstOrDefault();
+            _btnEliminar = Controls.Find("btnEliminar", true).FirstOrDefault();
 
             if (_btnContinuar != null)
             {
                 _btnContinuar.Click -= btnContinuar_Click;
                 _btnContinuar.Click += btnContinuar_Click;
-                this.AcceptButton = _btnContinuar;
+
+                if (_btnContinuar is IButtonControl ib)   // Guna2Button suele implementarlo
+                    this.AcceptButton = ib;
             }
+
+            // MUY IMPORTANTE: que no queden cableados como opción
+            if (_btnContinuar != null) _btnContinuar.Click -= Opcion_Click;
             if (_btnEliminar != null)
             {
                 _btnEliminar.Click -= btnEliminar_Click;
                 _btnEliminar.Click += btnEliminar_Click;
+                _btnEliminar.Click -= Opcion_Click;
             }
 
-            // 4) Buscar un TextBox multiline para el resumen (izq/dcha)
-            _txtResumen = FindResumenTextBox(); // intenta encontrar txtNotasTamal / txtResumen...
-            RedibujarResumen();
+            // 2) Cablear botones de opciones
+            _flpOpciones = Controls.Find("flpOpciones", true).OfType<FlowLayoutPanel>().FirstOrDefault();
+            if (_flpOpciones != null) WireOptionButtonsRecursive(_flpOpciones);
+            else WireOptionButtonsRecursive(this); // fallback: todo el form
 
-            // 5) Panel de “chips” (opciones)
-            _flpOpciones = this.Controls.Find("flpOpciones", true).OfType<FlowLayoutPanel>().FirstOrDefault();
-            if (_flpOpciones != null)
-                WireOptionButtons(_flpOpciones);              // engancha SOLO los hijos de flpOpciones
-            else
-                WireOptionButtons(this);                      // fallback: engancha en todo el form (filtra Continuar/Eliminar)
-
+            // 3) Estado inicial
+            RedibujarNotasTamal();
             ActualizarEstado();
         }
 
-        // ==================== WIRING DE OPCIONES ====================
-        private void WireOptionButtons(Control root)
+        // ==================== WIRING OPCIONES ====================
+        private void WireOptionButtonsRecursive(Control root)
         {
             if (root == null) return;
 
             foreach (Control c in root.Controls)
+                WireOptionButtonsRecursive(c);
+
+            if (EsAccion(root)) return;              // <- excluye Continuar/Eliminar
+
+            if (EsBotonOpcion(root))
             {
-                // recorre recursivo
-                WireOptionButtons(c);
-
-                // detecta botones (Button, Guna2Button u otros que terminen en Button)
-                bool esBoton =
-                    (c is Button) ||
-                    (c.GetType().Name.IndexOf("Button", StringComparison.OrdinalIgnoreCase) >= 0) ||
-                    ((c.Name ?? "").StartsWith("btn", StringComparison.OrdinalIgnoreCase));
-
-                if (!esBoton) continue;
-
-                // Excluir acciones
-                if (ReferenceEquals(c, _btnContinuar) || ReferenceEquals(c, _btnEliminar)) continue;
-                string n = (c.Name ?? "").Trim().ToUpperInvariant();
-                string t = (c.Text ?? "").Trim().ToUpperInvariant();
-                if (n == "BTNCONTINUAR" || n == "BTNELIMINAR") continue;
-                if (t == "CONTINUAR" || t == "ELIMINAR") continue;
-
-                // Engancha click de opción
-                c.Click -= Opcion_Click;
-                c.Click += Opcion_Click;
+                root.Click -= Opcion_Click;
+                root.Click += Opcion_Click;
             }
+        }
+        private bool EsAccion(Control c)
+        {
+            if (c == null) return false;
+
+            // por referencia
+            if (ReferenceEquals(c, _btnContinuar) || ReferenceEquals(c, _btnEliminar))
+                return true;
+
+            // por nombre (por si no los resolvió)
+            var n = (c.Name ?? "").ToLowerInvariant();
+            if (n == "btncontinuar" || n == "btneliminar")
+                return true;
+
+            // opcional: si marcas Tag="accion" en los botones de pie
+            if (string.Equals(c.Tag as string, "accion", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return false;
+        }
+
+        private static bool EsBotonOpcion(Control c)
+        {
+            if (c == null) return false;
+
+            // Lo típico: Button o controles cuyo tipo contiene "Button"
+            if (c is Button) return true;
+            var typeName = c.GetType().Name ?? "";
+            if (typeName.IndexOf("Button", StringComparison.OrdinalIgnoreCase) >= 0) return true;
+
+            // También aceptamos controles "tile/panel" que tengan una propiedad Text visible
+            // (Guna2TileButton, etc.). Si no quieres que algo cuente, marca su Tag = "no-opcion".
+            if (string.Equals(c.Tag as string, "no-opcion", StringComparison.OrdinalIgnoreCase)) return false;
+
+            return c.GetType().GetProperty("Text") != null;
         }
 
         // ==================== CLICK EN OPCIÓN ====================
         private void Opcion_Click(object sender, EventArgs e)
         {
-            if (_seleccionados >= CantidadRequerida) { System.Media.SystemSounds.Beep.Play(); return; }
+            if (_seleccionados >= CantidadRequerida)
+            {
+                System.Media.SystemSounds.Beep.Play();
+                return;
+            }
 
             var ctrl = sender as Control;
             if (ctrl == null) return;
 
-            var opt = ParseOpcionFromControl(ctrl);
-            if (opt == null) return;
+            var sel = ParseOpcionFromControl(ctrl);
+            if (sel == null) return;
 
-            Selecciones.Add(opt);
+            Selecciones.Add(sel);
             _seleccionados++;
 
-            RedibujarResumen();
+            RedibujarNotasTamal();
             ActualizarEstado();
         }
 
@@ -160,152 +177,110 @@ namespace CapaPresentacion.Notas
                 _seleccionados--;
             }
 
-            RedibujarResumen();
+            RedibujarNotasTamal();
             ActualizarEstado();
         }
 
         // ==================== CONTINUAR ====================
         private void btnContinuar_Click(object sender, EventArgs e)
         {
-            if (_seleccionados != CantidadRequerida)
+            if (_seleccionados < CantidadRequerida)
             {
-                System.Media.SystemSounds.Beep.Play();
+                MessageBox.Show($"Debes seleccionar {CantidadRequerida} opción(es).",
+                                "Tamal", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            this.DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.OK;
             Close();
         }
 
-        // ==================== RESUMEN / ESTADO ====================
-        private void RedibujarResumen()
+        // ==================== RESUMEN ====================
+        private void RedibujarNotasTamal()
         {
-            if (_txtResumen == null) return;
+            if (_txtNotasTamal == null) return;
 
-            // Si quieres listar “uno por línea”:
+            string s = BuildNotasTamal();
+            TrySetText(_txtNotasTamal, s);
+        }
+
+        private string BuildNotasTamal()
+        {
+            if (Selecciones == null || Selecciones.Count == 0) return string.Empty;
+
+            var grupos = Selecciones
+                .GroupBy(s => new { D = (s.Descripcion ?? "").Trim().ToUpperInvariant(), P = s.PrecioExtra })
+                .Select(g => new
+                {
+                    Cant = g.Count(),
+                    Desc = g.Key.D,
+                    Precio = g.Key.P,
+                    Total = g.Count() * g.Key.P
+                })
+                .ToList();
+
             var sb = new StringBuilder();
-            for (int i = 0; i < Selecciones.Count; i++)
+            foreach (var x in grupos)
             {
-                var s = Selecciones[i];
-                if (i > 0) sb.AppendLine();
-                sb.Append("- ").Append(s.Descripcion);
-                if (s.PrecioExtra > 0m)
-                    sb.Append(" = S/ ").Append(s.PrecioExtra.ToString("0.00", CultureInfo.InvariantCulture));
+                if (sb.Length > 0) sb.AppendLine();
+
+                if (x.Cant <= 1)
+                {
+                    if (x.Precio > 0m)
+                        sb.Append("- ").Append(x.Desc).Append(" = S/ ").Append(x.Total.ToString("0.00", CultureInfo.InvariantCulture));
+                    else
+                        sb.Append("- ").Append(x.Desc);
+                }
+                else
+                {
+                    if (x.Precio > 0m)
+                        sb.Append("- ").Append(x.Cant).Append(" x ").Append(x.Desc).Append(" = S/ ").Append(x.Total.ToString("0.00", CultureInfo.InvariantCulture));
+                    else
+                        sb.Append("- ").Append(x.Cant).Append(" x ").Append(x.Desc);
+                }
             }
-            _txtResumen.Text = sb.ToString();
-            _txtResumen.SelectionStart = _txtResumen.TextLength;
-            _txtResumen.ScrollToCaret();
+            return sb.ToString();
         }
 
         private void ActualizarEstado()
         {
-            var lblEstado = this.Controls.Find("lblEstado", true).FirstOrDefault();
-            if (lblEstado != null)
-                lblEstado.Text = string.Format("Seleccionados: {0}/{1}", _seleccionados, CantidadRequerida);
+            if (_btnContinuar != null) _btnContinuar.Enabled = (_seleccionados >= CantidadRequerida);
+            if (_btnEliminar != null) _btnEliminar.Enabled = (_seleccionados > 0);
 
-            if (_btnContinuar != null)
-                _btnContinuar.Enabled = (_seleccionados == CantidadRequerida);
-
-            if (_btnEliminar != null)
-                _btnEliminar.Enabled = (_seleccionados > 0);
+            Text = $"{Titulo}  ({_seleccionados}/{CantidadRequerida})";
         }
 
-        // ==================== PARSEO DE BOTÓN ====================
+        // ==================== PARSEO ====================
         private SeleccionSimple ParseOpcionFromControl(Control c)
         {
-            // 1) Tag como DTO
-            var dto = c.Tag as SeleccionSimple;
-            if (dto != null)
-            {
-                var r1 = new SeleccionSimple
-                {
-                    Codigo = dto.Codigo,
-                    Descripcion = dto.Descripcion,
-                    PrecioExtra = dto.PrecioExtra
-                };
-                // Si no trae precio, intenta resolver por código
-                if (r1.PrecioExtra == 0m && !string.IsNullOrWhiteSpace(r1.Codigo))
-                    r1.PrecioExtra = ObtenerPrecioDeCodigo(r1.Codigo);
-                return r1;
-            }
+            string desc = (c.Text ?? string.Empty).Trim();
+            if (desc.Length == 0) return null;
 
-            // 2) Tag como "COD|Desc|Precio?"
-            var tag = c.Tag as string;
-            if (!string.IsNullOrWhiteSpace(tag))
-            {
-                var parts = tag.Split('|');
-                if (parts.Length >= 2)
-                {
-                    var cod = parts[0].Trim();
-                    var des = parts[1].Trim();
-                    decimal precio = 0m;
-                    if (parts.Length >= 3)
-                        decimal.TryParse(parts[2], NumberStyles.Any, CultureInfo.InvariantCulture, out precio);
-                    if (precio == 0m && !string.IsNullOrWhiteSpace(cod))
-                        precio = ObtenerPrecioDeCodigo(cod);
-
-                    return new SeleccionSimple
-                    {
-                        Codigo = cod,
-                        Descripcion = des,
-                        PrecioExtra = precio
-                    };
-                }
-            }
-
-            // 3) Fallback: deduce código desde Name si tiene dígitos
-            string codigo = "";
-            var m = Regex.Match(c.Name ?? "", @"\d+");
-            if (m.Success) codigo = m.Value;
+            // Si usas Tag para código/precio, levántalos aquí; por defecto usamos Name y 0 extra:
+            string codigo = c.Name ?? string.Empty;
+            decimal precio = 0m;
+            // if (c.Tag is decimal d) precio = d;
 
             return new SeleccionSimple
             {
                 Codigo = codigo,
-                Descripcion = (c.Text ?? "").Trim(),
-                PrecioExtra = string.IsNullOrWhiteSpace(codigo) ? 0m : ObtenerPrecioDeCodigo(codigo)
+                Descripcion = desc,
+                PrecioExtra = precio
             };
         }
 
-        private decimal ObtenerPrecioDeCodigo(string codigo)
+        // ==================== HELPERS ====================
+        private static void TrySetText(Control ctrl, string text)
         {
-            if (string.IsNullOrWhiteSpace(codigo)) return 0m;
-            var cod10 = codigo.Trim().PadLeft(10, '0');
+            if (ctrl == null) return;
             try
             {
-                var p = _svcProductos.Obtener(cod10, ListaPrecio);
-                if (p == null) return 0m;
-                return p.PrecioUnitario != 0m ? p.PrecioUnitario : p.ValorUnitario;
+                var p = ctrl.GetType().GetProperty("Text");
+                p?.SetValue(ctrl, text ?? string.Empty, null);
             }
-            catch { return 0m; }
+            catch { /* ignore */ }
         }
 
-        // ==================== HELPERS DE UI ====================
-        private TextBoxBase FindResumenTextBox()
-        {
-            // Busca por nombres típicos
-            var candidatos = new[] { "txtNotasTamal", "txtResumen", "txtSeleccion", "txtNotas", "txtDetalle" };
-            foreach (var name in candidatos)
-            {
-                var tb = this.Controls.Find(name, true).OfType<TextBoxBase>().FirstOrDefault();
-                if (tb != null) return tb;
-            }
-            // fallback: primer TextBoxBase multilínea que no sea txtProductoSelect
-            var firstMulti = this.Controls
-                .OfType<TextBoxBase>()
-                .FirstOrDefault(t => t.Multiline && !string.Equals(t.Name, "txtProductoSelect", StringComparison.OrdinalIgnoreCase));
-            return firstMulti;
-        }
-
-        private static void TrySetText(Control c, string text)
-        {
-            if (c == null) return;
-            var prop = c.GetType().GetProperty("Text");
-            if (prop != null && prop.CanWrite) prop.SetValue(c, text ?? string.Empty, null);
-        }
-
-        private void btnCerrar_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
+        private void btnCerrar_Click(object sender, EventArgs e) => Close();
     }
 }

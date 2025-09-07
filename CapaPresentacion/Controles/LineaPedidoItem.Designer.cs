@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.pnlPed = new System.Windows.Forms.Panel();
-            this.txtNote = new Guna.UI2.WinForms.Guna2TextBox();
             this.txtProducto = new Guna.UI2.WinForms.Guna2TextBox();
             this.pnlPed.SuspendLayout();
             this.SuspendLayout();
@@ -37,38 +36,12 @@
             // pnlPed
             // 
             this.pnlPed.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(228)))), ((int)(((byte)(214)))));
-            this.pnlPed.Controls.Add(this.txtNote);
             this.pnlPed.Controls.Add(this.txtProducto);
             this.pnlPed.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlPed.Location = new System.Drawing.Point(0, 0);
             this.pnlPed.Name = "pnlPed";
-            this.pnlPed.Size = new System.Drawing.Size(310, 76);
+            this.pnlPed.Size = new System.Drawing.Size(310, 41);
             this.pnlPed.TabIndex = 0;
-            // 
-            // txtNote
-            // 
-            this.txtNote.AcceptsReturn = true;
-            this.txtNote.Animated = true;
-            this.txtNote.BorderRadius = 12;
-            this.txtNote.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.txtNote.DefaultText = "";
-            this.txtNote.DisabledState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(208)))), ((int)(((byte)(208)))), ((int)(((byte)(208)))));
-            this.txtNote.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(226)))), ((int)(((byte)(226)))));
-            this.txtNote.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
-            this.txtNote.DisabledState.PlaceholderForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
-            this.txtNote.Dock = System.Windows.Forms.DockStyle.Top;
-            this.txtNote.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.txtNote.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtNote.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.txtNote.Location = new System.Drawing.Point(0, 36);
-            this.txtNote.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.txtNote.Multiline = true;
-            this.txtNote.Name = "txtNote";
-            this.txtNote.PlaceholderText = "";
-            this.txtNote.SelectedText = "";
-            this.txtNote.Size = new System.Drawing.Size(310, 36);
-            this.txtNote.TabIndex = 10;
-            this.txtNote.Visible = false;
             // 
             // txtProducto
             // 
@@ -101,7 +74,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.pnlPed);
             this.Name = "LineaPedidoItem";
-            this.Size = new System.Drawing.Size(310, 76);
+            this.Size = new System.Drawing.Size(310, 41);
             this.pnlPed.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -110,7 +83,6 @@
         #endregion
 
         private System.Windows.Forms.Panel pnlPed;
-        private Guna.UI2.WinForms.Guna2TextBox txtNote;
         private Guna.UI2.WinForms.Guna2TextBox txtProducto;
     }
 }

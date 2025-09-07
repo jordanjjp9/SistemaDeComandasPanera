@@ -198,6 +198,7 @@
             this.txtNotasHelado.Multiline = true;
             this.txtNotasHelado.Name = "txtNotasHelado";
             this.txtNotasHelado.PlaceholderText = "";
+            this.txtNotasHelado.ReadOnly = true;
             this.txtNotasHelado.SelectedText = "";
             this.txtNotasHelado.Size = new System.Drawing.Size(341, 760);
             this.txtNotasHelado.TabIndex = 1;

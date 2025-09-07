@@ -55,90 +55,180 @@ namespace CapaPresentacion.Botoneras
 
         private void frmPastas_Load(object sender, EventArgs e)
         {
-            foreach (var b in EnumerarBotones(this))
+            //foreach (var b in EnumerarBotones(this))
+            //{
+            //    if (b.Name.StartsWith("btnProd", StringComparison.OrdinalIgnoreCase))
+            //    {
+            //        // Obtiene el código desde el Name o desde el Tag si ya lo pusiste
+            //        var cod = b.Tag as string;
+            //        if (string.IsNullOrWhiteSpace(cod))
+            //        {
+            //            var m = Regex.Match(b.Name, @"\d+"); // ejemplo: btnProd0000000225 -> 0000000225
+            //            if (m.Success) cod = m.Value;
+            //        }
+
+            //        b.Tag = cod; // guarda en Tag
+            //        b.Click -= BtnProducto_Click;
+            //        b.Click += BtnProducto_Click;
+            //    }
+            //}
+            //flpPastas.AutoScroll = true; // NECESARIO para que calcule el área de scroll
+
+            //// (Opcional) suaviza el repintado
+            //typeof(Panel).GetProperty("DoubleBuffered",
+            //    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            //    ?.SetValue(flpPastas, true);
+
+            //// 🔹 Ocultar barras de scroll, pero mantener AutoScroll funcionando
+            //flpPastas.HorizontalScroll.Enabled = false;
+            //flpPastas.HorizontalScroll.Visible = false;
+            //flpPastas.VerticalScroll.Enabled = false;
+            //flpPastas.VerticalScroll.Visible = false;
+
+            //// (Si ya tienes botones en el diseñador)
+            //foreach (Control c in flpPastas.Controls)
+            //    WireChild(c);
+
+            //flpPastas.ControlAdded += (_, ev) => WireChild(ev.Control);
+
+            //flpPastas.AutoScrollPosition = new Point(1, 1);
+            // AutoScroll requerido para que funcione el desplazamiento
+            flpPastas.AutoScroll = true;
+
+            // Oculta barras, pero mantiene el scroll programático
+            try
             {
-                if (b.Name.StartsWith("btnProd", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Obtiene el código desde el Name o desde el Tag si ya lo pusiste
-                    var cod = b.Tag as string;
-                    if (string.IsNullOrWhiteSpace(cod))
-                    {
-                        var m = Regex.Match(b.Name, @"\d+"); // ejemplo: btnProd0000000225 -> 0000000225
-                        if (m.Success) cod = m.Value;
-                    }
-
-                    b.Tag = cod; // guarda en Tag
-                    b.Click -= BtnProducto_Click;
-                    b.Click += BtnProducto_Click;
-                }
+                flpPastas.HorizontalScroll.Enabled = false;
+                flpPastas.HorizontalScroll.Visible = false;
+                flpPastas.VerticalScroll.Enabled = false;
+                flpPastas.VerticalScroll.Visible = false;
             }
-            flpPastas.AutoScroll = true; // NECESARIO para que calcule el área de scroll
+            catch { }
 
-            // (Opcional) suaviza el repintado
-            typeof(Panel).GetProperty("DoubleBuffered",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                ?.SetValue(flpPastas, true);
+            // Suaviza el repintado (doble buffer por reflexión)
+            try
+            {
+                var pi = typeof(Panel).GetProperty("DoubleBuffered",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (pi != null) pi.SetValue(flpPastas, true, null);
+            }
+            catch { }
 
-            // 🔹 Ocultar barras de scroll, pero mantener AutoScroll funcionando
-            flpPastas.HorizontalScroll.Enabled = false;
-            flpPastas.HorizontalScroll.Visible = false;
-            flpPastas.VerticalScroll.Enabled = false;
-            flpPastas.VerticalScroll.Visible = false;
+            // Cablea todo el árbol de controles:
+            WireProductoButtons(this);
 
-            // (Si ya tienes botones en el diseñador)
-            foreach (Control c in flpPastas.Controls)
-                WireChild(c);
+            // Si agregas controles dinámicamente, vuelve a cablearlos
+            this.ControlAdded += delegate (object _, ControlEventArgs ev)
+            {
+                WireProductoButtons(ev.Control);
+            };
 
-            flpPastas.ControlAdded += (_, ev) => WireChild(ev.Control);
-
+            // Posición inicial
             flpPastas.AutoScrollPosition = new Point(1, 1);
         }
-
-        private IEnumerable<Button> EnumerarBotones(Control raiz)
+        private void WireProductoButtons(Control root)
         {
-            foreach (Control c in raiz.Controls)
+            if (root == null) return;
+
+            // Si es un “botón de producto” por convención de nombre
+            if (!string.IsNullOrEmpty(root.Name) &&
+                root.Name.StartsWith("btnProd", StringComparison.OrdinalIgnoreCase))
             {
-                if (c is Button b) yield return b;
-                if (c.HasChildren)
-                    foreach (var b2 in EnumerarBotones(c)) yield return b2;
+                // Obtén/actualiza el código (10 dígitos normalmente) y guárdalo en Tag
+                string cod = root.Tag as string;
+                if (string.IsNullOrWhiteSpace(cod))
+                {
+                    Match m = Regex.Match(root.Name, @"\d+");
+                    if (m.Success) cod = m.Value;
+                }
+                root.Tag = cod;
+
+                // Click del control (funciona con Button, Guna2Button, etc.)
+                root.Click -= BtnProducto_Click;
+                root.Click += BtnProducto_Click;
+
+                // Arrastre sobre el propio control también
+                root.MouseDown -= flpPastas_MouseDown;
+                root.MouseMove -= flpPastas_MouseMove;
+                root.MouseUp -= flpPastas_MouseUp;
+                root.MouseDown += flpPastas_MouseDown;
+                root.MouseMove += flpPastas_MouseMove;
+                root.MouseUp += flpPastas_MouseUp;
             }
+
+            // Recorre hijos
+            foreach (Control c in root.Controls)
+                WireProductoButtons(c);
         }
 
+        //private IEnumerable<Button> EnumerarBotones(Control raiz)
+        //{
+        //    foreach (Control c in raiz.Controls)
+        //    {
+        //        if (c is Button b) yield return b;
+        //        if (c.HasChildren)
+        //            foreach (var b2 in EnumerarBotones(c)) yield return b2;
+        //    }
+        //}
+
+        //    private void BtnProducto_Click(object sender, EventArgs e)
+        //    {
+        //// Evita “click” después de arrastrar
+        //if (_capturandoDrag || _dragging || _cancelNextClick)
+        //{
+        //    _cancelNextClick = false;
+        //    return;
+        //}
+
+        //var btn = sender as Button;
+        //var cod = btn?.Tag as string;
+
+        //if (string.IsNullOrWhiteSpace(cod))
+        //{
+        //    var m = Regex.Match(btn?.Name ?? "", @"\d+");
+        //    if (m.Success) cod = m.Value;
+        //}
+
+        //if (!string.IsNullOrWhiteSpace(cod))
+        //    ProductoSeleccionado?.Invoke(cod);
+        //    }
         private void BtnProducto_Click(object sender, EventArgs e)
         {
-            var btn = sender as Button;
-            var cod = btn?.Tag as string;
+            // Si venías arrastrando, consume el click
+            if (_cancelNextClick) { _cancelNextClick = false; return; }
 
-            if (string.IsNullOrWhiteSpace(cod))
+            Control ctrl = sender as Control;
+            string cod = ctrl != null ? ctrl.Tag as string : null;
+
+            if (string.IsNullOrWhiteSpace(cod) && ctrl != null)
             {
-                // fallback por si no hubiera Tag
-                var m = Regex.Match(btn?.Name ?? "", @"\d+");
+                Match m = Regex.Match(ctrl.Name ?? "", @"\d+");
                 if (m.Success) cod = m.Value;
             }
 
-            if (!string.IsNullOrWhiteSpace(cod))
-                ProductoSeleccionado?.Invoke(cod); // ← avisa al padre
+            if (!string.IsNullOrWhiteSpace(cod) && ProductoSeleccionado != null)
+                ProductoSeleccionado(cod);
         }
 
-        private void WireChild(Control c)
-        {
-            // Drag en los hijos
-            c.MouseDown -= flpPastas_MouseDown;
-            c.MouseMove -= flpPastas_MouseMove;
-            c.MouseUp -= flpPastas_MouseUp;
-            c.MouseDown += flpPastas_MouseDown;
-            c.MouseMove += flpPastas_MouseMove;
-            c.MouseUp += flpPastas_MouseUp;
+        //private void WireChild(Control c)
+        //{
+        //    // Drag en los hijos
+        //    c.MouseDown -= flpPastas_MouseDown;
+        //    c.MouseMove -= flpPastas_MouseMove;
+        //    c.MouseUp -= flpPastas_MouseUp;
+        //    c.MouseDown += flpPastas_MouseDown;
+        //    c.MouseMove += flpPastas_MouseMove;
+        //    c.MouseUp += flpPastas_MouseUp;
 
 
-            // Evitar que el foco en el botón provoque auto-scroll del contenedor
-            c.Enter -= Child_EnterRedirectFocus;
-            c.MouseDown -= Child_MouseDownRedirectFocus;
-            c.Enter += Child_EnterRedirectFocus;
-            c.MouseDown += Child_MouseDownRedirectFocus;
+        //    // Evitar que el foco en el botón provoque auto-scroll del contenedor
+        //    c.Enter -= Child_EnterRedirectFocus;
+        //    c.MouseDown -= Child_MouseDownRedirectFocus;
+        //    c.Enter += Child_EnterRedirectFocus;
+        //    c.MouseDown += Child_MouseDownRedirectFocus;
 
-            c.TabStop = false; // opcional
-        }
+        //    c.TabStop = false; // opcional
+        //}
 
         private void Child_EnterRedirectFocus(object sender, EventArgs e) => flpPastas.Focus();
         private void Child_MouseDownRedirectFocus(object sender, MouseEventArgs e) => flpPastas.Focus();
@@ -242,5 +332,6 @@ namespace CapaPresentacion.Botoneras
             catch { }
             base.OnFormClosed(e);
         }
+
     }
 }

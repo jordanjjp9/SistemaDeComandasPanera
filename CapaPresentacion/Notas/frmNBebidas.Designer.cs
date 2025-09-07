@@ -330,6 +330,7 @@
             this.txtNotasBebida.Multiline = true;
             this.txtNotasBebida.Name = "txtNotasBebida";
             this.txtNotasBebida.PlaceholderText = "";
+            this.txtNotasBebida.ReadOnly = true;
             this.txtNotasBebida.SelectedText = "";
             this.txtNotasBebida.Size = new System.Drawing.Size(341, 760);
             this.txtNotasBebida.TabIndex = 3;

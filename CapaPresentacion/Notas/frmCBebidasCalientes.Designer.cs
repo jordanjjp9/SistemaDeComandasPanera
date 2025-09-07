@@ -382,6 +382,7 @@
             this.txtNotasBCalient.Location = new System.Drawing.Point(0, 49);
             this.txtNotasBCalient.Name = "txtNotasBCalient";
             this.txtNotasBCalient.PlaceholderText = "";
+            this.txtNotasBCalient.ReadOnly = true;
             this.txtNotasBCalient.SelectedText = "";
             this.txtNotasBCalient.Size = new System.Drawing.Size(341, 768);
             this.txtNotasBCalient.TabIndex = 1;
