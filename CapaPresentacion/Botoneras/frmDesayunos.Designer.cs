@@ -42,6 +42,7 @@
             this.btnProd0000001246 = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000000457 = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000001245 = new Guna.UI2.WinForms.Guna2Button();
+            this.btnProd0000000811 = new Guna.UI2.WinForms.Guna2Button();
             this.flpDesayuno.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -62,6 +63,7 @@
             this.flpDesayuno.Controls.Add(this.btnProd0000001246);
             this.flpDesayuno.Controls.Add(this.btnProd0000000457);
             this.flpDesayuno.Controls.Add(this.btnProd0000001245);
+            this.flpDesayuno.Controls.Add(this.btnProd0000000811);
             this.flpDesayuno.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flpDesayuno.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flpDesayuno.Location = new System.Drawing.Point(0, 0);
@@ -293,6 +295,23 @@
             this.btnProd0000001245.Text = "BOWL AVENA";
             this.btnProd0000001245.TextOffset = new System.Drawing.Point(0, 70);
             // 
+            // btnProd0000000811
+            // 
+            this.btnProd0000000811.BorderRadius = 22;
+            this.btnProd0000000811.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000000811.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000000811.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnProd0000000811.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnProd0000000811.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000000811.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProd0000000811.ForeColor = System.Drawing.Color.White;
+            this.btnProd0000000811.Location = new System.Drawing.Point(835, 214);
+            this.btnProd0000000811.Name = "btnProd0000000811";
+            this.btnProd0000000811.Size = new System.Drawing.Size(202, 205);
+            this.btnProd0000000811.TabIndex = 112;
+            this.btnProd0000000811.Text = "MORNING WAFFLE";
+            this.btnProd0000000811.TextOffset = new System.Drawing.Point(0, 70);
+            // 
             // frmDesayunos
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -325,5 +344,6 @@
         private Guna.UI2.WinForms.Guna2Button btnProd0000001246;
         private Guna.UI2.WinForms.Guna2Button btnProd0000000457;
         private Guna.UI2.WinForms.Guna2Button btnProd0000001245;
+        private Guna.UI2.WinForms.Guna2Button btnProd0000000811;
     }
 }

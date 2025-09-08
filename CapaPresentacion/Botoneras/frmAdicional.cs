@@ -55,36 +55,19 @@ namespace CapaPresentacion.Botoneras
 
         private void frmAdicional_Load(object sender, EventArgs e)
         {
-            //foreach (var b in EnumerarBotones(this))
-            //{
-            //    if (b.Name.StartsWith("btnProd", StringComparison.OrdinalIgnoreCase))
-            //    {
-            //        // Obtiene el código desde el Name o desde el Tag si ya lo pusiste
-            //        var cod = b.Tag as string;
-            //        if (string.IsNullOrWhiteSpace(cod))
-            //        {
-            //            var m = Regex.Match(b.Name, @"\d+"); // ejemplo: btnProd0000000225 -> 0000000225
-            //            if (m.Success) cod = m.Value;
-            //        }
-
-            //        b.Tag = cod; // guarda en Tag
-            //        b.Click -= BtnProducto_Click;
-            //        b.Click += BtnProducto_Click;
-            //    }
-            //}
             foreach (var b in EnumerarBotones(this))
             {
                 if (b.Name.StartsWith("btnProd", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Código desde el Name (btnProd0000000225 → 0000000225)
+                    // Toma el código del Name si no está en Tag
                     var cod = b.Tag as string;
                     if (string.IsNullOrWhiteSpace(cod))
                     {
-                        var m = Regex.Match(b.Name, @"\d+");
+                        var m = Regex.Match(b.Name, @"\d+"); // ej. btnProd0000000225 -> 0000000225
                         if (m.Success) cod = m.Value;
                     }
 
-                    b.Tag = cod;              // guarda el código en Tag
+                    b.Tag = cod;              // guarda el código en Tag para reutilizar
                     b.Click -= BtnProducto_Click;
                     b.Click += BtnProducto_Click;
                 }
@@ -111,44 +94,34 @@ namespace CapaPresentacion.Botoneras
             flpAdicional.AutoScrollPosition = new Point(1, 1);
         }
 
-        private IEnumerable<Button> EnumerarBotones(Control raiz)
+        private static System.Collections.Generic.IEnumerable<Control> EnumerarBotones(Control raiz)
         {
             foreach (Control c in raiz.Controls)
             {
-                if (c is Button b) yield return b;
-                if (c.HasChildren)
-                    foreach (var b2 in EnumerarBotones(c)) yield return b2;
+                // filtra por nombre de prefijo si quieres: if (c.Name.StartsWith("btnProd")) …
+                if (c is Button || c.GetType().Name.Contains("Guna2Button"))
+                    yield return c;
+
+                foreach (var child in EnumerarBotones(c))
+                    yield return child;
             }
         }
 
-        //private void BtnProducto_Click(object sender, EventArgs e)
-        //{
-        //    var btn = sender as Button;
-        //    var cod = btn?.Tag as string;
-
-        //    if (string.IsNullOrWhiteSpace(cod))
-        //    {
-        //        // fallback por si no hubiera Tag
-        //        var m = Regex.Match(btn?.Name ?? "", @"\d+");
-        //        if (m.Success) cod = m.Value;
-        //    }
-
-        //    if (!string.IsNullOrWhiteSpace(cod))
-        //        ProductoSeleccionado?.Invoke(cod); // ← avisa al padre
-        //}
         private void BtnProducto_Click(object sender, EventArgs e)
         {
-            var btn = sender as Button;
+            if (_cancelNextClick) { _cancelNextClick = false; return; }  // venías arrastrando
+            var btn = sender as Control;
             var cod = btn?.Tag as string;
 
             if (string.IsNullOrWhiteSpace(cod))
             {
+                // fallback por si no hubiera Tag
                 var m = Regex.Match(btn?.Name ?? "", @"\d+");
                 if (m.Success) cod = m.Value;
             }
 
             if (!string.IsNullOrWhiteSpace(cod))
-                ProductoSeleccionado?.Invoke(cod);
+                ProductoSeleccionado?.Invoke(cod);  // ← avisa al “padre” (frmMenuPrincipal)
         }
 
         private void WireChild(Control c)
@@ -275,5 +248,6 @@ namespace CapaPresentacion.Botoneras
             catch { }
             base.OnFormClosed(e);
         }
+
     }
 }

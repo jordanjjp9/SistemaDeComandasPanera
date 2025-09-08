@@ -34,6 +34,21 @@ namespace CapaPresentacion.Botoneras
         public frmBebidasC()
         {
             InitializeComponent();
+            this.Load += frmBebidasC_Load;
+
+            flpBebidasC.VerticalScroll.Visible = false;
+            //flpAdicional.HorizontalScroll.Visible = true;
+
+            //  _principal = principal;
+
+            _inertiaTimer = new System.Windows.Forms.Timer { Interval = 15 };
+            _inertiaTimer.Tick += _inertiaTimer_Tick;
+
+            // Suscribir handlers (hazlo aquí o en el diseñador, pero no doble)
+            flpBebidasC.MouseDown += flpBebidasC_MouseDown;
+            flpBebidasC.MouseMove += flpBebidasC_MouseMove;
+            flpBebidasC.MouseUp += flpBebidasC_MouseUp;
+
         }
 
         private void frmBebidasC_Load(object sender, EventArgs e)
@@ -42,43 +57,98 @@ namespace CapaPresentacion.Botoneras
             {
                 if (b.Name.StartsWith("btnProd", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Obtiene el código desde el Name o desde el Tag si ya lo pusiste
+                    // Toma el código del Name si no está en Tag
                     var cod = b.Tag as string;
                     if (string.IsNullOrWhiteSpace(cod))
                     {
-                        var m = Regex.Match(b.Name, @"\d+"); // ejemplo: btnProd0000000225 -> 0000000225
+                        var m = Regex.Match(b.Name, @"\d+"); // ej. btnProd0000000225 -> 0000000225
                         if (m.Success) cod = m.Value;
                     }
 
-                    b.Tag = cod; // guarda en Tag
+                    b.Tag = cod;              // guarda el código en Tag para reutilizar
                     b.Click -= BtnProducto_Click;
                     b.Click += BtnProducto_Click;
                 }
             }
+            flpBebidasC.AutoScroll = true; // NECESARIO para que calcule el área de scroll
+
+            // (Opcional) suaviza el repintado
+            typeof(Panel).GetProperty("DoubleBuffered",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                ?.SetValue(flpBebidasC, true);
+
+            // 🔹 Ocultar barras de scroll, pero mantener AutoScroll funcionando
+            flpBebidasC.HorizontalScroll.Enabled = false;
+            flpBebidasC.HorizontalScroll.Visible = false;
+            flpBebidasC.VerticalScroll.Enabled = false;
+            flpBebidasC.VerticalScroll.Visible = false;
+
+            // (Si ya tienes botones en el diseñador)
+            foreach (Control c in flpBebidasC.Controls)
+                WireChild(c);
+
+            flpBebidasC.ControlAdded += (_, ev) => WireChild(ev.Control);
+
+            flpBebidasC.AutoScrollPosition = new Point(1, 1);
+            WireProductButtons(this);
         }
-
-        public string UltimaNotaSeleccionada { get; private set; } = string.Empty;
-
-        public string TomarYLimpiarNota()
+        private void WireProductButtons(Control root)
         {
-            var n = UltimaNotaSeleccionada;
-            UltimaNotaSeleccionada = string.Empty;
-            return n;
+            foreach (Control c in root.Controls)
+            {
+                if (c is Button || c.GetType().Name.Contains("Guna2Button"))
+                {
+                    if (c.Name.StartsWith("btnProd", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var cod = c.Tag as string;
+                        if (string.IsNullOrWhiteSpace(cod))
+                        {
+                            var m = Regex.Match(c.Name ?? "", @"\d+");
+                            if (m.Success) cod = m.Value;
+                        }
+                        c.Tag = cod;
+                        c.Click -= BtnProducto_Click;
+                        c.Click += BtnProducto_Click;
+                    }
+                }
+                WireProductButtons(c); // recursivo
+            }
         }
-
-        private IEnumerable<Button> EnumerarBotones(Control raiz)
+        private static System.Collections.Generic.IEnumerable<Control> EnumerarBotones(Control raiz)
         {
             foreach (Control c in raiz.Controls)
             {
-                if (c is Button b) yield return b;
-                if (c.HasChildren)
-                    foreach (var b2 in EnumerarBotones(c)) yield return b2;
+                // filtra por nombre de prefijo si quieres: if (c.Name.StartsWith("btnProd")) …
+                if (c is Button || c.GetType().Name.Contains("Guna2Button"))
+                    yield return c;
+
+                foreach (var child in EnumerarBotones(c))
+                    yield return child;
             }
         }
 
+        //public string UltimaNotaSeleccionada { get; private set; } = string.Empty;
+
+        //public string TomarYLimpiarNota()
+        //{
+        //    var n = UltimaNotaSeleccionada;
+        //    UltimaNotaSeleccionada = string.Empty;
+        //    return n;
+        //}
+
+        //private IEnumerable<Button> EnumerarBotones(Control raiz)
+        //{
+        //    foreach (Control c in raiz.Controls)
+        //    {
+        //        if (c is Button b) yield return b;
+        //        if (c.HasChildren)
+        //            foreach (var b2 in EnumerarBotones(c)) yield return b2;
+        //    }
+        //}
+
         private void BtnProducto_Click(object sender, EventArgs e)
         {
-            var btn = sender as Button;
+            var btn = sender as Control;
             var cod = btn?.Tag as string;
 
             if (string.IsNullOrWhiteSpace(cod))
@@ -86,30 +156,31 @@ namespace CapaPresentacion.Botoneras
                 var m = Regex.Match(btn?.Name ?? "", @"\d+");
                 if (m.Success) cod = m.Value;
             }
-            if (string.IsNullOrWhiteSpace(cod)) return;
 
-            // 1) leer cantidad desde frmMenuPrincipal (si está abierto)
-            int cantidad = 1;
-            var main = Application.OpenForms.OfType<frmMenuPrincipal>().FirstOrDefault();
-            if (main != null) cantidad = main.CantidadActualPublic;
-
-            using (var dlg = new frmNotasBebidas())
-            {
-                dlg.StartPosition = FormStartPosition.CenterParent;
-
-                // 2) pasar contexto (producto + cantidad)
-                dlg.SetContexto(btn?.Text, cantidad);
-
-                if (dlg.ShowDialog(this) == DialogResult.OK)
-                {
-                    // Guarda nota para que frmMenuPrincipal la recoja (tú ya lo haces)
-                    UltimaNotaSeleccionada = dlg.NotaSeleccionada;
-
-                    // Avisar al padre para que agregue el producto (tu flujo actual)
-                    ProductoSeleccionado?.Invoke(cod);
-                }
-            }
+            if (!string.IsNullOrWhiteSpace(cod))
+                ProductoSeleccionado?.Invoke(cod);
         }
+        private void WireChild(Control c)
+        {
+            // Drag en los hijos
+            c.MouseDown -= flpBebidasC_MouseDown;
+            c.MouseMove -= flpBebidasC_MouseMove;
+            c.MouseUp -= flpBebidasC_MouseUp;
+            c.MouseDown += flpBebidasC_MouseDown;
+            c.MouseMove += flpBebidasC_MouseMove;
+            c.MouseUp += flpBebidasC_MouseUp;
+
+
+            // Evitar que el foco en el botón provoque auto-scroll del contenedor
+            c.Enter -= Child_EnterRedirectFocus;
+            c.MouseDown -= Child_MouseDownRedirectFocus;
+            c.Enter += Child_EnterRedirectFocus;
+            c.MouseDown += Child_MouseDownRedirectFocus;
+
+            c.TabStop = false; // opcional
+        }
+        private void Child_EnterRedirectFocus(object sender, EventArgs e) => flpBebidasC.Focus();
+        private void Child_MouseDownRedirectFocus(object sender, MouseEventArgs e) => flpBebidasC.Focus();
 
         private void flpBebidasC_MouseDown(object sender, MouseEventArgs e)
         {

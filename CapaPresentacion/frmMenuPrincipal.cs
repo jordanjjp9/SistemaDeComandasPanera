@@ -40,6 +40,8 @@ namespace CapaPresentacion
 
         private const string CHICHA_ALMUERZO_CODE = "0000000868";
 
+        private int? _cantidadForzada;  // prioridad sobre txtCantidad cuando no es null
+
         // === PASTAS que disparan MenuPedidoItem ===
         private static readonly string[] COD_PASTAS =
         {
@@ -48,8 +50,7 @@ namespace CapaPresentacion
             "0000000275", // PESTO CON MILANESA
             "0000000276"  // BOLOGNESA
         };
-        private static bool EsCodigoPasta(string cod10)
-            => COD_PASTAS.Contains((cod10 ?? "").Trim(), StringComparer.Ordinal);
+        private static bool EsCodigoPasta(string cod10) => COD_PASTAS.Contains((cod10 ?? "").Trim(), StringComparer.Ordinal);
 
         private sealed class UnidadJugo
         {
@@ -78,7 +79,7 @@ namespace CapaPresentacion
             foreach (Control ctrl in panelHost.Controls) ctrl.Dispose();
             panelHost.Controls.Clear();
 
-            // Desengancha al anterior si lo había
+            // Desengancha del anterior si lo había
             if (_formHijoActual is ISelectorProducto selOld)
                 selOld.ProductoSeleccionado -= Hijo_ProductoSeleccionado;
 
@@ -92,7 +93,7 @@ namespace CapaPresentacion
             formHijo.Show();
             formHijo.BringToFront();
 
-            // 👇 Engancha si implementa ISelectorProducto
+            // 👇 Engancha si implementa ISelectorProducto (¡importante!)
             if (formHijo is ISelectorProducto sel)
                 sel.ProductoSeleccionado += Hijo_ProductoSeleccionado;
         }
@@ -101,48 +102,7 @@ namespace CapaPresentacion
 
         private void frmMenuPrincipal_Load(object sender, EventArgs e)
         {
-            //// Cabecera
-            //txtAmb.Text = SesionActual.Ambiente ?? "";
-            //txtMesa.Text = SesionActual.Mesa?.Numero.ToString() ?? "";
-            //txtVendedor.Text = SesionActual.Vendedor?.Nombre ?? "";
 
-            //// Solo lectura visual
-            //txtAmb.ReadOnly = txtMesa.ReadOnly = txtVendedor.ReadOnly = true;
-
-            //// Servicios / cache
-            //_svcProductos = new cnProducto();
-            //RecargarCache("001");
-
-            //// Cantidad por defecto y validaciones
-            //txtCantidad.KeyPress += txtCantidad_KeyPress;
-            //if (string.IsNullOrWhiteSpace(txtCantidad.Text)) txtCantidad.Text = "1";
-
-            //// Botonera superior
-            //var sec = new frmBotoneraPrincipal(this);
-            //MostrarFormularioEnPanel(sec, pnlCSup);
-
-            //// ===== Lista de líneas (panel izquierdo) =====
-            //flpLineas.FlowDirection = FlowDirection.TopDown;  // vertical
-            //flpLineas.WrapContents = false;
-            //flpLineas.AutoScroll = true;
-
-            //// Arrastre + inercia + oculta barras (lo hace el scroller internamente)
-            //_lineasScroller = new CapaPresentacion.Helpers.DragScroller(flpLineas, CapaPresentacion.Helpers.DragAxis.Vertical);
-
-            //// Habilitar/Deshabilitar botones según selección de una línea
-            //LineaPedidoItem.SeleccionCambio += (_, __) =>
-            //{
-            //    bool haySel = (LineaPedidoItem.SeleccionActual != null);
-            //    btnEliminar.Enabled = haySel;
-            //    btnComentarioLbr.Enabled = haySel;  // si quieres que comentario libre solo funcione con un item seleccionado
-            //};
-            //// estado inicial
-            //bool haySelIni = (LineaPedidoItem.SeleccionActual != null);
-            //btnEliminar.Enabled = haySelIni;
-            //btnComentarioLbr.Enabled = haySelIni;
-
-            //flpLineas.ControlAdded += (_, __) => ActualizarSubtotal();
-            //flpLineas.ControlRemoved += (_, __) => ActualizarSubtotal();
 
             // Cabecera
             txtAmb.Text = SesionActual.Ambiente ?? "";
@@ -173,16 +133,29 @@ namespace CapaPresentacion
             _lineasScroller = new CapaPresentacion.Helpers.DragScroller(
                 flpLineas, CapaPresentacion.Helpers.DragAxis.Vertical);
 
-            // 🔸 Habilitar/Deshabilitar botones según la SELECCIÓN GLOBAL
+            ////// 🔸 Habilitar/Deshabilitar botones según la SELECCIÓN GLOBAL
+            ////LineaSelection.Changed += (s, ev) =>
+            ////{
+            ////    var sel = LineaSelection.Actual;              // puede ser LineaPedidoItem o ComboPedidoItem
+            ////    bool haySel = (sel != null);
+
+            ////    btnEliminar.Enabled = haySel;
+
+            ////    // Comentario libre: habilitar para líneas normales y combos
+            ////    btnComentarioLbr.Enabled = (sel is LineaPedidoItem) || (sel is ComboPedidoItem);
+            ////};
             LineaSelection.Changed += (s, ev) =>
             {
-                var sel = LineaSelection.Actual;              // puede ser LineaPedidoItem o ComboPedidoItem
+                var sel = LineaSelection.Actual;              // puede ser LineaPedidoItem, ComboPedidoItem o MenuPedidoItem
                 bool haySel = (sel != null);
 
                 btnEliminar.Enabled = haySel;
 
-                // Comentario libre: habilitar para líneas normales y combos
-                btnComentarioLbr.Enabled = (sel is LineaPedidoItem) || (sel is ComboPedidoItem);
+                // ⬇️ incluir MenuPedidoItem
+                btnComentarioLbr.Enabled =
+                    (sel is LineaPedidoItem) ||
+                    (sel is ComboPedidoItem) ||
+                    (sel is MenuPedidoItem);
             };
 
             // Estado inicial de botones (nada seleccionado)
@@ -198,10 +171,23 @@ namespace CapaPresentacion
 
         private int CantidadActual()
         {
+            //var p = TryParseCantidadCodigo(txtCantidad.Text);
+            //return (p.ok && p.cantidad > 0) ? p.cantidad : 1;
+            if (_cantidadForzada.HasValue)
+            {
+                int q = _cantidadForzada.Value;
+                _cantidadForzada = null;          // se consume una vez
+                return (q > 0) ? q : 1;
+            }
+
             var p = TryParseCantidadCodigo(txtCantidad.Text);
             return (p.ok && p.cantidad > 0) ? p.cantidad : 1;
         }
-
+        private void SeleccionarPorCodigoConCantidad(string codigo10, int cantidad)
+        {
+            _cantidadForzada = (cantidad > 0) ? cantidad : 1;  // la usará CantidadActual()
+            Hijo_ProductoSeleccionado(codigo10);               // ← entra a TODO tu flujo central
+        }
 
         private ceProductos BuscarProductoPorCodigoExacto(string codigo10)
         {
@@ -252,31 +238,7 @@ namespace CapaPresentacion
             return null;
         }
 
-        //private void Hijo_ProductoSeleccionado(string codigo)
-        //{
-        //    if (string.IsNullOrWhiteSpace(codigo)) return;
 
-        //    string cod10 = codigo.Trim().PadLeft(LARGO_CODIGO, '0');
-
-        //    ceProductos prod;
-        //    if (!_cachePorCodigo.TryGetValue(cod10, out prod) || prod == null)
-        //    {
-        //        prod = _svcProductos.Obtener(cod10, "001");
-        //        if (prod != null) _cachePorCodigo[cod10] = prod;
-        //    }
-        //    if (prod == null)
-        //    {
-        //        MessageBox.Show($"Producto {cod10} no encontrado.", "Productos",
-        //                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        //        return;
-        //    }
-
-        //    int cantidad = CantidadActual();
-        //    if (cantidad <= 0) cantidad = 1;
-
-        //    // 👉 delega todo aquí (combos, helados, normal)
-        //    SeleccionarProducto(prod, cantidad);
-        //}
         private void Hijo_ProductoSeleccionado(string codigo)
         {
             if (string.IsNullOrWhiteSpace(codigo)) return;
@@ -318,8 +280,51 @@ namespace CapaPresentacion
                                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
             int cantidad2 = CantidadActual();
+
+            if (_formHijoActual != null &&
+            _formHijoActual.GetType().Name.Equals("frmBebidasC", StringComparison.OrdinalIgnoreCase))
+            {
+                if (cantidad2 <= 0) cantidad2 = 1;
+
+                using (var frmN = new CapaPresentacion.Notas.frmNBebidas
+                {
+                    // Esto hace que arriba se vea: "1 x CHOCOLATE CALIENTE..."
+                    ProductoBaseTexto = $"{cantidad2} x {prod2.Descripcion}",
+                    TextoInicial = string.Empty
+                })
+                {
+                    if (frmN.ShowDialog(this) == DialogResult.OK)
+                    {
+                        // Agrega la línea como en todos lados, con las notas del NBebidas
+                        AgregarLineaPedido(prod2, cantidad2, frmN.Notas);
+                    }
+                }
+                return;
+            }
+
+
+            if (_formHijoActual != null &&
+                _formHijoActual.GetType().Name.Equals("frmAdicional", StringComparison.OrdinalIgnoreCase))
+            {
+                decimal pu = PrecioDe(prod2);   // tu helper existente (PRE_SOL / VAL_SOL)
+                string notas = string.Empty;
+
+                flpLineas.AddLinea(
+                    prod2.Codigo,
+                    prod2.Descripcion,
+                    cantidad2,
+                    pu,
+                    notas,
+                    seleccionar: false,         // 👈 antes estaba true; cámbialo a false
+                    scrollIntoView: true
+                );
+
+                ActualizarSubtotal();           // si ya lo tienes implementado
+                return;
+            }
+
+
             if (cantidad2 <= 0) cantidad2 = 1;
 
             SeleccionarProducto(prod2, cantidad2);
@@ -358,17 +363,29 @@ namespace CapaPresentacion
             }
             else if (partes.Length == 2)
             {
-                // cantidad*código
+                //// cantidad*código
+                //var qStr = partes[0].Trim();
+                //var codStr = partes[1].Trim();
+
+                //if (!int.TryParse(qStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var q) || q <= 0)
+                //    return (false, 1, null);
+
+                //if (string.IsNullOrEmpty(codStr))
+                //    return (true, q, null); // aún no teclea el código, entrada parcial válida
+
+                //if (CodigoSoloNumerico && !codStr.All(char.IsDigit))
+                //    return (false, q, null);
+
+                //return (true, q, codStr);
+
                 var qStr = partes[0].Trim();
                 var codStr = partes[1].Trim();
 
-                if (!int.TryParse(qStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var q) || q <= 0)
+                int q = 1;
+                if (qStr.Length > 0 && (!int.TryParse(qStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out q) || q <= 0))
                     return (false, 1, null);
 
-                if (string.IsNullOrEmpty(codStr))
-                    return (true, q, null); // aún no teclea el código, entrada parcial válida
-
-                if (CodigoSoloNumerico && !codStr.All(char.IsDigit))
+                if (CodigoSoloNumerico && !string.IsNullOrEmpty(codStr) && !codStr.All(char.IsDigit))
                     return (false, q, null);
 
                 return (true, q, codStr);
@@ -381,67 +398,51 @@ namespace CapaPresentacion
 
         private void btnComentarioLbr_Click(object sender, EventArgs e)
         {
-            //var sel = flpLineas.GetSeleccion(); // tu helper para obtener el LineaPedidoItem seleccionado
+            //var sel = LineaSelection.Actual;
             //if (sel == null)
             //{
-            //    MessageBox.Show("Selecciona primero un producto de la lista.", "Notas",
+            //    MessageBox.Show("Selecciona primero un ítem.", "Comentario",
             //                    MessageBoxButtons.OK, MessageBoxIcon.Information);
             //    return;
             //}
 
-            //using (var dlg = new frmComentarioLbr())
+            //if (sel is LineaPedidoItem lp)
             //{
-            //    dlg.StartPosition = FormStartPosition.CenterParent;
-            //    dlg.TextoInicial = sel.Notas;       // precarga
-            //    if (dlg.ShowDialog(this) == DialogResult.OK)
-            //        sel.Notas = dlg.Comentario;     // devuelve al panel (con saltos preservados)
-            //}
-
-            //var lp = CapaPresentacion.Controles.LineaPedidoItem.SeleccionActual;
-            //if (lp == null)
-            //{
-            //    MessageBox.Show("Selecciona primero una línea.", "Comentario libre",
-            //                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-            //    return;
-            //}
-
-            //using (var dlg = new frmComentarioLbr())
-            //{
-            //    // Precargar SOLO las notas (sin encabezado)
-            //    dlg.Texto = lp.GetNotasRaw();
-            //    dlg.TextoInicial = dlg.Texto;
-
-            //    if (dlg.ShowDialog(this) == DialogResult.OK)
+            //    using (var dlg = new frmComentarioLbr())
             //    {
-            //        lp.SetNotas(dlg.Comentario);   // reemplaza las notas y repinta
+            //        dlg.Texto = lp.Notas ?? string.Empty;   // o lp.GetNotasRaw() si lo tienes
+            //        dlg.TextoInicial = dlg.Texto;
+            //        if (dlg.ShowDialog(this) == DialogResult.OK)
+            //            lp.SetNotas(dlg.Comentario);
             //    }
             //}
+            //else if (sel is ComboPedidoItem ci)
+            //{
+            //    if (!ci.EditarUltimoJugoOBebida(this))
+            //        MessageBox.Show("No hay jugo/bebida para editar notas.", "Comentario",
+            //                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //}
+            //else if (sel is MenuPedidoItem mi)
+            //{
+            //    // Edita la zona que tocaste por última vez: Menu o Chicha
+            //    var zona = mi.ZonaActiva;
+            //    if (zona == MenuPedidoItem.ZonaNotas.Ninguna)
+            //        zona = MenuPedidoItem.ZonaNotas.Chicha; // por si acaso
 
-            ////var sel = LineaSelection.Actual;
-            ////if (sel == null)
-            ////{
-            ////    MessageBox.Show("Selecciona primero un ítem.", "Comentario",
-            ////                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-            ////    return;
-            ////}
+            //    using (var dlg = new frmComentarioLbr())
+            //    {
+            //        dlg.Texto = mi.GetNotasRaw(zona);
+            //        dlg.TextoInicial = dlg.Texto;
 
-            ////if (sel is LineaPedidoItem lp)
-            ////{
-            ////    using (var dlg = new frmComentarioLbr())
-            ////    {
-            ////        dlg.Texto = lp.Notas ?? string.Empty;
-            ////        dlg.TextoInicial = dlg.Texto;
+            //        // Título informativo (opcional)
+            //        dlg.Text = (zona == MenuPedidoItem.ZonaNotas.Menu)
+            //                   ? "Comentario del Menú"
+            //                   : "Comentario de la Chicha";
 
-            ////        if (dlg.ShowDialog(this) == DialogResult.OK)
-            ////            lp.SetNotas(dlg.Comentario);
-            ////    }
-            ////}
-            ////else if (sel is ComboPedidoItem ci)
-            ////{
-            ////    if (!ci.EditarUltimoJugoOBebida(this))
-            ////        MessageBox.Show("No hay jugo/bebida para editar notas.", "Comentario",
-            ////                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-            ////}
+            //        if (dlg.ShowDialog(this) == DialogResult.OK)
+            //            mi.SetNotas(zona, dlg.Comentario);   // reemplaza notas de esa zona
+            //    }
+            //}
 
             var sel = LineaSelection.Actual;
             if (sel == null)
@@ -455,37 +456,92 @@ namespace CapaPresentacion
             {
                 using (var dlg = new frmComentarioLbr())
                 {
-                    dlg.Texto = lp.Notas ?? string.Empty;   // o lp.GetNotasRaw() si lo tienes
+                    dlg.Texto = lp.Notas ?? string.Empty;   // o lp.GetNotasRaw() si lo prefieres
                     dlg.TextoInicial = dlg.Texto;
                     if (dlg.ShowDialog(this) == DialogResult.OK)
                         lp.SetNotas(dlg.Comentario);
                 }
             }
+            //else if (sel is ComboPedidoItem ci)
+            //{
+            //    // SHIFT + click: editar SIEMPRE el encabezado (txtCombo)
+            //    if ((ModifierKeys & Keys.Shift) == Keys.Shift)
+            //    {
+            //        using (var dlg = new frmComentarioLbr())
+            //        {
+            //            dlg.Text = "Comentario del Combo";
+            //            dlg.Texto = ci.GetNotasEncabezadoRaw();
+            //            dlg.TextoInicial = dlg.Texto;
+            //            if (dlg.ShowDialog(this) == DialogResult.OK)
+            //                ci.SetNotasEncabezado(dlg.Comentario);
+            //        }
+            //        return;
+            //    }
+
+            //    // Comportamiento habitual: editar última bebida/jugo/tamal;
+            //    // si no hay subitems, cae a editar encabezado.
+            //    if (!ci.EditarUltimoJugoOBebida(this))
+            //    {
+            //        using (var dlg = new frmComentarioLbr())
+            //        {
+            //            dlg.Text = "Comentario del Combo";
+            //            dlg.Texto = ci.GetNotasEncabezadoRaw();
+            //            dlg.TextoInicial = dlg.Texto;
+            //            if (dlg.ShowDialog(this) == DialogResult.OK)
+            //                ci.SetNotasEncabezado(dlg.Comentario);
+            //        }
+            //    }
+            //}
             else if (sel is ComboPedidoItem ci)
             {
-                if (!ci.EditarUltimoJugoOBebida(this))
-                    MessageBox.Show("No hay jugo/bebida para editar notas.", "Comentario",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // 1) Si el usuario hizo click en el encabezado o mantiene SHIFT, edita encabezado
+                if (ci.EncabezadoActivo || (ModifierKeys & Keys.Shift) == Keys.Shift)
+                {
+                    using (var dlg = new frmComentarioLbr())
+                    {
+                        dlg.Text = "Comentario del Combo";
+                        dlg.Texto = ci.GetNotasEncabezadoRaw();
+                        dlg.TextoInicial = dlg.Texto;
+                        if (dlg.ShowDialog(this) == DialogResult.OK)
+                            ci.SetNotasEncabezado(dlg.Comentario);
+                    }
+                    return;
+                }
+
+                // 2) Si hay subitems, intenta editarlos (si cancelas NO hace fallback a encabezado)
+                if (ci.TieneSubItemEditable())   // <— método que te pasé antes
+                {
+                    ci.EditarUltimoJugoOBebida(this);
+                    return;
+                }
+
+                // 3) Si no hay subitems, edita encabezado
+                using (var dlg = new frmComentarioLbr())
+                {
+                    dlg.Text = "Comentario del Combo";
+                    dlg.Texto = ci.GetNotasEncabezadoRaw();
+                    dlg.TextoInicial = dlg.Texto;
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                        ci.SetNotasEncabezado(dlg.Comentario);
+                }
             }
             else if (sel is MenuPedidoItem mi)
             {
-                // Edita la zona que tocaste por última vez: Menu o Chicha
+                // Igual que ya lo tenías
                 var zona = mi.ZonaActiva;
                 if (zona == MenuPedidoItem.ZonaNotas.Ninguna)
-                    zona = MenuPedidoItem.ZonaNotas.Chicha; // por si acaso
+                    zona = MenuPedidoItem.ZonaNotas.Chicha;
 
                 using (var dlg = new frmComentarioLbr())
                 {
                     dlg.Texto = mi.GetNotasRaw(zona);
                     dlg.TextoInicial = dlg.Texto;
-
-                    // Título informativo (opcional)
                     dlg.Text = (zona == MenuPedidoItem.ZonaNotas.Menu)
                                ? "Comentario del Menú"
                                : "Comentario de la Chicha";
 
                     if (dlg.ShowDialog(this) == DialogResult.OK)
-                        mi.SetNotas(zona, dlg.Comentario);   // reemplaza notas de esa zona
+                        mi.SetNotas(zona, dlg.Comentario);
                 }
             }
         }
@@ -493,6 +549,51 @@ namespace CapaPresentacion
 
         private void txtCantidad_KeyDown(object sender, KeyEventArgs e)
         {
+            //if (e.KeyCode != Keys.Enter) return;
+
+            //var parsed = TryParseCantidadCodigo(txtCantidad.Text);
+
+            //if (!parsed.ok)
+            //{
+            //    MessageBox.Show("Formato inválido. Usa: cantidad o cantidad*código");
+            //    e.SuppressKeyPress = true;
+            //    return;
+            //}
+
+            //// Si solo hay cantidad, no buscamos aún (dejas listo para escribir *código)
+            //if (parsed.codigo == null)
+            //{
+            //    e.SuppressKeyPress = true;
+            //    return;
+            //}
+
+            //// Normaliza el código: si es numérico, pad a 10
+            //string codIngresado = parsed.codigo.Trim();
+            //string cod10 = codIngresado.All(char.IsDigit) ? codIngresado.PadLeft(LARGO_CODIGO, '0') : codIngresado;
+
+            //// Buscar: exacto -> termina en
+            //var producto = BuscarProductoPorCodigoExacto(cod10); 
+            //if (producto == null && codIngresado.All(char.IsDigit)) producto = BuscarProductoPorCodigoTerminaEn(codIngresado);
+
+            //if (producto == null)
+            //{
+            //    MessageBox.Show($"No se encontró el producto '{codIngresado}'.");
+            //    e.SuppressKeyPress = true;
+            //    return;
+            //}
+
+
+            //// Mostrar usando la cantidad parseada (evita inconsistencias)
+            ////  AgregarLinea(producto, parsed.cantidad);
+            //SeleccionarProducto(producto, parsed.cantidad);
+            //SeleccionarPorCodigoConCantidad(producto.Codigo, parsed.cantidad);
+
+            //// Limpia y listo para el siguiente input
+            //txtCantidad.Clear();
+            //txtCantidad.Focus();
+
+            //e.SuppressKeyPress = true;
+
             if (e.KeyCode != Keys.Enter) return;
 
             var parsed = TryParseCantidadCodigo(txtCantidad.Text);
@@ -504,14 +605,14 @@ namespace CapaPresentacion
                 return;
             }
 
-            // Si solo hay cantidad, no buscamos aún (dejas listo para escribir *código)
+            // Si solo hay cantidad, no buscamos aún
             if (parsed.codigo == null)
             {
                 e.SuppressKeyPress = true;
                 return;
             }
 
-            // Normaliza el código: si es numérico, pad a 10
+            // Normaliza el código si es numérico
             string codIngresado = parsed.codigo.Trim();
             string cod10 = codIngresado.All(char.IsDigit)
                 ? codIngresado.PadLeft(LARGO_CODIGO, '0')
@@ -529,14 +630,12 @@ namespace CapaPresentacion
                 return;
             }
 
-            // Mostrar usando la cantidad parseada (evita inconsistencias)
-            //  AgregarLinea(producto, parsed.cantidad);
-            SeleccionarProducto(producto, parsed.cantidad);
+            //  Unificar el flujo: SOLO esta llamada
+            SeleccionarPorCodigoConCantidad(producto.Codigo, parsed.cantidad);
 
-            // Limpia y listo para el siguiente input
+            // Limpieza
             txtCantidad.Clear();
             txtCantidad.Focus();
-
             e.SuppressKeyPress = true;
         }
 
@@ -544,36 +643,7 @@ namespace CapaPresentacion
 
         private void SeleccionarProducto(ceProductos prod, int cantidad)
         {
-            //if (prod == null || cantidad <= 0) return;
 
-            //// 1) ¿Es un combo de desayuno? -> abre el wizard (jugos + notas) y termina aquí
-            //if (_svcProductos.EsComboDesayuno(prod))
-            //{
-            //    EjecutarWizardDesayunoPorUnidad(prod, cantidad);   // ← usa este
-            //    return;
-            //}
-
-            //// 2) Flujo existente (ej. helados con notas especiales)
-            //string cod10 = (prod.Codigo ?? "").Trim().PadLeft(LARGO_CODIGO, '0');
-
-            //if (RequiereNotas(cod10))
-            //{
-            //    using (var dlg = new CapaPresentacion.Notas.frmNHelados())
-            //    {
-            //        dlg.StartPosition = FormStartPosition.CenterParent;
-            //        dlg.Cantidad = cantidad;
-            //        dlg.Producto = prod.Descripcion ?? prod.Codigo;
-
-            //        if (dlg.ShowDialog(this) == DialogResult.OK)
-            //            //AgregarLineaPedido(prod, cantidad, dlg.Notas);
-            //            AgregarProducto(prod.Codigo, prod.Descripcion, cantidad, PrecioDe(prod));
-            //    }
-            //}
-            //else
-            //{
-            //    // 3) Producto normal sin notas -> agrega línea directa
-            //    AgregarLineaPedido(prod, cantidad, string.Empty);
-            //}
 
             if (prod == null || cantidad <= 0) return;
 
@@ -676,28 +746,7 @@ namespace CapaPresentacion
 
         private void AgregarLineaPedido(ceProductos prod, int cantidad, string notas)
         {
-            //if (prod == null || cantidad <= 0) return;
 
-            //decimal pu = PrecioDe(prod); // tu helper existente
-
-            //var item = new LineaPedidoItem();
-            //item.Configurar(prod.Codigo, prod.Descripcion, cantidad, pu, notas ?? string.Empty);
-
-            //flpLineas.SuspendLayout();
-            //flpLineas.Controls.Add(item);
-            //flpLineas.ResumeLayout();
-
-            //// Selecciona la línea recién agregada y hace scroll hacia ella
-            //LineaPedidoItem.Seleccionar(item, true);
-
-            //// (opcional) habilita/deshabilita eliminar según haya selección
-            //btnEliminar.Enabled = (LineaPedidoItem.SeleccionActual != null);
-
-            //// ... tu código existente ...
-            //LineaPedidoItem.Seleccionar(item, true);
-            //btnEliminar.Enabled = (LineaPedidoItem.SeleccionActual != null);
-
-            //ActualizarSubtotal();   // ⬅️ aquí
 
             if (prod == null || cantidad <= 0) return;
 
@@ -724,23 +773,73 @@ namespace CapaPresentacion
             //// Habilita/deshabilita el botón según quede selección
             //btnEliminar.Enabled = (flpLineas.GetSeleccion() != null);
 
+            ////var sel = LineaSelection.Actual;
+            ////if (sel == null) return;
+
+            ////var ctrl = sel.View;            // raíz del control seleccionado
+
+            ////var parent = ctrl.Parent;
+            ////if (parent != null)
+            ////{
+            ////    parent.Controls.Remove(ctrl);
+            ////    ctrl.Dispose();
+            ////}
+
+            ////LineaSelection.Clear();
+            ////btnEliminar.Enabled = false;
+            ////btnComentarioLbr.Enabled = false;
+
+            ////ActualizarSubtotal();
+
             var sel = LineaSelection.Actual;
             if (sel == null) return;
 
-            var ctrl = sel.View;            // raíz del control seleccionado
+            var view = sel.View;                   // Control raíz del ítem seleccionado
+            var parent = view?.Parent as Control;
+            if (parent == null) return;
 
-            var parent = ctrl.Parent;
-            if (parent != null)
+            // índice del control que se va
+            int index = parent.Controls.IndexOf(view);
+
+            parent.Controls.Remove(view);
+            view.Dispose();
+
+            // limpiar selección global
+            LineaSelection.Clear();
+
+            // intentar seleccionar un vecino (mismo índice o anterior)
+            var vecino = BuscarSeleccionableVecino(parent, index);
+            if (vecino != null)
             {
-                parent.Controls.Remove(ctrl);
-                ctrl.Dispose();
+                LineaSelection.Select(vecino, true);   // esto dispara LineaSelection.Changed y habilita botones
+            }
+            else
+            {
+                // no quedó nada seleccionable
+                btnEliminar.Enabled = false;
+                btnComentarioLbr.Enabled = false;
             }
 
-            LineaSelection.Clear();
-            btnEliminar.Enabled = false;
-            btnComentarioLbr.Enabled = false;
-
             ActualizarSubtotal();
+        }
+
+        private ILineaSeleccionable BuscarSeleccionableVecino(Control parent, int removedIndex)
+        {
+            if (parent == null || parent.Controls.Count == 0) return null;
+
+            // 1) mismo índice (si quedó algo ahí)
+            int start = Math.Min(removedIndex, parent.Controls.Count - 1);
+            if (start >= 0 && parent.Controls[start] is ILineaSeleccionable s1) return s1;
+
+            // 2) hacia atrás
+            for (int i = start - 1; i >= 0; i--)
+                if (parent.Controls[i] is ILineaSeleccionable s2) return s2;
+
+            // 3) hacia adelante (por si acaso)
+            for (int i = start + 1; i < parent.Controls.Count; i++)
+                if (parent.Controls[i] is ILineaSeleccionable s3) return s3;
+
+            return null;
         }
 
         private void frmMenuPrincipal_Shown(object sender, EventArgs e)
@@ -771,107 +870,7 @@ namespace CapaPresentacion
             public decimal PrecioExtra { get; set; } // 0 si no aplica
         }
 
-        // Orquesta NBebidas -> (opcional) CBebidasCalientes según N o N-1.
-        // El callback "appendNotas" te deja anexar las notas a la línea que acabas de crear.
-        //private void EjecutarFlujoBebidasParaDesayuno(
-        //    int cantidadDesayunos,
-        //    string descripcionDesayuno,
-        //    string listaPrecio,
-        //    Action<string> appendNotas)
-        //{
-        //    int calientesPendientes = cantidadDesayunos; // N
 
-        //    // 1) Primero NBebidas (si tocan "GRANDE", consume 1 caliente)
-        //    using (var nb = new frmNBebidas
-        //    {
-        //        ProductoBaseTexto = $"{cantidadDesayunos} x {descripcionDesayuno}",
-        //        TextoInicial = ""
-        //    })
-        //    {
-        //        if (nb.ShowDialog(this) == DialogResult.OK)
-        //        {
-        //            calientesPendientes -= Math.Min(1, nb.CuposCalienteConsumidos);
-        //            var notasFria = (nb.Notas ?? "").Trim();
-        //            if (notasFria.Length > 0) appendNotas?.Invoke(notasFria);
-        //        }
-        //    }
-
-        //    // 2) Si aún faltan calientes, abre el de calientes por "calientesPendientes"
-        //    if (calientesPendientes > 0)
-        //    {
-        //        using (var bc = new frmCBebidasCalientes
-        //        {
-        //            ListaPrecio = listaPrecio,
-        //            Titulo = "Bebidas Calientes",
-        //            ProductoBaseTexto = $"{cantidadDesayunos} x {descripcionDesayuno}",
-        //            CantidadRequerida = calientesPendientes,
-        //            ReglaAdicionalLecheActiva = true
-        //        })
-        //        {
-        //            if (bc.ShowDialog(this) == DialogResult.OK)
-        //            {
-        //                var notasCaliente = BuildNotasDesdeSelecciones(bc.Selecciones);
-        //                if (notasCaliente.Length > 0) appendNotas?.Invoke(notasCaliente);
-        //            }
-        //        }
-        //    }
-        //}
-
-        // Formatea selecciones como:
-        // - 2 x DESCAFEINADO = S/ 2.00
-        // - AMERICANO
-        //private string BuildNotasDesdeSelecciones(
-        //    System.Collections.Generic.List<frmCBebidasCalientes.SeleccionSimple> sels)
-        //{
-        //    if (sels == null || sels.Count == 0) return string.Empty;
-
-        //    var grupos = sels
-        //        .GroupBy(s => new { s.Codigo, Descripcion = (s.Descripcion ?? "").Trim().ToUpperInvariant(), s.PrecioExtra })
-        //        .Select(g => new
-        //        {
-        //            Cant = g.Count(),
-        //            g.Key.Descripcion,
-        //            g.Key.PrecioExtra,
-        //            Total = g.Count() * g.Key.PrecioExtra
-        //        })
-        //        .ToList();
-
-        //    var sb = new System.Text.StringBuilder();
-        //    foreach (var x in grupos)
-        //    {
-        //        if (sb.Length > 0) sb.AppendLine();
-        //        if (x.Cant <= 1)
-        //        {
-        //            if (x.PrecioExtra > 0m)
-        //                sb.Append("- ").Append(x.Descripcion).Append(" = S/ ").Append(x.Total.ToString("0.00"));
-        //            else
-        //                sb.Append("- ").Append(x.Descripcion);
-        //        }
-        //        else
-        //        {
-        //            if (x.PrecioExtra > 0m)
-        //                sb.Append("- ").Append(x.Cant).Append(" x ").Append(x.Descripcion).Append(" = S/ ").Append(x.Total.ToString("0.00"));
-        //            else
-        //                sb.Append("- ").Append(x.Cant).Append(" x ").Append(x.Descripcion);
-        //        }
-        //    }
-        //    return sb.ToString();
-        //}
-        //private void AgregarProducto(string cod, string desc, int cantidad, decimal precioUnit)
-        //{
-        //    var item = flpLineas.AddLinea(cod, desc, cantidad, precioUnit, notas: "");
-
-        //    bool esDesayuno = desc.IndexOf("DESAYUNO", StringComparison.OrdinalIgnoreCase) >= 0;
-        //    if (esDesayuno)
-        //    {
-        //        EjecutarFlujoBebidasParaDesayuno(cantidad, desc, "001", notas =>
-        //        {
-        //            item.AppendNotas(notas);
-        //        });
-        //    }
-
-        //    // RecalcularSubtotal();
-        //}
 
 
         private void EjecutarWizardDesayunoPorUnidad(ceProductos prod, int cantidad)
@@ -1102,22 +1101,7 @@ namespace CapaPresentacion
             ActualizarSubtotal();
         }
 
-        //const string COD_CHICHA_ALMUERZO = "0000000868";
-        //private void EjecutarPastaAlmuerzo(string codigoProducto)
-        //{
-        //    var prod = _svcProductos.Obtener(codigoProducto, "001");
-        //    if (prod == null)
-        //    {
-        //        MessageBox.Show("Producto no encontrado.", "Pastas",
-        //                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        //        return;
-        //    }
 
-        //    int cantidad = LeerCantidad(); // lee de tu textbox de cantidad
-        //    if (cantidad <= 0) cantidad = 1;
-
-        //    AgregarMenuPasta(prod, cantidad);
-        //}
 
         // =============================================================
         // =================== Flujo MenuPedidoItem ====================
@@ -1125,50 +1109,7 @@ namespace CapaPresentacion
 
         private void AgregarMenuPasta(ceProductos menuProd, int cantidad)
         {
-            ////// 1) Resolver “chicha almuerzo”
-            ////var chicha = _svcProductos.Obtener(CHICHA_ALMUERZO_CODE, "001")
-            ////             ?? new ceProductos { Codigo = CHICHA_ALMUERZO_CODE, Descripcion = "CHICHA ALMUERZO", PrecioUnitario = 0m };
 
-            ////// 2) Pedir notas de bebida en frmNBebidas
-            ////string notas = string.Empty;
-            ////using (var frm = new frmNBebidas())
-            ////{
-            ////    frm.ProductoBaseTexto = $"{cantidad} x {chicha.Descripcion}";
-            ////    frm.TextoInicial = string.Empty;
-
-            ////    if (frm.ShowDialog(this) != DialogResult.OK)
-            ////        return; // cancelado
-
-            ////    notas = frm.Notas ?? string.Empty;
-            ////}
-
-            ////// 3) Crear y poblar el MenuPedidoItem
-            ////var item = new MenuPedidoItem();
-
-            ////var txtMenu = item.Controls.Find("txtMenu", true).FirstOrDefault();
-            ////var txtChich = item.Controls.Find("txtChich", true).FirstOrDefault();
-
-            ////// Encabezado del menú
-            ////TrySetText(txtMenu, $"{cantidad} x {menuProd.Descripcion?.ToUpperInvariant()}");
-
-            ////// Línea de chicha + notas
-            ////var sb = new StringBuilder()
-            ////    .Append($"{cantidad} x {chicha.Descripcion?.ToUpperInvariant()}");
-            ////string normNotas = NormalizarNotas(notas);
-            ////if (!string.IsNullOrEmpty(normNotas))
-            ////    sb.AppendLine().Append(normNotas);
-            ////TrySetText(txtChich, sb.ToString());
-
-            ////// 4) Insertar en el FlowLayoutPanel
-            ////AjustarAnchoItem(item);
-            ////flpLineas.SuspendLayout();
-            ////flpLineas.Controls.Add(item);
-            ////flpLineas.ResumeLayout(true);
-
-            ////// 5) Seleccionar, scroll y total
-            ////LineaSelection.Select(item, true);
-            ////btnEliminar.Enabled = btnComentarioLbr.Enabled = (LineaSelection.Actual != null);
-            ////ActualizarSubtotal();
 
             // 1) Resolver chicha
             var chicha = _svcProductos.Obtener(CHICHA_ALMUERZO_CODE, "001")
@@ -1204,44 +1145,32 @@ namespace CapaPresentacion
             btnEliminar.Enabled = btnComentarioLbr.Enabled = (LineaSelection.Actual != null);
             ActualizarSubtotal();
         }
-        //private int LeerCantidad()
+
+        //private static void TrySetText(Control c, string text)
         //{
-        //    // Cambia "txtCantidad" por tu control real
-        //    var text = txtCantidad?.Text?.Trim();
-        //    if (int.TryParse(text, out int n) && n > 0) return n;
-        //    return 1;
+        //    if (c == null) return;
+        //    try
+        //    {
+        //        var p = c.GetType().GetProperty("Text");
+        //        p?.SetValue(c, text ?? string.Empty, null);
+        //    }
+        //    catch { /* ignore */ }
         //}
-        private static void TrySetText(Control c, string text)
-        {
-            if (c == null) return;
-            try
-            {
-                var p = c.GetType().GetProperty("Text");
-                p?.SetValue(c, text ?? string.Empty, null);
-            }
-            catch { /* ignore */ }
-        }
-        private static string NormalizarNotas(string raw)
-        {
-            if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
-
-            var lines = (raw ?? string.Empty)
-                        .Replace("\r\n", "\n")
-                        .Replace("\r", "\n")
-                        .Split('\n')
-                        .Select(l => (l ?? string.Empty).Trim())
-                        .Where(l => l.Length > 0)
-                        .Select(l => l.StartsWith("-") ? l : "- " + l);
-
-            return string.Join(Environment.NewLine, lines);
-        }
-        //private void AjustarAnchosMenuItems()
+        //private static string NormalizarNotas(string raw)
         //{
-        //    if (flpLineas == null) return;
+        //    if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
 
-        //    foreach (Control c in flpLineas.Controls)
-        //        AjustarAnchoItem(c);
+        //    var lines = (raw ?? string.Empty)
+        //                .Replace("\r\n", "\n")
+        //                .Replace("\r", "\n")
+        //                .Split('\n')
+        //                .Select(l => (l ?? string.Empty).Trim())
+        //                .Where(l => l.Length > 0)
+        //                .Select(l => l.StartsWith("-") ? l : "- " + l);
+
+        //    return string.Join(Environment.NewLine, lines);
         //}
+
         private void AjustarAnchoItem(Control item)
         {
             if (item == null || flpLineas == null) return;
@@ -1254,55 +1183,5 @@ namespace CapaPresentacion
             if (usable < 80) usable = 80;
             item.Width = usable;
         }
-        //private void EjecutarPastaAlmuerzo(ceProductos prodPasta, int cantidad)
-        //{
-        //    if (prodPasta == null || cantidad <= 0) return;
-
-        //    // 1) Traer la “Chicha almuerzo”
-        //    var prodChicha = BuscarProductoPorCodigo(COD_CHICHA_ALMUERZO);
-        //    string descChicha = prodChicha?.Descripcion?.Trim() ?? "CHICHA ALMUERZO";
-
-        //    // 2) Notas de bebida (para la chicha)
-        //    string notasBebida = string.Empty;
-        //    using (var frmN = new CapaPresentacion.Notas.frmNBebidas())
-        //    {
-        //        frmN.ProductoBaseTexto = $"1 x {descChicha}";
-        //        frmN.TextoInicial = ""; // opcional
-        //        if (frmN.ShowDialog(this) == DialogResult.OK)
-        //            notasBebida = frmN.Notas ?? string.Empty;
-        //        else
-        //            return; // cancelado
-        //    }
-
-        //    // 3) Crear el control y pintarlo
-        //    var item = new CapaPresentacion.Controles.MenuPedidoItem();
-        //    decimal puBase = PrecioDe(prodPasta); // tu helper existente
-
-        //    item.SetMenu(prodPasta.Codigo, prodPasta.Descripcion, cantidad, puBase);
-        //    item.SetChicha(descChicha, notasBebida);
-
-        //    flpLineas.SuspendLayout();
-        //    flpLineas.Controls.Add(item);
-        //    flpLineas.ResumeLayout();
-
-        //    // seleccionar y habilitar botones
-        //    LineaSelection.Select(item, true);
-        //    btnEliminar.Enabled = (LineaSelection.Actual != null);
-        //    btnComentarioLbr.Enabled = (LineaSelection.Actual != null);
-
-        //    ActualizarSubtotal();
-        //}
-        //private ceProductos BuscarProductoPorCodigo(string codigo)
-        //{
-        //    // Ejemplos según tu arquitectura:
-        //    // return _cacheProductos.FirstOrDefault(p => p.Codigo == codigo);
-        //    // o
-        //    // return _svcProductos.BuscarPorCodigo(codigo, "001");
-        //    return _svcProductos?.BuscarCod(codigo); // ajusta al método real que ya tienes
-        //}
-        // Código fijo de la “chicha almuerzo”
-        //private const string COD_CHICHA_ALMUERZO = "0000000868";
-
-        //private ceProductos TraerChicha() => _svcProductos.Obtener(COD_CHICHA_ALMUERZO, "001");   // usa tu lista “001”
     }
 }

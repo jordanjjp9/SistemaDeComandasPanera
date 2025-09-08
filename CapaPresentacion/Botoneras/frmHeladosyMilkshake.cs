@@ -136,19 +136,6 @@ namespace CapaPresentacion.Botoneras
 
         private void BtnProducto_Click(object sender, EventArgs e)
         {
-            /*
-            var btn = sender as Button;
-            var cod = btn?.Tag as string;
-
-            if (string.IsNullOrWhiteSpace(cod))
-            {
-                // fallback por si no hubiera Tag
-                var m = Regex.Match(btn?.Name ?? "", @"\d+");
-                if (m.Success) cod = m.Value;
-            }
-
-            if (!string.IsNullOrWhiteSpace(cod))
-                ProductoSeleccionado?.Invoke(cod); // ← avisa al padre*/
 
             var btn = sender as Control;
             if (btn == null) return;

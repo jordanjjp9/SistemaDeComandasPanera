@@ -19,6 +19,7 @@ namespace CapaPresentacion.Controles
         public int Cantidad { get; private set; } = 1;
         public decimal PrecioUnitario { get; private set; } = 0m;   // PU final
         public decimal Total { get { return Cantidad * PrecioUnitario; } }
+        public string NotasEncabezado { get; private set; } = string.Empty;
 
         // Preferencias de agrupación
         public bool AgruparJugosIguales { get; set; } = true;
@@ -62,6 +63,10 @@ namespace CapaPresentacion.Controles
         // Notas del ENCABEZADO del combo (debajo de "N x DESCRIPCION = S/ …")
         private readonly List<string> _notasEncabezado = new List<string>();
 
+        // Marca si el usuario tocó el encabezado (txtCombo)
+        private bool _encabezadoActivo = false;
+        public bool EncabezadoActivo => _encabezadoActivo;
+
         // ===== ILineaSeleccionable =====
         public Control View { get { return this; } }
         public void SetVisualSelected(bool selected)
@@ -84,6 +89,15 @@ namespace CapaPresentacion.Controles
 
             // Encabezado
             ConfigurarTextBoxSoloLectura(txtCombo);
+
+            // 🔹 NUEVO: click en todo el Guna2TextBox (no solo el inner) marca encabezado activo
+            if (txtCombo != null)
+            {
+                txtCombo.Click -= Header_Click;
+                txtCombo.MouseDown -= Header_Click;
+                txtCombo.Click += Header_Click;
+                txtCombo.MouseDown += Header_Click;
+            }
 
             // Preparar contenedores
             PrepFlow(flpJugos);
@@ -117,6 +131,8 @@ namespace CapaPresentacion.Controles
 
             // Selección global
             WireSelectClick(this);
+
+            // Inner TextBox de txtCombo también marca encabezado activo
             WireInnerTextBoxClicks(txtCombo);
         }
 
@@ -187,6 +203,12 @@ namespace CapaPresentacion.Controles
                 foreach (var n in ToNotas(notas))
                     _notasEncabezado.Add(n);
             RepintarEncabezado();
+        }
+
+        /// <summary>Devuelve las notas del encabezado, una por línea y con prefijo "- ".</summary>
+        public string GetNotasEncabezadoRaw()
+        {
+            return FormatearNotas(_notasEncabezado);
         }
 
         // ======= TAMALES =======
@@ -432,9 +454,19 @@ namespace CapaPresentacion.Controles
             inner.ShortcutsEnabled = false;
             inner.Cursor = Cursors.Hand;
 
+            // selección global
             inner.Click -= Any_Click_Select; inner.Click += Any_Click_Select;
             inner.MouseDown -= Any_Click_Select; inner.MouseDown += Any_Click_Select;
+
+            // marcar encabezado activo cuando tocan el inner
+            inner.Click -= Inner_HeaderMark_Click; inner.Click += Inner_HeaderMark_Click;
+            inner.MouseDown -= Inner_HeaderMark_Click; inner.MouseDown += Inner_HeaderMark_Click;
         }
+
+        private void Inner_HeaderMark_Click(object sender, EventArgs e) => MarcarEncabezadoActivo();
+
+        // click sobre el Guna2TextBox completo del encabezado
+        private void Header_Click(object sender, EventArgs e) => MarcarEncabezadoActivo();
 
         private void Any_Click_Select(object sender, EventArgs e)
         {
@@ -604,6 +636,7 @@ namespace CapaPresentacion.Controles
             // Click: marca bloque y selecciona el item
             tb.Click += (s, e) =>
             {
+                _encabezadoActivo = false;
                 _bloqueSeleccionado = (BloqueTexto)((Control)s).Tag;
                 LineaSelection.Select(this, true);
             };
@@ -611,6 +644,7 @@ namespace CapaPresentacion.Controles
             // Doble clic: editor de notas por bloque
             tb.DoubleClick += (s, e) =>
             {
+                _encabezadoActivo = false;
                 _bloqueSeleccionado = (BloqueTexto)((Control)s).Tag;
                 EditarNotasSeleccionadas(this.FindForm());
             };
@@ -690,12 +724,14 @@ namespace CapaPresentacion.Controles
 
             tb.Click += (s, e) =>
             {
+                _encabezadoActivo = false;                    // apagar encabezado
                 _bloqueSeleccionado = (BloqueTexto)((Control)s).Tag;
                 LineaSelection.Select(this, true);
             };
 
             tb.DoubleClick += (s, e) =>
             {
+                _encabezadoActivo = false;                    // apagar encabezado
                 _bloqueSeleccionado = (BloqueTexto)((Control)s).Tag;
                 EditarNotasSeleccionadas(this.FindForm());
             };
@@ -751,6 +787,27 @@ namespace CapaPresentacion.Controles
 
             _bloqueSeleccionado = b;
             return EditarNotasSeleccionadas(owner);
+        }
+
+        public bool TieneSubItemEditable()
+        {
+            var candidato =
+                _bloqueSeleccionado
+                ?? _ultimoTamal
+                ?? _ultimoJugo
+                ?? _ultimaBebida
+                ?? (_tamales.Count > 0 ? _tamales[_tamales.Count - 1] : null)
+                ?? (_jugos.Count > 0 ? _jugos[_jugos.Count - 1] : null)
+                ?? (_bebidas.Count > 0 ? _bebidas[_bebidas.Count - 1] : null);
+
+            return candidato != null;
+        }
+
+        private void MarcarEncabezadoActivo()
+        {
+            _encabezadoActivo = true;
+            _bloqueSeleccionado = null;        // no hay bloque seleccionado
+            LineaSelection.Select(this, true); // mantiene la selección global en este item
         }
     }
 }

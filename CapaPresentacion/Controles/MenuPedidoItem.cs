@@ -29,6 +29,8 @@ namespace CapaPresentacion.Controles
         // ==== selección global ====
         public Control View => this;
         public void SetVisualSelected(bool sel) => BorderStyle = sel ? BorderStyle.FixedSingle : BorderStyle.None;
+        // dentro de MenuPedidoItem
+        private void Any_Click_Select(object s, EventArgs e) => LineaSelection.Select(this, true);
 
         public MenuPedidoItem()
         {

@@ -35,6 +35,8 @@
             this.btnProd0000001518 = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000001517 = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000000968 = new Guna.UI2.WinForms.Guna2Button();
+            this.btnProd0000000391 = new Guna.UI2.WinForms.Guna2Button();
+            this.btnProd0000000390 = new Guna.UI2.WinForms.Guna2Button();
             this.flpFiambres.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -48,6 +50,8 @@
             this.flpFiambres.Controls.Add(this.btnProd0000001518);
             this.flpFiambres.Controls.Add(this.btnProd0000001517);
             this.flpFiambres.Controls.Add(this.btnProd0000000968);
+            this.flpFiambres.Controls.Add(this.btnProd0000000391);
+            this.flpFiambres.Controls.Add(this.btnProd0000000390);
             this.flpFiambres.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flpFiambres.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flpFiambres.Location = new System.Drawing.Point(0, 0);
@@ -160,6 +164,40 @@
             this.btnProd0000000968.Text = "QUESO EDAM";
             this.btnProd0000000968.TextOffset = new System.Drawing.Point(0, 70);
             // 
+            // btnProd0000000391
+            // 
+            this.btnProd0000000391.BorderRadius = 22;
+            this.btnProd0000000391.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000000391.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000000391.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnProd0000000391.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnProd0000000391.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000000391.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProd0000000391.ForeColor = System.Drawing.Color.White;
+            this.btnProd0000000391.Location = new System.Drawing.Point(419, 3);
+            this.btnProd0000000391.Name = "btnProd0000000391";
+            this.btnProd0000000391.Size = new System.Drawing.Size(202, 205);
+            this.btnProd0000000391.TabIndex = 138;
+            this.btnProd0000000391.Text = "CHICHARRON X 1 KG";
+            this.btnProd0000000391.TextOffset = new System.Drawing.Point(0, 70);
+            // 
+            // btnProd0000000390
+            // 
+            this.btnProd0000000390.BorderRadius = 22;
+            this.btnProd0000000390.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000000390.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000000390.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnProd0000000390.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnProd0000000390.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000000390.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProd0000000390.ForeColor = System.Drawing.Color.White;
+            this.btnProd0000000390.Location = new System.Drawing.Point(419, 214);
+            this.btnProd0000000390.Name = "btnProd0000000390";
+            this.btnProd0000000390.Size = new System.Drawing.Size(202, 205);
+            this.btnProd0000000390.TabIndex = 139;
+            this.btnProd0000000390.Text = "CHICHARRON X 1/2 KG";
+            this.btnProd0000000390.TextOffset = new System.Drawing.Point(0, 70);
+            // 
             // frmFiambres
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -184,5 +222,7 @@
         private Guna.UI2.WinForms.Guna2Button btnProd0000001518;
         private Guna.UI2.WinForms.Guna2Button btnProd0000001517;
         private Guna.UI2.WinForms.Guna2Button btnProd0000000968;
+        private Guna.UI2.WinForms.Guna2Button btnProd0000000391;
+        private Guna.UI2.WinForms.Guna2Button btnProd0000000390;
     }
 }

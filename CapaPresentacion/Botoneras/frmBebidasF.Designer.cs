@@ -68,6 +68,9 @@
             this.flpBebidasF.Name = "flpBebidasF";
             this.flpBebidasF.Size = new System.Drawing.Size(1249, 650);
             this.flpBebidasF.TabIndex = 0;
+            this.flpBebidasF.MouseDown += new System.Windows.Forms.MouseEventHandler(this.flpBebidasF_MouseDown);
+            this.flpBebidasF.MouseMove += new System.Windows.Forms.MouseEventHandler(this.flpBebidasF_MouseMove);
+            this.flpBebidasF.MouseUp += new System.Windows.Forms.MouseEventHandler(this.flpBebidasF_MouseUp);
             // 
             // btnProd0000000981
             // 

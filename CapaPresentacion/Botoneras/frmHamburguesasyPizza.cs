@@ -85,43 +85,83 @@ namespace CapaPresentacion.Botoneras
 
             // (Si ya tienes botones en el diseñador)
             foreach (Control c in flpHambuguesasYPizzas.Controls)
-            {
-                if (c is Button b)
-                {
-                    b.MouseDown += flpHambuguesasYPizzas_MouseDown;
-                    b.MouseMove += flpHambuguesasYPizzas_MouseMove;
-                    b.MouseUp += flpHambuguesasYPizzas_MouseUp;
-                }
-            }
+                WireChild(c);
 
             flpHambuguesasYPizzas.AutoScrollPosition = new Point(1, 1);
+            WireProductButtons(this);
+        }
+        private void WireProductButtons(Control root)
+        {
+            foreach (Control c in root.Controls)
+            {
+                if (c is Button || c.GetType().Name.Contains("Guna2Button"))
+                {
+                    if (c.Name.StartsWith("btnProd", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var cod = c.Tag as string;
+                        if (string.IsNullOrWhiteSpace(cod))
+                        {
+                            var m = Regex.Match(c.Name, @"\d+"); // btnProd0000000225 -> 0000000225
+                            if (m.Success) cod = m.Value;
+                        }
+                        c.Tag = cod;
+                        c.Click -= BtnProducto_Click;
+                        c.Click += BtnProducto_Click;
+                    }
+                }
+                // recursivo para hijos
+                WireProductButtons(c);
+            }
         }
 
-        private IEnumerable<Button> EnumerarBotones(Control raiz)
+        private static System.Collections.Generic.IEnumerable<Control> EnumerarBotones(Control raiz)
         {
             foreach (Control c in raiz.Controls)
             {
-                if (c is Button b) yield return b;
-                if (c.HasChildren)
-                    foreach (var b2 in EnumerarBotones(c)) yield return b2;
+                // filtra por nombre de prefijo si quieres: if (c.Name.StartsWith("btnProd")) …
+                if (c is Button || c.GetType().Name.Contains("Guna2Button"))
+                    yield return c;
+
+                foreach (var child in EnumerarBotones(c))
+                    yield return child;
             }
         }
 
         private void BtnProducto_Click(object sender, EventArgs e)
         {
-            var btn = sender as Button;
+            var btn = sender as Control;
             var cod = btn?.Tag as string;
 
             if (string.IsNullOrWhiteSpace(cod))
             {
-                // fallback por si no hubiera Tag
                 var m = Regex.Match(btn?.Name ?? "", @"\d+");
                 if (m.Success) cod = m.Value;
             }
 
             if (!string.IsNullOrWhiteSpace(cod))
-                ProductoSeleccionado?.Invoke(cod); // ← avisa al padre
+                ProductoSeleccionado?.Invoke(cod);
         }
+        private void WireChild(Control c)
+        {
+            // Drag en los hijos
+            c.MouseDown -= flpHambuguesasYPizzas_MouseDown;
+            c.MouseMove -= flpHambuguesasYPizzas_MouseMove;
+            c.MouseUp -= flpHambuguesasYPizzas_MouseUp;
+            c.MouseDown += flpHambuguesasYPizzas_MouseDown;
+            c.MouseMove += flpHambuguesasYPizzas_MouseMove;
+            c.MouseUp += flpHambuguesasYPizzas_MouseUp;
+
+
+            // Evitar que el foco en el botón provoque auto-scroll del contenedor
+            c.Enter -= Child_EnterRedirectFocus;
+            c.MouseDown -= Child_MouseDownRedirectFocus;
+            c.Enter += Child_EnterRedirectFocus;
+            c.MouseDown += Child_MouseDownRedirectFocus;
+
+            c.TabStop = false; // opcional
+        }
+        private void Child_EnterRedirectFocus(object sender, EventArgs e) => flpHambuguesasYPizzas.Focus();
+        private void Child_MouseDownRedirectFocus(object sender, MouseEventArgs e) => flpHambuguesasYPizzas.Focus();
 
         private void flpHambuguesasYPizzas_MouseDown(object sender, MouseEventArgs e)
         {

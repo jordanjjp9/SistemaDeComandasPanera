@@ -92,32 +92,58 @@ namespace CapaPresentacion.Botoneras
             flpTEnteras.ControlAdded += (_, ev) => WireChild(ev.Control);
 
             flpTEnteras.AutoScrollPosition = new Point(1, 1);
+            WireProductButtons(this);
+        }
+        private void WireProductButtons(Control root)
+        {
+            foreach (Control c in root.Controls)
+            {
+                if (c is Button || c.GetType().Name.Contains("Guna2Button"))
+                {
+                    if (c.Name.StartsWith("btnProd", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var cod = c.Tag as string;
+                        if (string.IsNullOrWhiteSpace(cod))
+                        {
+                            var m = Regex.Match(c.Name, @"\d+"); // btnProd0000000225 -> 0000000225
+                            if (m.Success) cod = m.Value;
+                        }
+                        c.Tag = cod;
+                        c.Click -= BtnProducto_Click;
+                        c.Click += BtnProducto_Click;
+                    }
+                }
+                // recursivo para hijos
+                WireProductButtons(c);
+            }
         }
 
-        private IEnumerable<Button> EnumerarBotones(Control raiz)
+        private static System.Collections.Generic.IEnumerable<Control> EnumerarBotones(Control raiz)
         {
             foreach (Control c in raiz.Controls)
             {
-                if (c is Button b) yield return b;
-                if (c.HasChildren)
-                    foreach (var b2 in EnumerarBotones(c)) yield return b2;
+                // filtra por nombre de prefijo si quieres: if (c.Name.StartsWith("btnProd")) …
+                if (c is Button || c.GetType().Name.Contains("Guna2Button"))
+                    yield return c;
+
+                foreach (var child in EnumerarBotones(c))
+                    yield return child;
             }
         }
 
         private void BtnProducto_Click(object sender, EventArgs e)
         {
-            var btn = sender as Button;
+            var btn = sender as Control;
             var cod = btn?.Tag as string;
 
             if (string.IsNullOrWhiteSpace(cod))
             {
-                // fallback por si no hubiera Tag
                 var m = Regex.Match(btn?.Name ?? "", @"\d+");
                 if (m.Success) cod = m.Value;
             }
 
             if (!string.IsNullOrWhiteSpace(cod))
-                ProductoSeleccionado?.Invoke(cod); // ← avisa al padre
+                ProductoSeleccionado?.Invoke(cod);
         }
 
         private void WireChild(Control c)
