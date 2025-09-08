@@ -576,10 +576,7 @@
     <None Include="Resources\LOGOLAPANERA31072025.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\logo pan.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\logo pan1.png" />
+    <None Include="Resources\logo pan %283%29.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

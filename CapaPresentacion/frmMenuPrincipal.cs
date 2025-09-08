@@ -1183,5 +1183,10 @@ namespace CapaPresentacion
             if (usable < 80) usable = 80;
             item.Width = usable;
         }
+
+        private void btnActualizar_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
