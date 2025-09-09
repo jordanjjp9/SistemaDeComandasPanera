@@ -18,8 +18,11 @@ namespace CapaPresentacion.Notas
             public string Codigo { get; set; }
             public string Descripcion { get; set; }
             public decimal PrecioExtra { get; set; }
+            // === NUEVO: notas rápidas asociadas a este producto ===
+            public string Notas { get; set; } = string.Empty;
         }
-
+        // Índice del último producto (btnProd...) seleccionado; -1 => ninguno aún
+        private int _indexUltimoProducto = -1;
         // ==================== Servicios / config ====================
         private readonly cnProducto _svcProductos = new cnProducto();
         public string ListaPrecio { get; set; } = "001";
@@ -74,6 +77,37 @@ namespace CapaPresentacion.Notas
 
             // Cablea todos los botones de producto (evita Continuar/Eliminar/etc.)
             WireOptionButtons(this);
+            WireNoteButtons();   // <<< NUEVO
+
+        }
+        //PARA ADICIONAR BUTTON COMO NOTAS BUTTON AZULES
+        private void WireNoteButtons()
+        {
+            WireNoteButton("btnAviso");
+          //  WireNoteButton("btnAviClint");
+            WireNoteButton("btnEsscP");
+            WireNoteButton("btnSLactos");
+        }
+        private void WireNoteButton(string name)
+        {
+            var c = FindByName(name);
+            if (c == null) return;
+            c.Click -= NotaEspecial_Click;
+            c.Click += NotaEspecial_Click;
+        }
+        private void NotaEspecial_Click(object sender, EventArgs e)
+        {
+            if (_indexUltimoProducto < 0 || _indexUltimoProducto >= Selecciones.Count) { System.Media.SystemSounds.Beep.Play(); return; }
+            var nota = ((sender as Control)?.Text ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(nota)) return;
+
+            var s = Selecciones[_indexUltimoProducto];
+            var actuales = (s.Notas ?? "").Split(new[] { " | " }, StringSplitOptions.RemoveEmptyEntries)
+                                           .Select(t => t.Trim()).ToList();
+            if (!actuales.Any(t => t.Equals(nota, StringComparison.OrdinalIgnoreCase)))
+                actuales.Add(nota);
+            s.Notas = string.Join(" | ", actuales);
+            RebuildNotas();
         }
 
         // ==================== Load ====================
@@ -129,46 +163,65 @@ namespace CapaPresentacion.Notas
             else if (esExtraLeche) _lecheCount++;
 
             // 5) Visual
-            AppendLineaNota(opt);
+            //AppendLineaNota(opt);
+            //ActualizarEstado();
+            //UpdateBaseButtonsEnabled();
+            //UpdateExtrasEnabled();
+
+            _indexUltimoProducto = Selecciones.Count - 1; // recordar el último producto
+            RebuildNotas();
             ActualizarEstado();
             UpdateBaseButtonsEnabled();
             UpdateExtrasEnabled();
         }
 
         // ==================== Notas (panel derecho) ====================
-        private void AppendLineaNota(SeleccionSimple opt)
-        {
-            if (txtNotasBCalient == null) return;
+        //private void RebuildNotas()
+        //{
+        //    if (txtNotasBCalient == null) return;
 
-            var sb = new StringBuilder();
-            sb.Append("- ").Append(opt.Descripcion);
-            if (opt.PrecioExtra > 0m)
-                sb.Append(" = S/ ").Append(opt.PrecioExtra.ToString("0.00", CultureInfo.InvariantCulture));
+        //    var sb = new StringBuilder();
+        //    for (int i = 0; i < Selecciones.Count; i++)
+        //    {
+        //        if (i > 0) sb.AppendLine();
+        //        var s = Selecciones[i];
+        //        sb.Append("- ").Append(s.Descripcion);
+        //        if (s.PrecioExtra > 0m)
+        //            sb.Append(" = S/ ").Append(s.PrecioExtra.ToString("0.00", CultureInfo.InvariantCulture));
+        //    }
 
-            if (txtNotasBCalient.TextLength > 0) txtNotasBCalient.AppendText(Environment.NewLine);
-            txtNotasBCalient.AppendText(sb.ToString());
-            txtNotasBCalient.SelectionStart = txtNotasBCalient.TextLength;
-            txtNotasBCalient.ScrollToCaret();
-        }
-
+        //    txtNotasBCalient.Text = sb.ToString();
+        //    txtNotasBCalient.SelectionStart = txtNotasBCalient.TextLength;
+        //    txtNotasBCalient.ScrollToCaret();
+        //}
         private void RebuildNotas()
         {
             if (txtNotasBCalient == null) return;
-
             var sb = new StringBuilder();
+
             for (int i = 0; i < Selecciones.Count; i++)
             {
-                if (i > 0) sb.AppendLine();
                 var s = Selecciones[i];
-                sb.Append("- ").Append(s.Descripcion);
+                if (i > 0) sb.AppendLine();
+                sb.Append("- 1 x ").Append(s.Descripcion);
                 if (s.PrecioExtra > 0m)
                     sb.Append(" = S/ ").Append(s.PrecioExtra.ToString("0.00", CultureInfo.InvariantCulture));
+
+                if (!string.IsNullOrWhiteSpace(s.Notas))
+                {
+                    foreach (var nota in s.Notas.Split(new[] { " | " }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        sb.AppendLine();
+                        sb.Append("  - ").Append(nota.Trim());
+                    }
+                }
             }
 
             txtNotasBCalient.Text = sb.ToString();
             txtNotasBCalient.SelectionStart = txtNotasBCalient.TextLength;
             txtNotasBCalient.ScrollToCaret();
         }
+
 
         // ==================== Parseo botón -> SeleccionSimple ====================
         private SeleccionSimple ParseOpcionFromControl(Control c)

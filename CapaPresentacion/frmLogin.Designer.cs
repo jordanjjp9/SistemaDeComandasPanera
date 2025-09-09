@@ -99,7 +99,7 @@
             // pnlLogo
             // 
             this.pnlLogo.BackColor = System.Drawing.Color.White;
-            this.pnlLogo.BackgroundImage = global::CapaPresentacion.Properties.Resources.logo_pan;
+            //this.pnlLogo.BackgroundImage = global::CapaPresentacion.Properties.Resources.logo_pan;
             this.pnlLogo.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.pnlLogo.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.pnlLogo.BorderRadius = 12;

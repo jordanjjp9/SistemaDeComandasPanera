@@ -17,5 +17,6 @@ namespace CapaEntidad
         public string ListaPrecioCodigo { get; set; } // LCDG_LPRC
         public bool Activo { get; set; }
         public string TipoProductoCodigo { get; set; }           // CDG_TPRD
+        public string IMP_PROD { get; set; }            // IMP_PROD
     }
 }

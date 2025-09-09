@@ -133,17 +133,6 @@ namespace CapaPresentacion
             _lineasScroller = new CapaPresentacion.Helpers.DragScroller(
                 flpLineas, CapaPresentacion.Helpers.DragAxis.Vertical);
 
-            ////// 🔸 Habilitar/Deshabilitar botones según la SELECCIÓN GLOBAL
-            ////LineaSelection.Changed += (s, ev) =>
-            ////{
-            ////    var sel = LineaSelection.Actual;              // puede ser LineaPedidoItem o ComboPedidoItem
-            ////    bool haySel = (sel != null);
-
-            ////    btnEliminar.Enabled = haySel;
-
-            ////    // Comentario libre: habilitar para líneas normales y combos
-            ////    btnComentarioLbr.Enabled = (sel is LineaPedidoItem) || (sel is ComboPedidoItem);
-            ////};
             LineaSelection.Changed += (s, ev) =>
             {
                 var sel = LineaSelection.Actual;              // puede ser LineaPedidoItem, ComboPedidoItem o MenuPedidoItem
@@ -166,7 +155,7 @@ namespace CapaPresentacion
             flpLineas.ControlAdded += (_, __) => ActualizarSubtotal();
             flpLineas.ControlRemoved += (_, __) => ActualizarSubtotal();
 
-            MostrarEnCentral(new CapaPresentacion.Botoneras.frmPastas());
+           // MostrarEnCentral(new CapaPresentacion.Botoneras.frmPastas());
         }
 
         private int CantidadActual()
@@ -237,8 +226,6 @@ namespace CapaPresentacion
 
             return null;
         }
-
-
         private void Hijo_ProductoSeleccionado(string codigo)
         {
             if (string.IsNullOrWhiteSpace(codigo)) return;
@@ -302,8 +289,6 @@ namespace CapaPresentacion
                 }
                 return;
             }
-
-
             if (_formHijoActual != null &&
                 _formHijoActual.GetType().Name.Equals("frmAdicional", StringComparison.OrdinalIgnoreCase))
             {
@@ -323,7 +308,66 @@ namespace CapaPresentacion
                 ActualizarSubtotal();           // si ya lo tienes implementado
                 return;
             }
+            if (_formHijoActual != null &&
+                _formHijoActual.GetType().Name.StartsWith("frmSandwich", StringComparison.OrdinalIgnoreCase))
+            {
+                if (cantidad2 <= 0) cantidad2 = 1;
 
+                string notas = string.Empty;
+                using (var dlg = new CapaPresentacion.Notas.frmNSandwich
+                {
+                    ProductoBaseTexto = $"{cantidad2} x {prod2.Descripcion}",
+                    TextoInicial = string.Empty
+                })
+                {
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                        notas = dlg.Notas ?? string.Empty;
+                }
+
+
+                // Agrega la línea normal del producto con las notas digitadas
+                AgregarLineaPedido(prod2, cantidad2, notas);
+                return;
+            }
+            if (_formHijoActual != null &&
+                _formHijoActual.GetType().Name.IndexOf("Jugo", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                if (cantidad2 <= 0) cantidad2 = 1;
+
+                string notas = string.Empty;
+                using (var dlg = new CapaPresentacion.Notas.frmNBebidas
+                {
+                    ProductoBaseTexto = $"{cantidad2} x {prod2.Descripcion}",
+                    TextoInicial = string.Empty
+                })
+                {
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                        notas = dlg.Notas ?? string.Empty;
+                }
+
+                // Agrega la línea con las notas digitadas
+                AgregarLineaPedido(prod2, cantidad2, notas);
+                return;
+            }
+            if (_formHijoActual != null &&
+                _formHijoActual.GetType().Name.IndexOf("Waffle", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                if (cantidad2 <= 0) cantidad2 = 1;
+
+                string notas = string.Empty;
+                using (var dlg = new CapaPresentacion.Notas.frmNWaffles
+                {
+                    ProductoBaseTexto = $"{cantidad2} x {prod2.Descripcion}",
+                    TextoInicial = string.Empty
+                })
+                {
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                        notas = dlg.Notas ?? string.Empty;
+                }
+
+                AgregarLineaPedido(prod2, cantidad2, notas);
+                return;
+            }
 
             if (cantidad2 <= 0) cantidad2 = 1;
 
@@ -363,20 +407,7 @@ namespace CapaPresentacion
             }
             else if (partes.Length == 2)
             {
-                //// cantidad*código
-                //var qStr = partes[0].Trim();
-                //var codStr = partes[1].Trim();
 
-                //if (!int.TryParse(qStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var q) || q <= 0)
-                //    return (false, 1, null);
-
-                //if (string.IsNullOrEmpty(codStr))
-                //    return (true, q, null); // aún no teclea el código, entrada parcial válida
-
-                //if (CodigoSoloNumerico && !codStr.All(char.IsDigit))
-                //    return (false, q, null);
-
-                //return (true, q, codStr);
 
                 var qStr = partes[0].Trim();
                 var codStr = partes[1].Trim();
@@ -398,52 +429,6 @@ namespace CapaPresentacion
 
         private void btnComentarioLbr_Click(object sender, EventArgs e)
         {
-            //var sel = LineaSelection.Actual;
-            //if (sel == null)
-            //{
-            //    MessageBox.Show("Selecciona primero un ítem.", "Comentario",
-            //                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-            //    return;
-            //}
-
-            //if (sel is LineaPedidoItem lp)
-            //{
-            //    using (var dlg = new frmComentarioLbr())
-            //    {
-            //        dlg.Texto = lp.Notas ?? string.Empty;   // o lp.GetNotasRaw() si lo tienes
-            //        dlg.TextoInicial = dlg.Texto;
-            //        if (dlg.ShowDialog(this) == DialogResult.OK)
-            //            lp.SetNotas(dlg.Comentario);
-            //    }
-            //}
-            //else if (sel is ComboPedidoItem ci)
-            //{
-            //    if (!ci.EditarUltimoJugoOBebida(this))
-            //        MessageBox.Show("No hay jugo/bebida para editar notas.", "Comentario",
-            //                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-            //}
-            //else if (sel is MenuPedidoItem mi)
-            //{
-            //    // Edita la zona que tocaste por última vez: Menu o Chicha
-            //    var zona = mi.ZonaActiva;
-            //    if (zona == MenuPedidoItem.ZonaNotas.Ninguna)
-            //        zona = MenuPedidoItem.ZonaNotas.Chicha; // por si acaso
-
-            //    using (var dlg = new frmComentarioLbr())
-            //    {
-            //        dlg.Texto = mi.GetNotasRaw(zona);
-            //        dlg.TextoInicial = dlg.Texto;
-
-            //        // Título informativo (opcional)
-            //        dlg.Text = (zona == MenuPedidoItem.ZonaNotas.Menu)
-            //                   ? "Comentario del Menú"
-            //                   : "Comentario de la Chicha";
-
-            //        if (dlg.ShowDialog(this) == DialogResult.OK)
-            //            mi.SetNotas(zona, dlg.Comentario);   // reemplaza notas de esa zona
-            //    }
-            //}
-
             var sel = LineaSelection.Actual;
             if (sel == null)
             {
@@ -462,36 +447,6 @@ namespace CapaPresentacion
                         lp.SetNotas(dlg.Comentario);
                 }
             }
-            //else if (sel is ComboPedidoItem ci)
-            //{
-            //    // SHIFT + click: editar SIEMPRE el encabezado (txtCombo)
-            //    if ((ModifierKeys & Keys.Shift) == Keys.Shift)
-            //    {
-            //        using (var dlg = new frmComentarioLbr())
-            //        {
-            //            dlg.Text = "Comentario del Combo";
-            //            dlg.Texto = ci.GetNotasEncabezadoRaw();
-            //            dlg.TextoInicial = dlg.Texto;
-            //            if (dlg.ShowDialog(this) == DialogResult.OK)
-            //                ci.SetNotasEncabezado(dlg.Comentario);
-            //        }
-            //        return;
-            //    }
-
-            //    // Comportamiento habitual: editar última bebida/jugo/tamal;
-            //    // si no hay subitems, cae a editar encabezado.
-            //    if (!ci.EditarUltimoJugoOBebida(this))
-            //    {
-            //        using (var dlg = new frmComentarioLbr())
-            //        {
-            //            dlg.Text = "Comentario del Combo";
-            //            dlg.Texto = ci.GetNotasEncabezadoRaw();
-            //            dlg.TextoInicial = dlg.Texto;
-            //            if (dlg.ShowDialog(this) == DialogResult.OK)
-            //                ci.SetNotasEncabezado(dlg.Comentario);
-            //        }
-            //    }
-            //}
             else if (sel is ComboPedidoItem ci)
             {
                 // 1) Si el usuario hizo click en el encabezado o mantiene SHIFT, edita encabezado
@@ -549,50 +504,6 @@ namespace CapaPresentacion
 
         private void txtCantidad_KeyDown(object sender, KeyEventArgs e)
         {
-            //if (e.KeyCode != Keys.Enter) return;
-
-            //var parsed = TryParseCantidadCodigo(txtCantidad.Text);
-
-            //if (!parsed.ok)
-            //{
-            //    MessageBox.Show("Formato inválido. Usa: cantidad o cantidad*código");
-            //    e.SuppressKeyPress = true;
-            //    return;
-            //}
-
-            //// Si solo hay cantidad, no buscamos aún (dejas listo para escribir *código)
-            //if (parsed.codigo == null)
-            //{
-            //    e.SuppressKeyPress = true;
-            //    return;
-            //}
-
-            //// Normaliza el código: si es numérico, pad a 10
-            //string codIngresado = parsed.codigo.Trim();
-            //string cod10 = codIngresado.All(char.IsDigit) ? codIngresado.PadLeft(LARGO_CODIGO, '0') : codIngresado;
-
-            //// Buscar: exacto -> termina en
-            //var producto = BuscarProductoPorCodigoExacto(cod10); 
-            //if (producto == null && codIngresado.All(char.IsDigit)) producto = BuscarProductoPorCodigoTerminaEn(codIngresado);
-
-            //if (producto == null)
-            //{
-            //    MessageBox.Show($"No se encontró el producto '{codIngresado}'.");
-            //    e.SuppressKeyPress = true;
-            //    return;
-            //}
-
-
-            //// Mostrar usando la cantidad parseada (evita inconsistencias)
-            ////  AgregarLinea(producto, parsed.cantidad);
-            //SeleccionarProducto(producto, parsed.cantidad);
-            //SeleccionarPorCodigoConCantidad(producto.Codigo, parsed.cantidad);
-
-            //// Limpia y listo para el siguiente input
-            //txtCantidad.Clear();
-            //txtCantidad.Focus();
-
-            //e.SuppressKeyPress = true;
 
             if (e.KeyCode != Keys.Enter) return;
 
@@ -768,28 +679,6 @@ namespace CapaPresentacion
 
         private void btnEliminar_Click(object sender, EventArgs e)
         {
-            //flpLineas.RemoveSelected();
-
-            //// Habilita/deshabilita el botón según quede selección
-            //btnEliminar.Enabled = (flpLineas.GetSeleccion() != null);
-
-            ////var sel = LineaSelection.Actual;
-            ////if (sel == null) return;
-
-            ////var ctrl = sel.View;            // raíz del control seleccionado
-
-            ////var parent = ctrl.Parent;
-            ////if (parent != null)
-            ////{
-            ////    parent.Controls.Remove(ctrl);
-            ////    ctrl.Dispose();
-            ////}
-
-            ////LineaSelection.Clear();
-            ////btnEliminar.Enabled = false;
-            ////btnComentarioLbr.Enabled = false;
-
-            ////ActualizarSubtotal();
 
             var sel = LineaSelection.Actual;
             if (sel == null) return;
@@ -870,9 +759,6 @@ namespace CapaPresentacion
             public decimal PrecioExtra { get; set; } // 0 si no aplica
         }
 
-
-
-
         private void EjecutarWizardDesayunoPorUnidad(ceProductos prod, int cantidad)
         {
             if (prod == null || cantidad <= 0) return;
@@ -951,7 +837,9 @@ namespace CapaPresentacion
                     {
                         var sels = frmB.Selecciones ?? new System.Collections.Generic.List<CapaPresentacion.Notas.frmCBebidasCalientes.SeleccionSimple>();
                         foreach (var b in sels)
-                            item.AddBebidaUnidad(b.Descripcion, b.PrecioExtra, string.Empty, false);
+                            //   item.AddBebidaUnidad(b.Descripcion, b.PrecioExtra, string.Empty, false);
+                            item.AddBebidaUnidad(b.Descripcion, b.PrecioExtra, b.Notas ?? string.Empty, false);
+
                     }
                 }
             }
@@ -1101,8 +989,6 @@ namespace CapaPresentacion
             ActualizarSubtotal();
         }
 
-
-
         // =============================================================
         // =================== Flujo MenuPedidoItem ====================
         // =============================================================
@@ -1146,31 +1032,6 @@ namespace CapaPresentacion
             ActualizarSubtotal();
         }
 
-        //private static void TrySetText(Control c, string text)
-        //{
-        //    if (c == null) return;
-        //    try
-        //    {
-        //        var p = c.GetType().GetProperty("Text");
-        //        p?.SetValue(c, text ?? string.Empty, null);
-        //    }
-        //    catch { /* ignore */ }
-        //}
-        //private static string NormalizarNotas(string raw)
-        //{
-        //    if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
-
-        //    var lines = (raw ?? string.Empty)
-        //                .Replace("\r\n", "\n")
-        //                .Replace("\r", "\n")
-        //                .Split('\n')
-        //                .Select(l => (l ?? string.Empty).Trim())
-        //                .Where(l => l.Length > 0)
-        //                .Select(l => l.StartsWith("-") ? l : "- " + l);
-
-        //    return string.Join(Environment.NewLine, lines);
-        //}
-
         private void AjustarAnchoItem(Control item)
         {
             if (item == null || flpLineas == null) return;
@@ -1183,10 +1044,84 @@ namespace CapaPresentacion
             if (usable < 80) usable = 80;
             item.Width = usable;
         }
+        private string ResolverImpresoraPorProducto(string codigo10)
+        {
+            // 1) Cache en memoria
+            if (_cachePorCodigo != null &&
+                _cachePorCodigo.TryGetValue((codigo10 ?? "").Trim(), out var pCache) &&
+                pCache != null && !string.IsNullOrWhiteSpace(pCache.IMP_PROD))
+                return pCache.IMP_PROD;
 
+            // 2) Servicio (si no estaba en cache)
+            var p = _svcProductos?.Obtener((codigo10 ?? "").Trim(), "001");
+            if (p != null)
+            {
+                _cachePorCodigo[codigo10.Trim()] = p;           // refresca cache
+                if (!string.IsNullOrWhiteSpace(p.IMP_PROD))
+                    return p.IMP_PROD;
+            }
+
+            return string.Empty; // si no hay dato en maestro
+        }
         private void btnActualizar_Click(object sender, EventArgs e)
         {
+            try
+            {
+                btnActualizar.Enabled = btnEliminar.Enabled = btnComentarioLbr.Enabled = false;
+                Cursor = Cursors.WaitCursor;
 
+                // === Datos de sesión/encabezado ===
+                string cdgVend = SesionActual.Vendedor?.Codigo ?? "";
+                string cdgUsr = SesionActual.Usuario ?? "";
+                string cdgLoc = SesionActual.Local ?? "001";
+                string cdgCaja = SesionActual.Caja ?? "001";
+
+                string numMesa = (txtMesa.Text ?? "").Trim();
+                int numPers = int.TryParse(txtNPersonas.Text, out var n) ? n : 0;
+
+                // === Generación de TXT vía wrapper ===
+                // (El wrapper arma ceMPedido/ceDPedido y llama a cnPedido/DAOPedidoTxt)
+                var resultado = TxtPedidoWriter.GenerarTxts(
+                    lineas: flpLineas.Controls,
+                    resolverImpresora: ResolverImpresoraPorProducto,
+                    cdgVend: cdgVend,
+                    cdgUsr: cdgUsr,
+                    cdgLoc: cdgLoc,
+                    cdgCaja: cdgCaja,
+                    numMesa: numMesa,
+                    numPers: numPers
+                );
+
+                // === Popup de confirmación ===
+                MessageBox.Show(
+                    "Pedido exportado.\n\n" +
+                    $"NUM_PED:  {resultado.NumPed}\n" +
+                    $"Cabecera: {resultado.RutaH}\n" +
+                    $"Detalle : {resultado.RutaD}\n\n" +
+                    $"Items   : {resultado.CantItems}\n" +
+                    $"SubTotal: S/ {resultado.SubTotal:0.00}\n" +
+                    $"IGV     : S/ {resultado.Igv:0.00}\n" +
+                    $"Total   : S/ {resultado.Total:0.00}",
+                    "TXT generado",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+
+                // (Opcional) Abrir la carpeta y resaltar el archivo de cabecera
+                // System.Diagnostics.Process.Start("explorer.exe", "/select,\"" + resultado.RutaH + "\"");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al generar el TXT: " + ex.Message,
+                    "Actualizar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                Cursor = Cursors.Default;
+                btnActualizar.Enabled = true;
+                btnEliminar.Enabled = (LineaSelection.Actual != null);
+                btnComentarioLbr.Enabled = (LineaSelection.Actual != null);
+            }
         }
     }
 }

@@ -34,15 +34,14 @@
             this.btnProd0000000625 = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000000624 = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000000333 = new Guna.UI2.WinForms.Guna2Button();
-            this.btnSinCaf = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000000330 = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000000225 = new Guna.UI2.WinForms.Guna2Button();
-            this.btnProd0000000862 = new Guna.UI2.WinForms.Guna2Button();
+            this.btnProd0000001253 = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000001252 = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000000229 = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000000230 = new Guna.UI2.WinForms.Guna2Button();
             this.btnAviso = new Guna.UI2.WinForms.Guna2Button();
-            this.btnAviClint = new Guna.UI2.WinForms.Guna2Button();
+            this.btnEsscP = new Guna.UI2.WinForms.Guna2Button();
             this.pnlButton = new System.Windows.Forms.Panel();
             this.btnEliminar = new Guna.UI2.WinForms.Guna2Button();
             this.btnContinuar = new Guna.UI2.WinForms.Guna2Button();
@@ -52,6 +51,7 @@
             this.pnlCabecera = new System.Windows.Forms.Panel();
             this.lblEstado = new System.Windows.Forms.Label();
             this.lblTitle = new Guna.UI2.WinForms.Guna2HtmlLabel();
+            this.btnSLactos = new Guna.UI2.WinForms.Guna2Button();
             this.pnlNBebCalient.SuspendLayout();
             this.flpBotoneraBebCaliente.SuspendLayout();
             this.pnlButton.SuspendLayout();
@@ -77,15 +77,15 @@
             this.flpBotoneraBebCaliente.Controls.Add(this.btnProd0000000625);
             this.flpBotoneraBebCaliente.Controls.Add(this.btnProd0000000624);
             this.flpBotoneraBebCaliente.Controls.Add(this.btnProd0000000333);
-            this.flpBotoneraBebCaliente.Controls.Add(this.btnSinCaf);
             this.flpBotoneraBebCaliente.Controls.Add(this.btnProd0000000330);
             this.flpBotoneraBebCaliente.Controls.Add(this.btnProd0000000225);
-            this.flpBotoneraBebCaliente.Controls.Add(this.btnProd0000000862);
+            this.flpBotoneraBebCaliente.Controls.Add(this.btnProd0000001253);
             this.flpBotoneraBebCaliente.Controls.Add(this.btnProd0000001252);
             this.flpBotoneraBebCaliente.Controls.Add(this.btnProd0000000229);
             this.flpBotoneraBebCaliente.Controls.Add(this.btnProd0000000230);
             this.flpBotoneraBebCaliente.Controls.Add(this.btnAviso);
-            this.flpBotoneraBebCaliente.Controls.Add(this.btnAviClint);
+            this.flpBotoneraBebCaliente.Controls.Add(this.btnEsscP);
+            this.flpBotoneraBebCaliente.Controls.Add(this.btnSLactos);
             this.flpBotoneraBebCaliente.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flpBotoneraBebCaliente.Location = new System.Drawing.Point(0, 58);
             this.flpBotoneraBebCaliente.Name = "flpBotoneraBebCaliente";
@@ -160,23 +160,6 @@
             this.btnProd0000000333.Text = "ESPRESSO";
             this.btnProd0000000333.TextOffset = new System.Drawing.Point(0, 70);
             // 
-            // btnSinCaf
-            // 
-            this.btnSinCaf.BorderRadius = 22;
-            this.btnSinCaf.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnSinCaf.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnSinCaf.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnSinCaf.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnSinCaf.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnSinCaf.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSinCaf.ForeColor = System.Drawing.Color.White;
-            this.btnSinCaf.Location = new System.Drawing.Point(835, 3);
-            this.btnSinCaf.Name = "btnSinCaf";
-            this.btnSinCaf.Size = new System.Drawing.Size(202, 205);
-            this.btnSinCaf.TabIndex = 116;
-            this.btnSinCaf.Text = "SIN CAFE";
-            this.btnSinCaf.TextOffset = new System.Drawing.Point(0, 70);
-            // 
             // btnProd0000000330
             // 
             this.btnProd0000000330.BorderRadius = 22;
@@ -187,7 +170,7 @@
             this.btnProd0000000330.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
             this.btnProd0000000330.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnProd0000000330.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000000330.Location = new System.Drawing.Point(3, 214);
+            this.btnProd0000000330.Location = new System.Drawing.Point(835, 3);
             this.btnProd0000000330.Name = "btnProd0000000330";
             this.btnProd0000000330.Size = new System.Drawing.Size(202, 205);
             this.btnProd0000000330.TabIndex = 117;
@@ -204,29 +187,29 @@
             this.btnProd0000000225.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(191)))), ((int)(((byte)(66)))));
             this.btnProd0000000225.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnProd0000000225.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000000225.Location = new System.Drawing.Point(211, 214);
+            this.btnProd0000000225.Location = new System.Drawing.Point(3, 214);
             this.btnProd0000000225.Name = "btnProd0000000225";
             this.btnProd0000000225.Size = new System.Drawing.Size(202, 205);
             this.btnProd0000000225.TabIndex = 118;
             this.btnProd0000000225.Text = "DESCAFEINADO";
             this.btnProd0000000225.TextOffset = new System.Drawing.Point(0, 70);
             // 
-            // btnProd0000000862
+            // btnProd0000001253
             // 
-            this.btnProd0000000862.BorderRadius = 22;
-            this.btnProd0000000862.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000000862.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000000862.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnProd0000000862.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000000862.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(191)))), ((int)(((byte)(66)))));
-            this.btnProd0000000862.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnProd0000000862.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000000862.Location = new System.Drawing.Point(419, 214);
-            this.btnProd0000000862.Name = "btnProd0000000862";
-            this.btnProd0000000862.Size = new System.Drawing.Size(202, 205);
-            this.btnProd0000000862.TabIndex = 119;
-            this.btnProd0000000862.Text = "CAFE CON LECHE";
-            this.btnProd0000000862.TextOffset = new System.Drawing.Point(0, 70);
+            this.btnProd0000001253.BorderRadius = 22;
+            this.btnProd0000001253.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000001253.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000001253.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnProd0000001253.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnProd0000001253.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(191)))), ((int)(((byte)(66)))));
+            this.btnProd0000001253.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProd0000001253.ForeColor = System.Drawing.Color.White;
+            this.btnProd0000001253.Location = new System.Drawing.Point(211, 214);
+            this.btnProd0000001253.Name = "btnProd0000001253";
+            this.btnProd0000001253.Size = new System.Drawing.Size(202, 205);
+            this.btnProd0000001253.TabIndex = 119;
+            this.btnProd0000001253.Text = "LATTE";
+            this.btnProd0000001253.TextOffset = new System.Drawing.Point(0, 70);
             // 
             // btnProd0000001252
             // 
@@ -238,7 +221,7 @@
             this.btnProd0000001252.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(191)))), ((int)(((byte)(66)))));
             this.btnProd0000001252.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnProd0000001252.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000001252.Location = new System.Drawing.Point(627, 214);
+            this.btnProd0000001252.Location = new System.Drawing.Point(419, 214);
             this.btnProd0000001252.Name = "btnProd0000001252";
             this.btnProd0000001252.Size = new System.Drawing.Size(202, 205);
             this.btnProd0000001252.TabIndex = 120;
@@ -255,7 +238,7 @@
             this.btnProd0000000229.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(191)))), ((int)(((byte)(66)))));
             this.btnProd0000000229.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnProd0000000229.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000000229.Location = new System.Drawing.Point(835, 214);
+            this.btnProd0000000229.Location = new System.Drawing.Point(627, 214);
             this.btnProd0000000229.Name = "btnProd0000000229";
             this.btnProd0000000229.Size = new System.Drawing.Size(202, 205);
             this.btnProd0000000229.TabIndex = 121;
@@ -272,7 +255,7 @@
             this.btnProd0000000230.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(219)))), ((int)(((byte)(191)))), ((int)(((byte)(66)))));
             this.btnProd0000000230.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnProd0000000230.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000000230.Location = new System.Drawing.Point(3, 425);
+            this.btnProd0000000230.Location = new System.Drawing.Point(835, 214);
             this.btnProd0000000230.Name = "btnProd0000000230";
             this.btnProd0000000230.Size = new System.Drawing.Size(202, 205);
             this.btnProd0000000230.TabIndex = 122;
@@ -289,29 +272,29 @@
             this.btnAviso.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
             this.btnAviso.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAviso.ForeColor = System.Drawing.Color.White;
-            this.btnAviso.Location = new System.Drawing.Point(211, 425);
+            this.btnAviso.Location = new System.Drawing.Point(3, 425);
             this.btnAviso.Name = "btnAviso";
             this.btnAviso.Size = new System.Drawing.Size(202, 205);
             this.btnAviso.TabIndex = 123;
             this.btnAviso.Text = "AVISO";
             this.btnAviso.TextOffset = new System.Drawing.Point(0, 70);
             // 
-            // btnAviClint
+            // btnEsscP
             // 
-            this.btnAviClint.BorderRadius = 22;
-            this.btnAviClint.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnAviClint.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnAviClint.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnAviClint.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnAviClint.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
-            this.btnAviClint.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAviClint.ForeColor = System.Drawing.Color.White;
-            this.btnAviClint.Location = new System.Drawing.Point(419, 425);
-            this.btnAviClint.Name = "btnAviClint";
-            this.btnAviClint.Size = new System.Drawing.Size(202, 205);
-            this.btnAviClint.TabIndex = 124;
-            this.btnAviClint.Text = "AVISO CLIENTE";
-            this.btnAviClint.TextOffset = new System.Drawing.Point(0, 70);
+            this.btnEsscP.BorderRadius = 22;
+            this.btnEsscP.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnEsscP.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnEsscP.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnEsscP.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnEsscP.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
+            this.btnEsscP.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnEsscP.ForeColor = System.Drawing.Color.White;
+            this.btnEsscP.Location = new System.Drawing.Point(211, 425);
+            this.btnEsscP.Name = "btnEsscP";
+            this.btnEsscP.Size = new System.Drawing.Size(202, 205);
+            this.btnEsscP.TabIndex = 125;
+            this.btnEsscP.Text = "ESSENCIA APARTE";
+            this.btnEsscP.TextOffset = new System.Drawing.Point(0, 70);
             // 
             // pnlButton
             // 
@@ -338,7 +321,6 @@
             this.btnEliminar.Size = new System.Drawing.Size(180, 72);
             this.btnEliminar.TabIndex = 3;
             this.btnEliminar.Text = "Eliminar";
-            this.btnEliminar.Click += new System.EventHandler(this.btnEliminar_Click);
             // 
             // btnContinuar
             // 
@@ -355,7 +337,6 @@
             this.btnContinuar.Size = new System.Drawing.Size(180, 72);
             this.btnContinuar.TabIndex = 2;
             this.btnContinuar.Text = "Continuar";
-            this.btnContinuar.Click += new System.EventHandler(this.btnContinuar_Click);
             // 
             // pnlSlide
             // 
@@ -435,6 +416,23 @@
             this.lblTitle.TabIndex = 0;
             this.lblTitle.Text = "Bebidas Calientes";
             // 
+            // btnSLactos
+            // 
+            this.btnSLactos.BorderRadius = 22;
+            this.btnSLactos.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnSLactos.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnSLactos.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnSLactos.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnSLactos.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
+            this.btnSLactos.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSLactos.ForeColor = System.Drawing.Color.White;
+            this.btnSLactos.Location = new System.Drawing.Point(419, 425);
+            this.btnSLactos.Name = "btnSLactos";
+            this.btnSLactos.Size = new System.Drawing.Size(202, 205);
+            this.btnSLactos.TabIndex = 126;
+            this.btnSLactos.Text = "SIN LACTOSA";
+            this.btnSLactos.TextOffset = new System.Drawing.Point(0, 70);
+            // 
             // frmCBebidasCalientes
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -444,7 +442,6 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "frmCBebidasCalientes";
             this.Text = "frmNBebidasCalientes";
-            this.Load += new System.EventHandler(this.frmCBebidasCalientes_Load);
             this.pnlNBebCalient.ResumeLayout(false);
             this.flpBotoneraBebCaliente.ResumeLayout(false);
             this.pnlButton.ResumeLayout(false);
@@ -469,17 +466,17 @@
         private Guna.UI2.WinForms.Guna2Button btnProd0000000625;
         private Guna.UI2.WinForms.Guna2Button btnProd0000000624;
         private Guna.UI2.WinForms.Guna2Button btnProd0000000333;
-        private Guna.UI2.WinForms.Guna2Button btnSinCaf;
         private Guna.UI2.WinForms.Guna2Button btnProd0000000330;
         private Guna.UI2.WinForms.Guna2Button btnProd0000000225;
-        private Guna.UI2.WinForms.Guna2Button btnProd0000000862;
+        private Guna.UI2.WinForms.Guna2Button btnProd0000001253;
         private Guna.UI2.WinForms.Guna2Button btnProd0000001252;
         private Guna.UI2.WinForms.Guna2Button btnProd0000000229;
         private Guna.UI2.WinForms.Guna2Button btnProd0000000230;
         private Guna.UI2.WinForms.Guna2Button btnAviso;
-        private Guna.UI2.WinForms.Guna2Button btnAviClint;
         private Guna.UI2.WinForms.Guna2Button btnEliminar;
         private Guna.UI2.WinForms.Guna2Button btnContinuar;
         private System.Windows.Forms.Label lblEstado;
+        private Guna.UI2.WinForms.Guna2Button btnEsscP;
+        private Guna.UI2.WinForms.Guna2Button btnSLactos;
     }
 }

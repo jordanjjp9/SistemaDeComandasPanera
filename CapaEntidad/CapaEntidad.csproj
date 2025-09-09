@@ -42,8 +42,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ceComanda.cs" />
+    <Compile Include="ceDPedido.cs" />
     <Compile Include="ceMesa.cs" />
-    <Compile Include="cePedido.cs" />
+    <Compile Include="ceMPedido.cs" />
     <Compile Include="ceProductos.cs" />
     <Compile Include="ceSesionActual.cs" />
     <Compile Include="ceVendedor.cs" />

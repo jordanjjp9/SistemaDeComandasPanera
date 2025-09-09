@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.flpSandwich = new CapaPresentacion.Helpers.FlowLayoutPanelSinScroll();
-            this.btnProd0000001087 = new Guna.UI2.WinForms.Guna2Button();
+            this.btnProd0000001510 = new Guna.UI2.WinForms.Guna2Button();
             this.guna2Button1 = new Guna.UI2.WinForms.Guna2Button();
             this.guna2Button2 = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000001037 = new Guna.UI2.WinForms.Guna2Button();
@@ -58,7 +58,7 @@
             // 
             this.flpSandwich.AutoScroll = true;
             this.flpSandwich.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(228)))), ((int)(((byte)(214)))));
-            this.flpSandwich.Controls.Add(this.btnProd0000001087);
+            this.flpSandwich.Controls.Add(this.btnProd0000001510);
             this.flpSandwich.Controls.Add(this.guna2Button1);
             this.flpSandwich.Controls.Add(this.guna2Button2);
             this.flpSandwich.Controls.Add(this.btnProd0000001037);
@@ -90,22 +90,22 @@
             this.flpSandwich.MouseMove += new System.Windows.Forms.MouseEventHandler(this.flpSandwich_MouseMove);
             this.flpSandwich.MouseUp += new System.Windows.Forms.MouseEventHandler(this.flpSandwich_MouseUp);
             // 
-            // btnProd0000001087
+            // btnProd0000001510
             // 
-            this.btnProd0000001087.BorderRadius = 22;
-            this.btnProd0000001087.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000001087.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000001087.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnProd0000001087.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000001087.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnProd0000001087.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnProd0000001087.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000001087.Location = new System.Drawing.Point(3, 3);
-            this.btnProd0000001087.Name = "btnProd0000001087";
-            this.btnProd0000001087.Size = new System.Drawing.Size(202, 205);
-            this.btnProd0000001087.TabIndex = 134;
-            this.btnProd0000001087.Text = "MIXTO TRES QUESOS";
-            this.btnProd0000001087.TextOffset = new System.Drawing.Point(0, 70);
+            this.btnProd0000001510.BorderRadius = 22;
+            this.btnProd0000001510.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000001510.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000001510.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnProd0000001510.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnProd0000001510.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000001510.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProd0000001510.ForeColor = System.Drawing.Color.White;
+            this.btnProd0000001510.Location = new System.Drawing.Point(3, 3);
+            this.btnProd0000001510.Name = "btnProd0000001510";
+            this.btnProd0000001510.Size = new System.Drawing.Size(202, 205);
+            this.btnProd0000001510.TabIndex = 134;
+            this.btnProd0000001510.Text = "MIXTO TRES QUESOS";
+            this.btnProd0000001510.TextOffset = new System.Drawing.Point(0, 70);
             // 
             // guna2Button1
             // 
@@ -483,7 +483,7 @@
 
         private Helpers.FlowLayoutPanelSinScroll flpSandwich;
      //   private System.Windows.Forms.FlowLayoutPanel flpSandwich;
-        private Guna.UI2.WinForms.Guna2Button btnProd0000001087;
+        private Guna.UI2.WinForms.Guna2Button btnProd0000001510;
         private Guna.UI2.WinForms.Guna2Button guna2Button1;
         private Guna.UI2.WinForms.Guna2Button guna2Button2;
         private Guna.UI2.WinForms.Guna2Button btnProd0000001037;

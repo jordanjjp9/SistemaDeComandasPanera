@@ -188,6 +188,7 @@
             this.btnEliminar.Size = new System.Drawing.Size(180, 72);
             this.btnEliminar.TabIndex = 1;
             this.btnEliminar.Text = "Eliminar";
+            this.btnEliminar.Click += new System.EventHandler(this.btnEliminar_Click);
             // 
             // btnContinuar
             // 
@@ -204,6 +205,7 @@
             this.btnContinuar.Size = new System.Drawing.Size(180, 72);
             this.btnContinuar.TabIndex = 0;
             this.btnContinuar.Text = "Continuar";
+            this.btnContinuar.Click += new System.EventHandler(this.btnContinuar_Click);
             // 
             // pnlSNotasBeb
             // 
@@ -294,6 +296,7 @@
             this.btnCerrar.Size = new System.Drawing.Size(81, 64);
             this.btnCerrar.TabIndex = 0;
             this.btnCerrar.Text = "X";
+            this.btnCerrar.Click += new System.EventHandler(this.btnCerrar_Click);
             // 
             // frmNWaffles
             // 
@@ -304,6 +307,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "frmNWaffles";
             this.Text = "frmNWaffles";
+            this.Load += new System.EventHandler(this.frmNWaffles_Load);
             this.pnlNBebidas.ResumeLayout(false);
             this.flpNWaffle.ResumeLayout(false);
             this.pnlButton.ResumeLayout(false);

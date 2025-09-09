@@ -139,55 +139,6 @@ namespace CapaPresentacion.Notas
                     root.Click += Chip_Click;
             }
         }
-
-        //private void WireQuickNoteButtons(Control root, Button btnContinuar, Button btnEliminar)
-        //{
-        //    if (root == null) return;
-
-        //    foreach (Control c in root.Controls)
-        //    {
-        //        // Recursivo
-        //        WireQuickNoteButtons(c, btnContinuar, btnEliminar);
-
-        //        // 🔴 NO tocar nunca el textbox de notas (en cualquiera de las dos variantes)
-        //        if (ReferenceEquals(c, _txtNotas) || ReferenceEquals(c, _txtNotasCtrl)) continue;
-        //        if (c is TextBoxBase) continue; // por si el nombre cambia
-        //        if ((c.Name ?? "").StartsWith("txt", StringComparison.OrdinalIgnoreCase)) continue;
-
-        //        // Solo cablear botones/chips reales
-        //        bool esChip =
-        //            (c is Button) ||
-        //            (c.GetType().Name.IndexOf("Button", StringComparison.OrdinalIgnoreCase) >= 0) ||
-        //            ((c.Name ?? "").StartsWith("btn", StringComparison.OrdinalIgnoreCase));
-
-        //        if (!esChip) continue;
-
-        //        // Excluir Continuar / Eliminar
-        //        if (ReferenceEquals(c, btnContinuar) || ReferenceEquals(c, btnEliminar)) continue;
-
-        //        // ⚠️ Evitar MULTI-ENGANCHE
-        //        if (_chipsWired.Contains(c)) continue;
-
-        //        c.Click += Chip_Click;
-        //        _chipsWired.Add(c);
-        //    }
-        //}
-
-
-        //private static bool EsBotonOpcion(Control c)
-        //{
-        //    if (c == null) return false;
-
-        //    // Tipos comunes: Button, Guna2Button, etc.
-        //    if (c is Button) return true;
-        //    if ((c.GetType().Name ?? "").IndexOf("Button", StringComparison.OrdinalIgnoreCase) >= 0) return true;
-
-        //    // Heurística adicional: nombre tipo "btnXXX"
-        //    if ((c.Name ?? "").StartsWith("btn", StringComparison.OrdinalIgnoreCase)) return true;
-
-        //    // Cualquier control con propiedad Text y evento Click
-        //    return c.GetType().GetProperty("Text") != null;
-        //}
         private static bool EsBotonOpcion(Control c)
         {
             if (c == null) return false;
