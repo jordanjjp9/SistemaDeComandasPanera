@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
@@ -12,25 +13,73 @@ namespace CapaPresentacion.Controles
 {
     public partial class MenuPedidoItem : UserControl, ILineaSeleccionable
     {
+        // ===== Datos del MENÚ (encabezado) =====
         public string Codigo { get; private set; } = "";
         public string Descripcion { get; private set; } = "";
         public int Cantidad { get; private set; } = 1;
         public decimal PrecioUnitario { get; private set; } = 0m;
-        public decimal Total => Cantidad * PrecioUnitario;
+        public decimal Total { get { return Cantidad * PrecioUnitario; } }
 
+        // ===== Datos de la CHICHA (solo para export) =====
+        private string _codigoChicha = "";
+        private string _descripcionChicha = "";
+        private int _cantChicha = 0; // 0 => no hay chicha
+
+        // ===== Notas separadas =====
+        private readonly List<string> _notasMenu = new List<string>();
+        private readonly List<string> _notasChicha = new List<string>();
+
+        // ===== Export plano =====
+        public sealed class LineaExport
+        {
+            public string Codigo { get; set; }  // CDG_PROD (10 dígitos lo resuelve el DAO)
+            public string Descripcion { get; set; }
+            public int Cantidad { get; set; }
+            public decimal PrecioUnitarioConIgv { get; set; } // PU mostrado en UI (CON IGV)
+            public string Notas { get; set; }     // OBS_PPRD
+        }
+
+        public IEnumerable<LineaExport> GetLineasExport()
+        {
+            // 1) Menú (siempre)
+            yield return new LineaExport
+            {
+                Codigo = this.Codigo ?? "",
+                Descripcion = this.Descripcion ?? "",
+                Cantidad = this.Cantidad,
+                PrecioUnitarioConIgv = this.PrecioUnitario,
+                Notas = FormatearNotas(_notasMenu)
+            };
+
+            // 2) Chicha (si hay)
+            if (_cantChicha > 0)
+            {
+                yield return new LineaExport
+                {
+                    Codigo = _codigoChicha ?? "",
+                    Descripcion = _descripcionChicha ?? "",
+                    Cantidad = _cantChicha,
+                    PrecioUnitarioConIgv = 0m, // chicha sin precio
+                    Notas = FormatearNotas(_notasChicha)
+                };
+            }
+        }
+
+        // ===== UI =====
         private Guna2TextBox _txtMenu;
         private Guna2TextBox _txtChich;
 
         private int _baseHeight;
         private bool _pendingGrow;
+
         public enum ZonaNotas { Ninguna = 0, Menu = 1, Chicha = 2 }
         public ZonaNotas ZonaActiva { get; private set; } = ZonaNotas.Menu;
 
-        // ==== selección global ====
-        public Control View => this;
-        public void SetVisualSelected(bool sel) => BorderStyle = sel ? BorderStyle.FixedSingle : BorderStyle.None;
-        // dentro de MenuPedidoItem
-        private void Any_Click_Select(object s, EventArgs e) => LineaSelection.Select(this, true);
+        // ===== ILineaSeleccionable =====
+        public Control View { get { return this; } }
+        public void SetVisualSelected(bool sel) { this.BorderStyle = sel ? BorderStyle.FixedSingle : BorderStyle.None; }
+
+        private void Any_Click_Select(object s, EventArgs e) { LineaSelection.Select(this, true); }
 
         public MenuPedidoItem()
         {
@@ -39,116 +88,155 @@ namespace CapaPresentacion.Controles
             _txtMenu = this.Controls.Find("txtMenu", true).OfType<Guna2TextBox>().FirstOrDefault();
             _txtChich = this.Controls.Find("txtChich", true).OfType<Guna2TextBox>().FirstOrDefault();
 
-            Prep(_txtMenu);
-            Prep(_txtChich);
+            PrepTextBox(_txtMenu);
+            PrepTextBox(_txtChich);
 
-            //if (_txtMenu != null) _txtMenu.TextChanged += (_, __) => Recalc();
-            //if (_txtChich != null) _txtChich.TextChanged += (_, __) => Recalc();
             if (_txtMenu != null)
             {
-                _txtMenu.Click += (_, __) => { ZonaActiva = ZonaNotas.Menu; LineaSelection.Select(this, true); };
-                _txtMenu.MouseDown += (_, __) => { ZonaActiva = ZonaNotas.Menu; LineaSelection.Select(this, true); };
+                _txtMenu.Click += (s, e) => { ZonaActiva = ZonaNotas.Menu; LineaSelection.Select(this, true); };
+                _txtMenu.MouseDown += (s, e) => { ZonaActiva = ZonaNotas.Menu; LineaSelection.Select(this, true); };
             }
             if (_txtChich != null)
             {
-                _txtChich.Click += (_, __) => { ZonaActiva = ZonaNotas.Chicha; LineaSelection.Select(this, true); };
-                _txtChich.MouseDown += (_, __) => { ZonaActiva = ZonaNotas.Chicha; LineaSelection.Select(this, true); };
+                _txtChich.Click += (s, e) => { ZonaActiva = ZonaNotas.Chicha; LineaSelection.Select(this, true); };
+                _txtChich.MouseDown += (s, e) => { ZonaActiva = ZonaNotas.Chicha; LineaSelection.Select(this, true); };
             }
 
-            this.SizeChanged += (_, __) => Recalc();
+            this.SizeChanged += (s, e) => Recalc();
 
-            // seleccionar con click en cualquier parte
+            // selección con click en cualquier parte
             WireSelectClick(this);
         }
 
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            int hMenu = _txtMenu != null ? _txtMenu.Height : 0;
-            int hChich = _txtChich != null ? _txtChich.Height : 0;
-            _baseHeight = this.Height - (hMenu + hChich);
+            int h1 = (_txtMenu != null) ? _txtMenu.Height : 0;
+            int h2 = (_txtChich != null) ? _txtChich.Height : 0;
+            _baseHeight = this.Height - (h1 + h2);
             Recalc();
         }
+
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
             if (_pendingGrow) { _pendingGrow = false; Recalc(); }
         }
 
-        private static void Prep(Guna2TextBox tb)
-        {
-            if (tb == null) return;
-            tb.Multiline = true;
-            tb.ReadOnly = true;
-            tb.WordWrap = true;
-            tb.ScrollBars = ScrollBars.None;
-            tb.Dock = DockStyle.Top;
-            tb.Cursor = Cursors.Hand;
-        }
-        private void WireSelectClick(Control root)
-        {
-            root.Click -= (_, __) => LineaSelection.Select(this, true);
-            root.Click += (_, __) => LineaSelection.Select(this, true);
-            root.MouseDown -= (_, __) => LineaSelection.Select(this, true);
-            root.MouseDown += (_, __) => LineaSelection.Select(this, true);
-            foreach (Control c in root.Controls) WireSelectClick(c);
-        }
         // ===== API =====
         public void SetMenu(string codigo, string descripcion, int cantidad, decimal pu)
         {
-            Codigo = (codigo ?? "").Trim();
-            Descripcion = string.IsNullOrWhiteSpace(descripcion) ? Codigo : descripcion.Trim();
-            Cantidad = Math.Max(1, cantidad);
-            PrecioUnitario = Math.Max(0m, pu);
+            this.Codigo = (codigo ?? "").Trim();
+            this.Descripcion = string.IsNullOrWhiteSpace(descripcion) ? this.Codigo : descripcion.Trim();
+            this.Cantidad = (cantidad > 0) ? cantidad : 1;
+            this.PrecioUnitario = (pu >= 0m) ? pu : 0m;
 
-            if (_txtMenu != null)
-                _txtMenu.Text = $"{Cantidad} x {Descripcion.ToUpperInvariant()} = S/ {Total:0.00}";
-
+            // no toco _notasMenu aquí; se modifican con SetNotas/Append
+            PintarMenu();
             Recalc();
         }
-        // En CapaPresentacion.Controles.MenuPedidoItem
-        public void SetChicha(string descripcion, string notas, int cantidad = 1)
+
+        // Compatibilidad: firma antigua sin código de chicha
+        public void SetChicha(string descripcion, string notas, int cantidad)
         {
-            if (_txtChich == null) return;
+            SetChicha(string.Empty, descripcion, notas, cantidad);
+        }
 
-            var sb = new StringBuilder();
-            int cant = Math.Max(1, cantidad);
+        // Nueva firma con código (recomendado para exportar CDG_PROD real de la chicha)
+        public void SetChicha(string codigo, string descripcion, string notas, int cantidad)
+        {
+            _codigoChicha = (codigo ?? "").Trim();
+            _descripcionChicha = string.IsNullOrWhiteSpace(descripcion) ? _codigoChicha : descripcion.Trim();
+            _cantChicha = (cantidad > 0) ? cantidad : 1;
 
-            sb.Append(cant).Append(" x ").Append((descripcion ?? "").Trim().ToUpperInvariant());
+            _notasChicha.Clear();
+            if (!string.IsNullOrWhiteSpace(notas))
+                _notasChicha.AddRange(ParseNotas(notas));
 
-            string norm = NormalizeNotes(notas);
-            if (!string.IsNullOrEmpty(norm))
-                sb.AppendLine().Append(norm);
-
-            _txtChich.Text = sb.ToString();
+            PintarChicha();
             Recalc();
         }
+
         public void AppendNotasChicha(string notas)
         {
-            if (_txtChich == null) return;
-
-            var text = _txtChich.Text ?? "";
-            var extra = NormalizeNotes(notas);
-            if (string.IsNullOrEmpty(extra)) return;
-
-            if (text.Length > 0 && !text.EndsWith(Environment.NewLine))
-                text += Environment.NewLine;
-
-            _txtChich.Text = text + extra;
+            if (string.IsNullOrWhiteSpace(notas)) return;
+            _notasChicha.AddRange(ParseNotas(notas));
+            PintarChicha();
             Recalc();
         }
-        private static string NormalizeNotes(string raw)
+
+        public void AppendNotasMenu(string notas)
         {
-            if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
-            var lines = raw.Replace("\r\n", "\n").Replace("\r", "\n")
-                           .Split('\n')
-                           .Select(l => (l ?? "").Trim())
-                           .Where(l => l.Length > 0)
-                           .Select(l => l.StartsWith("-") ? l : "- " + l);
-            return string.Join(Environment.NewLine, lines);
+            if (string.IsNullOrWhiteSpace(notas)) return;
+            _notasMenu.AddRange(ParseNotas(notas));
+            PintarMenu();
+            Recalc();
         }
 
-        // ===== autogrow =====
+        // === Lectura/edición de notas por zona ===
+        public string GetNotasRaw(ZonaNotas zona)
+        {
+            if (zona == ZonaNotas.Menu) return FormatearNotas(_notasMenu);
+            if (zona == ZonaNotas.Chicha) return FormatearNotas(_notasChicha);
+            return string.Empty;
+        }
+
+        public void SetNotas(ZonaNotas zona, string notas)
+        {
+            var parsed = ParseNotas(notas);
+
+            if (zona == ZonaNotas.Menu)
+            {
+                _notasMenu.Clear();
+                _notasMenu.AddRange(parsed);
+                PintarMenu();
+            }
+            else if (zona == ZonaNotas.Chicha)
+            {
+                _notasChicha.Clear();
+                _notasChicha.AddRange(parsed);
+                PintarChicha();
+            }
+            Recalc();
+        }
+
+        // ===== Pintado =====
+        private void PintarMenu()
+        {
+            if (_txtMenu == null) return;
+
+            var sb = new StringBuilder();
+            sb.AppendFormat("{0} x {1} = S/ {2:0.00}", Cantidad, (Descripcion ?? "").ToUpperInvariant(), Total);
+
+            foreach (var n in _notasMenu)
+                sb.AppendLine().Append("  - ").Append(n);
+
+            _txtMenu.Text = sb.ToString();
+        }
+
+        private void PintarChicha()
+        {
+            if (_txtChich == null) return;
+
+            if (_cantChicha <= 0)
+            {
+                _txtChich.Text = string.Empty;
+                return;
+            }
+
+            var sb = new StringBuilder();
+            sb.Append(_cantChicha).Append(" x ").Append((_descripcionChicha ?? "").ToUpperInvariant());
+
+            if (_notasChicha.Count > 0)
+            {
+                foreach (var n in _notasChicha)
+                    sb.AppendLine().Append("  - ").Append(n);
+            }
+
+            _txtChich.Text = sb.ToString();
+        }
+
+        // ===== Autogrow =====
         private void Recalc()
         {
             if (!IsHandleCreated) { _pendingGrow = true; return; }
@@ -166,26 +254,46 @@ namespace CapaPresentacion.Controles
         private static int AltoNecesario(Guna2TextBox tb)
         {
             if (tb == null) return 0;
+
             string t = tb.Text ?? string.Empty;
             if (t.Length == 0) return Math.Max(28, tb.Font.Height + 8);
 
-            var inner = TryInner(tb);
+            TextBox inner = TryInner(tb);
             if (inner != null && inner.IsHandleCreated)
             {
                 try { inner.WordWrap = true; inner.ScrollBars = ScrollBars.None; } catch { }
                 int last = Math.Max(0, t.Length - 1);
                 while (last >= 0 && (t[last] == '\r' || t[last] == '\n')) last--;
                 if (last < 0) last = 0;
-                var pt = inner.GetPositionFromCharIndex(last);
+                Point pt = inner.GetPositionFromCharIndex(last);
                 return Math.Max(28, pt.Y + inner.Font.Height + 14);
             }
 
             using (var g = tb.CreateGraphics())
             {
                 var sf = new StringFormat(StringFormatFlags.LineLimit | StringFormatFlags.MeasureTrailingSpaces);
-                var size = g.MeasureString(t + "\nA", tb.Font, Math.Max(1, tb.ClientSize.Width), sf);
+                SizeF size = g.MeasureString(t + "\nA", tb.Font, Math.Max(1, tb.ClientSize.Width), sf);
                 return Math.Max(28, (int)Math.Ceiling(size.Height) + 10);
             }
+        }
+
+        // ===== Helpers =====
+        private static void PrepTextBox(Guna2TextBox tb)
+        {
+            if (tb == null) return;
+            tb.Multiline = true;
+            tb.ReadOnly = true;
+            tb.WordWrap = true;
+            tb.ScrollBars = ScrollBars.None;
+            tb.Dock = DockStyle.Top;
+            tb.Cursor = Cursors.Hand;
+        }
+
+        private void WireSelectClick(Control root)
+        {
+            root.Click -= Any_Click_Select; root.Click += Any_Click_Select;
+            root.MouseDown -= Any_Click_Select; root.MouseDown += Any_Click_Select;
+            foreach (Control c in root.Controls) WireSelectClick(c);
         }
 
         private static TextBox TryInner(Control guna2TextBox)
@@ -194,68 +302,34 @@ namespace CapaPresentacion.Controles
             {
                 var prop = guna2TextBox.GetType().GetProperty("TextBox",
                     BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                return prop?.GetValue(guna2TextBox, null) as TextBox;
+                return prop != null ? prop.GetValue(guna2TextBox, null) as TextBox : null;
             }
             catch { return null; }
         }
-        // --- NOTAS MENU ---
-        public string GetNotasMenuRaw()
+
+        private static List<string> ParseNotas(string raw)
         {
-            if (_txtMenu == null) return string.Empty;
-            var t = _txtMenu.Text ?? string.Empty;
-            t = t.Replace("\r\n", "\n").Replace("\r", "\n");
-            var lines = t.Split('\n');
-            return (lines.Length <= 1) ? string.Empty
-                                       : string.Join(Environment.NewLine, lines.Skip(1));
-        }
-        public void SetNotasMenu(string notas)
-        {
-            if (_txtMenu == null) return;
-            var header = ObtenerPrimeraLinea(_txtMenu.Text);
-            var norm = NormalizeNotes(notas);
-            _txtMenu.Text = string.IsNullOrEmpty(norm) ? header : header + Environment.NewLine + norm;
-            Recalc();
+            var list = new List<string>();
+            if (string.IsNullOrWhiteSpace(raw)) return list;
+
+            string t = raw.Replace("\r\n", "\n").Replace("\r", "\n");
+            foreach (var r in t.Split('\n'))
+            {
+                var s = (r ?? "").Trim();
+                if (s.Length == 0) continue;
+                if (s.StartsWith("-")) s = s.TrimStart('-').Trim();
+                list.Add(s);
+            }
+            return list;
         }
 
-        // --- NOTAS CHICHA ---
-        public string GetNotasChichaRaw()
+        private static string FormatearNotas(IEnumerable<string> notas)
         {
-            if (_txtChich == null) return string.Empty;
-            var t = _txtChich.Text ?? string.Empty;
-            t = t.Replace("\r\n", "\n").Replace("\r", "\n");
-            var lines = t.Split('\n');
-            return (lines.Length <= 1) ? string.Empty
-                                       : string.Join(Environment.NewLine, lines.Skip(1));
+            var arr = (notas ?? new List<string>())
+                      .Select(n => n == null ? "" : n.Trim())
+                      .Where(n => n.Length > 0)
+                      .Select(n => n.StartsWith("-") ? n : "- " + n);
+            return string.Join(Environment.NewLine, arr);
         }
-        public void SetNotasChicha(string notas)
-        {
-            if (_txtChich == null) return;
-            var header = ObtenerPrimeraLinea(_txtChich.Text);
-            var norm = NormalizeNotes(notas);
-            _txtChich.Text = string.IsNullOrEmpty(norm) ? header : header + Environment.NewLine + norm;
-            Recalc();
-        }
-
-        // helper para tomar la primera línea de un textbox multilínea
-        private static string ObtenerPrimeraLinea(string text)
-        {
-            if (string.IsNullOrEmpty(text)) return string.Empty;
-            var t = text.Replace("\r\n", "\n").Replace("\r", "\n");
-            int nl = t.IndexOf('\n');
-            return (nl < 0) ? t : t.Substring(0, nl);
-        }
-
-        // API genérica según zona activa (útil desde el formulario)
-        public string GetNotasRaw(ZonaNotas zona)
-            => zona == ZonaNotas.Chicha ? GetNotasChichaRaw()
-               : zona == ZonaNotas.Menu ? GetNotasMenuRaw()
-               : string.Empty;
-
-        public void SetNotas(ZonaNotas zona, string notas)
-        {
-            if (zona == ZonaNotas.Chicha) SetNotasChicha(notas);
-            else if (zona == ZonaNotas.Menu) SetNotasMenu(notas);
-        }
-
     }
 }

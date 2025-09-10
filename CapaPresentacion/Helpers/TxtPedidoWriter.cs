@@ -1,42 +1,67 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Windows.Forms;
 using CapaEntidad;
 using CapaNegocio;
+using CapaPresentacion.Controles;
 using CapaPresentacion.Helpers;
 
-namespace CapaPresentacion.Helpers
+namespace CapaPresentacion
 {
     public static class TxtPedidoWriter
     {
-        // === Contrato que usa frmMenuPrincipal para el MessageBox ===
+        // === Carpeta destino solicitada ===
+        private static readonly string CARPETA_DESTINO =
+            @"C:\Users\lenovo\Documents\DocumentosPrueba";
+
         public sealed class Resultado
         {
             public string NumPed { get; set; }
             public string RutaH { get; set; }
             public string RutaD { get; set; }
             public int CantItems { get; set; }
-            public decimal SubTotal { get; set; } // Base imponible (sin IGV)
+            public decimal SubTotal { get; set; }
             public decimal Igv { get; set; }
             public decimal Total { get; set; }
         }
 
-        private const string CARPETA_DESTINO = @"C:\Users\lenovo\Documents\DocumentosPrueba";
+        // Línea plana a partir de los controles de la UI
+        private sealed class Plano
+        {
+            public string Cod10;         // CDG_PROD (10 dígitos si es posible)
+            public string Descripcion;
+            public int Cantidad;
+            public decimal PuConIgv;     // PU mostrado en UI (CON IGV)
+            public string Notas;         // OBS_PPRD
+        }
+
+        // Resolver opcional de datos tributarios por producto (M_PROD / M_PRODUC)
+        // Devuelve (POR_IGV, SWT_IGV). Si no puedes resolverlos, retorna nulls.
+        public delegate (decimal? porIgv, bool? swtIgv)? ResolverTributario(string cod10);
+
         public static Resultado GenerarTxts(
             Control.ControlCollection lineas,
-            Func<string, string> resolverImpresora,
+            Func<string, string> resolverImpresora, // IMP_PROD
             string cdgVend,
             string cdgUsr,
             string cdgLoc,
             string cdgCaja,
             string numMesa,
-            int numPers)
+            int numPers,
+            ResolverTributario resolverTrib = null // opcional
+        )
         {
             if (lineas == null) throw new ArgumentNullException(nameof(lineas));
 
-            // === 1) Cabecera ===
+            // === 1) Aplanar la UI a una lista de “plano” (solo top-level) ===
+            var planos = Flatten(lineas).ToList();
+
+            // === 2) Armar cabecera/entidad para totales y M_PEDIDO ===
             string numPed = DateTime.Now.ToString("yyMMddHHmmss", CultureInfo.InvariantCulture);
 
             var cab = new ceMPedido
@@ -46,50 +71,127 @@ namespace CapaPresentacion.Helpers
                 CDG_VEND = (cdgVend ?? "").Trim(),
                 CDG_MON = "S",
                 CDG_LOC = (cdgLoc ?? "001").Trim(),
-                CDG_AMB = (SesionActual.Ambiente ?? "").Trim(), // SesionActual es estático
+                CDG_AMB = (SesionActual.Ambiente ?? "").Trim(),
                 NUM_MESA = (numMesa ?? "").Trim(),
                 CDG_USR = (cdgUsr ?? "").Trim(),
                 POR_IGV = ceMPedido.IGV_TASA
             };
             if (numPers > 0) cab.NUM_PERS = numPers;
 
-            // === 2) Detalle desde los controles (Líneas / Combos / Menús) ===
-            foreach (Control ctrl in EnumerarControles(lineas))
+            // Convertir “plano” a detalles para que ceMPedido calcule totales
+            foreach (var p in planos)
             {
-                // Requiere al menos la propiedad "Codigo" para considerar el control una línea válida
-                if (!HasProp(ctrl, "Codigo")) continue;
-
-                string cod10 = Get<string>(ctrl, "Codigo", "");
-                if (string.IsNullOrWhiteSpace(cod10)) continue;
-
-                int cantidad = Get<int>(ctrl, "Cantidad", 1);
-                decimal puConIgv = Get<decimal>(ctrl, "PrecioUnitario", 0m);  // PU mostrado en UI (CON IGV)
-                string desc = Get<string>(ctrl, "Descripcion", "") ?? "";
-                string notas = GetNotasAmigable(ctrl) ?? "";               // 👈 toma Notas / NotasEncabezado / métodos Raw
-
                 var det = new ceDPedido
                 {
-                    COD10 = cod10,
-                    CDG_PROD = ceDPedido.CodigoToInt(cod10),
-                    CAN_PPRD = Math.Max(1, cantidad),
-                    DESCRIPCION = desc,
-                    OBS_PPRD = notas.Trim(),              // BLANCO si vacío (DAO lo respeta)
-                    CDG_LPRC = 1,                         // Lista 001 (el DAO lo emite como "001")
-                    IMP_PROD = (resolverImpresora != null) ? (resolverImpresora(cod10) ?? "") : ""
+                    COD10 = p.Cod10,
+                    CDG_PROD = ceDPedido.CodigoToInt(p.Cod10),
+                    CAN_PPRD = Math.Max(1, p.Cantidad),
+                    DESCRIPCION = p.Descripcion ?? "",
+                    OBS_PPRD = p.Notas?.Trim() ?? "",
+                    CDG_LPRC = 1
                 };
-
-                det.SetPreciosDesdePuConIgv(puConIgv, ceMPedido.IGV_TASA);
+                det.SetPreciosDesdePuConIgv(p.PuConIgv, ceMPedido.IGV_TASA); // calcula PRE_PPRD/IMP_TPRD/PRE_IGV/IMP_IGV
                 cab.Detalles.Add(det);
             }
-
             cab.RecalcularTotales();
 
-            // === 3) Exportar TXT (con ENCABEZADOS) ===
-            var svc = new cnPedido();
+            // === 3) Exportar con DAO (M_PEDIDO + D básico) ===
             Directory.CreateDirectory(CARPETA_DESTINO);
+            var svc = new cnPedido();
             var (mPath, dPath) = svc.ExportarTxt(cab, CARPETA_DESTINO, incluirEncabezados: true);
 
-            // === 4) Resultado para el form ===
+            // === 4) Reescribir D_PEDIDO con layout extendido (mapea TODO) ===
+            var header = string.Join("|", new[]
+            {
+                "NUM_PED","CDG_PROD","CDG_FPRD","CAN_PPRD","PRE_PPRD","DCT_PPRD","DCT_FIC","IGV_PPRD","IMP_TPRD",
+                "CAN_DPRD","CAN_FPRD","OBS_PPRD","CDG_LPRC","PRE_IGV","IMP_IGV",
+                "FAC_UVTA","CDG_UVTA","COM_PPRD","CAN_PROD","CAN_OTRB","CAN_UVTA","PRE_UVTA","VAL_UVTA","TOT_UVTA",
+                "POR_TISC","SWT_IGV","COM_IMPO","POR_IGV","IMP_IVA","NUM_ITEM","IMP_PROD","SWT_IMPR","PCT_CARG","IMP_CARG"
+            });
+
+            using (var wd = new StreamWriter(dPath, false, Encoding.UTF8))
+            {
+                wd.WriteLine(header);
+
+                int itemN = 0;
+                for (int i = 0; i < planos.Count; i++)
+                {
+                    var p = planos[i];
+                    var det = cab.Detalles[i];
+                    itemN++;
+
+                    string cdgProd10 = To10Digits(p.Cod10);
+                    bool precioCero = (p.PuConIgv <= 0m + 0.0000001m);
+
+                    // Resolver IMP_PROD (impresora) y banderas
+                    string impProd = resolverImpresora?.Invoke(p.Cod10) ?? "";
+                    string swtImpr = string.IsNullOrWhiteSpace(impProd) ? "" : "X";
+
+                    // Resolver tributación específica por producto (opcional)
+                    decimal porIgvProd = cab.POR_IGV;
+                    string swtIgv = "";
+                    if (resolverTrib != null)
+                    {
+                        var r = resolverTrib(p.Cod10);
+                        if (r.HasValue)
+                        {
+                            if (r.Value.porIgv.HasValue) porIgvProd = r.Value.porIgv.Value;
+                            if (r.Value.swtIgv.HasValue && r.Value.swtIgv.Value) swtIgv = "X";
+                        }
+                    }
+
+                    // Campos “core”
+                    string CAN_PPRD = det.CAN_PPRD.ToString("0.0000", CultureInfo.InvariantCulture);
+                    string PRE_PPRD = (precioCero ? 0m : det.PRE_PPRD).ToString("0.0000", CultureInfo.InvariantCulture);
+                    string DCT_PPRD = "0.00";
+                    string DCT_FIC = "0.00";
+                    string IGV_PPRD = "0.00";
+                    string IMP_TPRD = (precioCero ? 0m : det.IMP_TPRD).ToString("0.00", CultureInfo.InvariantCulture);
+
+                    string CAN_DPRD = ""; // vacío
+                    string CAN_FPRD = ""; // vacío
+
+                    string OBS_PPRD = det.OBS_PPRD ?? "";
+                    string CDG_LPRC = "001";
+
+                    string PRE_IGV = (precioCero ? 0m : det.PRE_IGV).ToString("0.0000", CultureInfo.InvariantCulture);
+                    string IMP_IGV = (precioCero ? 0m : det.IMP_IGV).ToString("0.00", CultureInfo.InvariantCulture);
+
+                    // Campos “extendidos” → estáticos cuando precio = 0
+                    string FAC_UVTA = precioCero ? "1.0000000000" : "";
+                    string CDG_UVTA = precioCero ? "001" : "";
+                    string COM_PPRD = precioCero ? "0.00" : "";
+                    string CAN_PROD = precioCero ? "0.0000" : "";
+                    string CAN_OTRB = precioCero ? "0.0000" : "";
+                    string CAN_UVTA = precioCero ? "1.0000" : "";
+                    string PRE_UVTA = precioCero ? "0.0000" : "";
+                    string VAL_UVTA = precioCero ? "0.0000" : "";
+                    string TOT_UVTA = precioCero ? "0.00" : "";
+                    string POR_TISC = precioCero ? "0.00" : "";
+                    string SWT_IGV = precioCero ? swtIgv : "";
+                    string COM_IMPO = precioCero ? "0.00" : "";
+                    string POR_IGV = precioCero ? porIgvProd.ToString("0.00", CultureInfo.InvariantCulture) : "";
+                    string IMP_IVA = precioCero ? "0.00" : "";
+                    string NUM_ITEM = itemN.ToString(CultureInfo.InvariantCulture);
+                    string IMP_PROD = impProd;
+                    string SWT_IMPR = swtImpr;
+                    string PCT_CARG = precioCero ? "0.00" : "";
+                    string IMP_CARG = precioCero ? "0.00" : "";
+
+                    var cols = new[]
+                    {
+                        cab.NUM_PED ?? "",
+                        cdgProd10,
+                        "",                         // CDG_FPRD
+                        CAN_PPRD, PRE_PPRD, DCT_PPRD, DCT_FIC, IGV_PPRD, IMP_TPRD,
+                        CAN_DPRD, CAN_FPRD, OBS_PPRD, CDG_LPRC, PRE_IGV, IMP_IGV,
+                        FAC_UVTA, CDG_UVTA, COM_PPRD, CAN_PROD, CAN_OTRB, CAN_UVTA, PRE_UVTA, VAL_UVTA, TOT_UVTA,
+                        POR_TISC, SWT_IGV, COM_IMPO, POR_IGV, IMP_IVA, NUM_ITEM, IMP_PROD, SWT_IMPR, PCT_CARG, IMP_CARG
+                    };
+                    wd.WriteLine(string.Join("|", cols));
+                }
+            }
+
             return new Resultado
             {
                 NumPed = cab.NUM_PED,
@@ -102,31 +204,82 @@ namespace CapaPresentacion.Helpers
             };
         }
 
+        // ——————————————————————————————
+        // Helpers
+        // ——————————————————————————————
 
-        // ===================== Helpers internos =====================
-
-        private static System.Collections.Generic.IEnumerable<Control> EnumerarControles(Control.ControlCollection root)
+        // Aplana SOLO controles top-level; nada de recursión para evitar duplicados.
+        private static IEnumerable<Plano> Flatten(Control.ControlCollection lineas)
         {
-            if (root == null) yield break;
-            var stack = new System.Collections.Generic.Stack<Control>();
-            foreach (Control c in root) stack.Push(c);
-
-            while (stack.Count > 0)
+            foreach (Control c in lineas)
             {
-                var cur = stack.Pop();
-                yield return cur;
-                foreach (Control child in cur.Controls)
-                    stack.Push(child);
+                // === COMBO: el propio control ya devuelve encabezado + sublíneas ===
+                if (c is ComboPedidoItem ci)
+                {
+                    foreach (var ln in ci.GetLineasExport())
+                    {
+                        string cod = Get<string>(ln, "Codigo", "");
+                        string desc = Get<string>(ln, "Descripcion", "");
+                        int qty = Get<int>(ln, "Cantidad", 1);
+                        decimal pu = Get<decimal>(ln, "PrecioUnitarioConIgv", 0m);
+                        string notas = Get<string>(ln, "Notas", "");
+
+                        yield return new Plano
+                        {
+                            Cod10 = (cod ?? "").Trim(),
+                            Descripcion = desc ?? "",
+                            Cantidad = qty,
+                            PuConIgv = pu,         // encabezado >0 ; sublíneas == 0 (por el cambio anterior)
+                            Notas = notas ?? ""
+                        };
+                    }
+                    continue;
+                }
+
+                // === MENÚ: ya devuelves ambas líneas (menú + chicha) ===
+                if (c is MenuPedidoItem mi)
+                {
+                    foreach (var ln in mi.GetLineasExport())
+                    {
+                        yield return new Plano
+                        {
+                            Cod10 = (ln.Codigo ?? "").Trim(),
+                            Descripcion = ln.Descripcion ?? "",
+                            Cantidad = ln.Cantidad,
+                            PuConIgv = ln.PrecioUnitarioConIgv,
+                            Notas = ln.Notas ?? ""
+                        };
+                    }
+                    continue;
+                }
+
+                // === Línea “normal” ===
+                if (HasProp(c, "Codigo"))
+                {
+                    string cod = Get<string>(c, "Codigo", "") ?? "";
+                    int can = Get<int>(c, "Cantidad", 1);
+                    decimal pu = Get<decimal>(c, "PrecioUnitario", 0m);
+                    string desc = Get<string>(c, "Descripcion", "") ?? "";
+                    string notas = GetNotasAmigable(c) ?? "";
+
+                    yield return new Plano
+                    {
+                        Cod10 = cod,
+                        Descripcion = desc,
+                        Cantidad = can,
+                        PuConIgv = pu,
+                        Notas = notas
+                    };
+                }
             }
         }
 
         private static bool HasProp(object obj, string prop)
         {
-            if (obj == null) return false;
-            return obj.GetType().GetProperty(prop, BindingFlags.Public | BindingFlags.Instance) != null;
+            return obj?.GetType().GetProperty(prop, BindingFlags.Public | BindingFlags.Instance) != null;
         }
 
-        private static T Get<T>(object obj, string prop, T def = default(T))
+        private static T Get<T>(object obj, string prop, T def)
         {
             if (obj == null) return def;
             var p = obj.GetType().GetProperty(prop, BindingFlags.Public | BindingFlags.Instance);
@@ -140,77 +293,30 @@ namespace CapaPresentacion.Helpers
             catch { return def; }
         }
 
-        /// <summary>
-        /// Devuelve las notas desde la propiedad 'Notas', 'NotasEncabezado' o métodos
-        /// 'GetNotasRaw' / 'GetNotasEncabezadoRaw' si existen.
-        /// </summary>
-        private static string GetNotasAmigable(object ctrl)
+        // Lee Notas / NotasEncabezado / GetNotasEncabezadoRaw si existen
+        private static string GetNotasAmigable(object obj)
         {
-            // Acumulador
-            string acum = null;
+            if (obj == null) return string.Empty;
 
-            // Helper para concatenar con salto de línea
-            string Append(string cur, string add)
-            {
-                if (string.IsNullOrWhiteSpace(add)) return cur;
-                add = add.Trim();
-                return string.IsNullOrEmpty(cur) ? add : (cur + Environment.NewLine + add);
-            }
+            var p1 = obj.GetType().GetProperty("Notas", BindingFlags.Public | BindingFlags.Instance);
+            if (p1 != null) try { return Convert.ToString(p1.GetValue(obj, null)) ?? ""; } catch { }
 
-            // 1) Propiedades directas
-            var n1 = Get<string>(ctrl, "Notas", "");
-            if (!string.IsNullOrWhiteSpace(n1)) acum = Append(acum, n1);
+            var p2 = obj.GetType().GetProperty("NotasEncabezado", BindingFlags.Public | BindingFlags.Instance);
+            if (p2 != null) try { return Convert.ToString(p2.GetValue(obj, null)) ?? ""; } catch { }
 
-            var n2 = Get<string>(ctrl, "NotasEncabezado", "");
-            if (!string.IsNullOrWhiteSpace(n2)) acum = Append(acum, n2);
+            var m = obj.GetType().GetMethod("GetNotasEncabezadoRaw", BindingFlags.Public | BindingFlags.Instance);
+            if (m != null) try { return Convert.ToString(m.Invoke(obj, null)) ?? ""; } catch { }
 
-            // 2) Métodos sin parámetros
-            try
-            {
-                var m0 = ctrl.GetType().GetMethod("GetNotasRaw", BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null);
-                if (m0 != null)
-                {
-                    var s = m0.Invoke(ctrl, null) as string;
-                    if (!string.IsNullOrWhiteSpace(s)) acum = Append(acum, s);
-                }
-
-                var m1 = ctrl.GetType().GetMethod("GetNotasEncabezadoRaw", BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null);
-                if (m1 != null)
-                {
-                    var s = m1.Invoke(ctrl, null) as string;
-                    if (!string.IsNullOrWhiteSpace(s)) acum = Append(acum, s);
-                }
-            }
-            catch { /* ignore */ }
-
-            // 3) Método con 1 parámetro (enum), típico en MenuPedidoItem: GetNotasRaw(zona)
-            try
-            {
-                var metodos = ctrl.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance);
-                foreach (var m in metodos)
-                {
-                    if (!string.Equals(m.Name, "GetNotasRaw", StringComparison.Ordinal)) continue;
-                    var pars = m.GetParameters();
-                    if (pars.Length != 1) continue;
-
-                    var pType = pars[0].ParameterType;
-                    if (!pType.IsEnum) continue;
-
-                    foreach (var val in Enum.GetValues(pType))
-                    {
-                        try
-                        {
-                            var s = m.Invoke(ctrl, new object[] { val }) as string;
-                            if (!string.IsNullOrWhiteSpace(s)) acum = Append(acum, s);
-                        }
-                        catch { /* intentamos todas las zonas */ }
-                    }
-                }
-            }
-            catch { /* ignore */ }
-
-            return acum ?? string.Empty;
+            return string.Empty;
         }
 
+        private static string To10Digits(string codigo)
+        {
+            string s = (codigo ?? "").Trim();
+            if (s.Length == 0) return "0000000000";
+            if (s.All(char.IsDigit)) return s.PadLeft(10, '0');
+            var digits = new string(s.Where(char.IsDigit).ToArray());
+            return digits.Length > 0 ? digits.PadLeft(10, '0') : "0000000000";
+        }
     }
 }

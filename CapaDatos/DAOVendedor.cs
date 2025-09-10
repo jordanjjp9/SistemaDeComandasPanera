@@ -117,14 +117,60 @@ namespace CapaDatos
         /// <summary>
         /// Lista vendedores con filtro opcional y estado (true=activos, false=inactivos, null=ambos).
         /// </summary>
+        //public List<ceVendedor> Listar(string filtro = null, bool? soloActivos = null)
+        //{
+        //    var lista = new List<ceVendedor>();
+
+        //    string sql = @"
+        //    SELECT CDG_VEND, DES_VEND, SWT_VEND
+        //    FROM dbo.M_VENDED
+        //    WHERE 1=1";
+
+        //    if (!string.IsNullOrWhiteSpace(filtro))
+        //        sql += " AND (CDG_VEND LIKE @f OR DES_VEND LIKE @f)";
+
+        //    if (soloActivos == true)
+        //        sql += " AND SWT_VEND = 1";
+        //    else if (soloActivos == false)
+        //        sql += " AND (SWT_VEND = 0 OR SWT_VEND IS NULL)";
+
+        //    sql += " ORDER BY DES_VEND;";
+
+        //    using (var cn = new SqlConnection(_cs))
+        //    using (var cmd = new SqlCommand(sql, cn))
+        //    {
+        //        if (!string.IsNullOrWhiteSpace(filtro))
+        //            cmd.Parameters.Add("@f", SqlDbType.VarChar, 60).Value = "%" + filtro.Trim() + "%";
+
+        //        cn.Open();
+        //        using (var dr = cmd.ExecuteReader())
+        //        {
+        //            while (dr.Read())
+        //            {
+        //                var v = new ceVendedor
+        //                {
+        //                    Codigo = dr.GetString(0),
+        //                    Nombre = dr.GetString(1),
+        //                    Activo = !dr.IsDBNull(2) && dr.GetInt32(2) == 1
+        //                };
+        //                lista.Add(v);
+        //            }
+        //        }
+        //    }
+
+        //    return lista;
+        //}
         public List<ceVendedor> Listar(string filtro = null, bool? soloActivos = null)
         {
             var lista = new List<ceVendedor>();
 
             string sql = @"
-            SELECT CDG_VEND, DES_VEND, SWT_VEND
-            FROM dbo.M_VENDED
-            WHERE 1=1";
+        SELECT
+            CDG_VEND,
+            DES_VEND,
+            CAST(ISNULL(SWT_VEND,0) AS INT) AS SWT_VEND   -- 👈 fuerza INT
+        FROM dbo.M_VENDED
+        WHERE 1=1";
 
             if (!string.IsNullOrWhiteSpace(filtro))
                 sql += " AND (CDG_VEND LIKE @f OR DES_VEND LIKE @f)";
@@ -151,7 +197,7 @@ namespace CapaDatos
                         {
                             Codigo = dr.GetString(0),
                             Nombre = dr.GetString(1),
-                            Activo = !dr.IsDBNull(2) && dr.GetInt32(2) == 1
+                            Activo = dr.GetInt32(2) == 1              // 👈 ahora sí es int seguro
                         };
                         lista.Add(v);
                     }
@@ -160,6 +206,50 @@ namespace CapaDatos
 
             return lista;
         }
+
+        ///---------------------------------------------------------------
+        /// PARA EL FORMULARIO ADMINISTRADOR
+        public DataTable ListarTablaParaUsuarios(string filtro = null, bool? soloActivos = null)
+        {
+            var dt = new DataTable();
+
+            using (var cn = new SqlConnection(_cs))
+            using (var cmd = new SqlCommand())
+            using (var da = new SqlDataAdapter(cmd))
+            {
+                cmd.Connection = cn;
+                cmd.CommandText = @"
+                SELECT
+                    v.CDG_VEND                                           AS [CodSico],
+                    v.DES_VEND                                           AS [Nombre],
+                    CAST('' AS varchar(10))                              AS [CodSistema],   -- vacío (en memoria)
+                    CASE WHEN ISNULL(v.SWT_VEND,0)=1 THEN 'Activo'
+                         ELSE 'Inactivo' END                             AS [Estado Vendedor]
+                FROM dbo.M_VENDED v
+                WHERE 1=1";
+
+                if (!string.IsNullOrWhiteSpace(filtro))
+                {
+                    cmd.CommandText += @"
+                  AND (v.CDG_VEND LIKE @f OR v.DES_VEND LIKE @f)";
+                    cmd.Parameters.Add("@f", SqlDbType.VarChar, 60)
+                                   .Value = "%" + filtro.Trim() + "%";
+                }
+
+                if (soloActivos == true)
+                    cmd.CommandText += " AND ISNULL(v.SWT_VEND,0) = 1";
+                else if (soloActivos == false)
+                    cmd.CommandText += " AND ISNULL(v.SWT_VEND,0) = 0";
+
+                cmd.CommandText += " ORDER BY v.DES_VEND;";
+
+                cn.Open();
+                da.Fill(dt);
+            }
+
+            return dt;
+        }
+        ///---------------------------------------------------------------
 
         /// <summary>
         /// Actualiza el estado (SWT_VEND) de un vendedor.

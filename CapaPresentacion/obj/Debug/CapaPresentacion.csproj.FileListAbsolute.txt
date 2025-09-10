@@ -59,3 +59,8 @@ C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Controles.ComboPedidoItem.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Notas.frmCDesayunoTamal.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Controles.MenuPedidoItem.resources
+C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Administrador.frmCodigoUser.resources
+C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Administrador.frmImpresoras.resources
+C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Administrador.frmListImpresoras.resources
+C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Administrador.frmPrincipal.resources
+C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Administrador.frmCodigosUsuarios.resources

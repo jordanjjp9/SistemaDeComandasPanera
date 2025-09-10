@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CapaEntidad;
 using CapaDatos;
+using System.Data;
 
 namespace CapaNegocio
 {
@@ -113,5 +114,6 @@ namespace CapaNegocio
         {
             return _dao.ActualizarEstado(codigo, activo) > 0;
         }
+        public DataTable ListarTablaParaUsuarios(string filtro = null, bool? soloActivos = null) => _dao.ListarTablaParaUsuarios(filtro, soloActivos);
     }
 }

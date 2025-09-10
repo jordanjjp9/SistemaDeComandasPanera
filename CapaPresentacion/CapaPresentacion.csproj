@@ -52,6 +52,36 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Administrador\frmCodigosUsuarios.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Administrador\frmCodigosUsuarios.Designer.cs">
+      <DependentUpon>frmCodigosUsuarios.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Administrador\frmCodigoUser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Administrador\frmCodigoUser.Designer.cs">
+      <DependentUpon>frmCodigoUser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Administrador\frmImpresoras.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Administrador\frmImpresoras.Designer.cs">
+      <DependentUpon>frmImpresoras.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Administrador\frmListImpresoras.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Administrador\frmListImpresoras.Designer.cs">
+      <DependentUpon>frmListImpresoras.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Administrador\frmPrincipal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Administrador\frmPrincipal.Designer.cs">
+      <DependentUpon>frmPrincipal.cs</DependentUpon>
+    </Compile>
     <Compile Include="Ambientes\frmSalonPrincipal.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -336,6 +366,21 @@
     <Compile Include="ucLineaPedido.Designer.cs">
       <DependentUpon>ucLineaPedido.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Administrador\frmCodigosUsuarios.resx">
+      <DependentUpon>frmCodigosUsuarios.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Administrador\frmCodigoUser.resx">
+      <DependentUpon>frmCodigoUser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Administrador\frmImpresoras.resx">
+      <DependentUpon>frmImpresoras.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Administrador\frmListImpresoras.resx">
+      <DependentUpon>frmListImpresoras.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Administrador\frmPrincipal.resx">
+      <DependentUpon>frmPrincipal.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Ambientes\frmSalonPrincipal.resx">
       <DependentUpon>frmSalonPrincipal.cs</DependentUpon>
     </EmbeddedResource>
@@ -581,6 +626,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\logo pan %283%291.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\menu.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
