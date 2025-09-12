@@ -56,8 +56,9 @@ namespace CapaPresentacion
             int num = ExtraerNumero(btn.Name);
             if (num == 0) num = ExtraerNumero(btn.Text);
 
-            // Guarda selección
-            SesionActual.Ambiente = "DELIVERY";                // "DELIVERY" o "RAPPI" en los otros forms
+            // === Guarda selección ===
+            // Antes: SesionActual.Ambiente = "Delivery";
+            SesionActual.SetAmbiente(AmbienteTipo.Delivery);   // ← fija "002"
             SesionActual.Mesa = new ceMesa { Numero = num };
 
             // Pide validación al host
@@ -66,36 +67,38 @@ namespace CapaPresentacion
                      ?? Application.OpenForms.OfType<frmMesas>().FirstOrDefault();
 
             host?.MostrarValidacion();
+
+            host?.MostrarValidacion();
         }
 
         // frmValidacion modal: bloquea SOLO este formulario mientras valida
-        private bool ValidarAcceso()
-        {
-            using (var dlg = new frmValidacion())
-            {
-                dlg.StartPosition = FormStartPosition.CenterParent;
-                return dlg.ShowDialog(this) == DialogResult.OK;
-            }
-        }
+        //private bool ValidarAcceso()
+        //{
+        //    using (var dlg = new frmValidacion())
+        //    {
+        //        dlg.StartPosition = FormStartPosition.CenterParent;
+        //        return dlg.ShowDialog(this) == DialogResult.OK;
+        //    }
+        //}
 
-        private void AbrirMenuPrincipalConOwner(int mesaSeleccionada)
-        {
-            // Si Delivery está cargado dentro de frmMesas, FindForm() devuelve ese frmMesas
-            var frmMesas = this.FindForm() as frmMesas;
+        //private void AbrirMenuPrincipalConOwner(int mesaSeleccionada)
+        //{
+        //    // Si Delivery está cargado dentro de frmMesas, FindForm() devuelve ese frmMesas
+        //    var frmMesas = this.FindForm() as frmMesas;
 
-            var menu = new frmMenuPrincipal
-            {
-                StartPosition = FormStartPosition.CenterScreen
-            };
+        //    var menu = new frmMenuPrincipal
+        //    {
+        //        StartPosition = FormStartPosition.CenterScreen
+        //    };
 
-            // (Opcional) pasar la mesa seleccionada
-            // menu.MesaSeleccionada = mesaSeleccionada;
+        //    // (Opcional) pasar la mesa seleccionada
+        //    // menu.MesaSeleccionada = mesaSeleccionada;
 
-            if (frmMesas != null)
-                menu.Show(frmMesas);  // owned form → siempre por encima de frmMesas
-            else
-                menu.Show();
-        }
+        //    if (frmMesas != null)
+        //        menu.Show(frmMesas);  // owned form → siempre por encima de frmMesas
+        //    else
+        //        menu.Show();
+        //}
 
         // Utilidad: extraer número (btnMesa980 -> 980, "MESA 980" -> 980)
         private int ExtraerNumero(string s)

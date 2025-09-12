@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CapaPresentacion.Helpers;
 
 namespace CapaPresentacion
 {
@@ -191,7 +192,12 @@ namespace CapaPresentacion
             pnlButons.Top = (pnlTop.Height - pnlButons.Height) / 2;
         }
 
-        private void btnSalon_Click(object sender, EventArgs e) => AbrirEnPanel<CapaPresentacion.Ambientes.frmSPrincipal>(centrar: true);
+        private void btnSalon_Click(object sender, EventArgs e) 
+        {
+            AbrirEnPanel<CapaPresentacion.Ambientes.frmSPrincipal>(centrar: true);
+            SesionActual.SetAmbiente(AmbienteTipo.Salon);
+            //RefrescarMesas();
+        }  
 
         //   private void btnSalon_Click_1(object sender, EventArgs e) => AbrirEnPanel<CapaPresentacion.Ambientes.frmSPrincipal>(centrar: true);
     }

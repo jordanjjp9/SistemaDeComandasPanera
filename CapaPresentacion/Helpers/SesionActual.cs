@@ -7,51 +7,83 @@ using CapaEntidad;
 
 namespace CapaPresentacion.Helpers
 {
-    public class SesionActual
+    // Enum simple para elegir el ambiente desde la UI
+    public enum AmbienteTipo { Salon, Delivery, Rappi }
+
+    public static class SesionActual
     {
-        //// Vendedor validado
-        //public static ceVendedor Vendedor { get; set; }
+        // --- Identidad de la sesión ---
+        public static ceVendedor Vendedor { get; set; }   // mozo vigente
+        public static ceMesa Mesa { get; set; }   // mesa seleccionada
 
-        //// Mesa seleccionada
-        //public static ceMesa Mesa { get; set; }
+        // Usuario / local / caja
+        public static string Usuario { get; set; } = "VENTAS";
+        public static string Local { get; set; } = "001";
+        public static string Caja { get; set; } = "001";
 
-        //// Ambiente (Salon, Delivery, Rappi)
-        //public static string Ambiente { get; set; }
+        // Ambiente SIEMPRE como código de 3 dígitos (001/002/003)
+        public static string Ambiente { get; private set; } = "001"; // default: SALÓN
 
-        //// Limpia los datos cuando sea necesario
-        //public static void Limpiar()
-        //{
-        //    Vendedor = null;
-        //    Mesa = null;
-        //    Ambiente = null;
-        //}
-        // Vendedor validado (código digitado antes de entrar)
-        public static ceVendedor Vendedor { get; set; }
+        /// <summary>Fija el ambiente usando el enum (compatible C# 7.3).</summary>
+        public static void SetAmbiente(AmbienteTipo tipo)
+        {
+            switch (tipo)
+            {
+                case AmbienteTipo.Salon:
+                    Ambiente = "001";
+                    break;
+                case AmbienteTipo.Delivery:
+                    Ambiente = "002";
+                    break;
+                case AmbienteTipo.Rappi:
+                    Ambiente = "003";
+                    break;
+                default:
+                    Ambiente = "001";
+                    break;
+            }
+        }
 
-        // Mesa seleccionada
-        public static ceMesa Mesa { get; set; }
+        /// <summary>
+        /// Fija el ambiente a partir del texto del botón/pestaña
+        /// ("SALON", "DELIVERY", "RAPPI"). Ignora mayúsculas/minúsculas.
+        /// </summary>
+        public static void SetAmbiente(string nombre)
+        {
+            var t = (nombre ?? string.Empty).Trim().ToUpperInvariant();
 
-        // Ambiente (001 salón, 002 delivery, 003 rappi…)
-        public static string Ambiente { get; set; }
+            if (t.StartsWith("SAL"))
+                Ambiente = "001";
+            else if (t.StartsWith("DEL"))
+                Ambiente = "002";
+            else if (t.StartsWith("RAP"))
+                Ambiente = "003";
+            else
+                Ambiente = "001";
+        }
 
-        // NUEVO: usuario del login (CDG_USR)
-        public static string Usuario { get; set; }
+        // --- “Memoria” útil para precargar en el formulario ---
+        public static string UltMesa { get; set; } // p.ej. "21", "807"
+        public static int? UltPers { get; set; } // p.ej. 2, 3…
+        public static string UltMozo
+        {
+            get { return Vendedor != null ? Vendedor.Codigo : null; }
+        }
 
-        // NUEVO: local/sucursal (CDG_LOC)
-        public static string Local { get; set; }
-
-        // NUEVO: caja (CDG_CAJA) si aplica
-        public static string Caja { get; set; }
-
-        // Limpia los datos cuando sea necesario
+        // --- Reset de sesión ---
         public static void Limpiar()
         {
             Vendedor = null;
             Mesa = null;
-            Ambiente = null;
             Usuario = null;
             Local = null;
             Caja = null;
+
+            UltMesa = null;
+            UltPers = null;
+
+            // volvemos al default (SALÓN)
+            Ambiente = "001";
         }
     }
 }

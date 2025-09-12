@@ -1599,69 +1599,12 @@ namespace CapaPresentacion
         }
         private void btnActualizar_Click(object sender, EventArgs e)
         {
-            //try
-            //{
-            //    btnActualizar.Enabled = btnEliminar.Enabled = btnComentarioLbr.Enabled = false;
-            //    Cursor = Cursors.WaitCursor;
-
-            //    // === Datos de sesión/encabezado ===
-            //    string cdgVend = SesionActual.Vendedor?.Codigo ?? "";
-            //    string cdgUsr = SesionActual.Usuario ?? "";
-            //    string cdgLoc = SesionActual.Local ?? "001";
-            //    string cdgCaja = SesionActual.Caja ?? "001";
-
-            //    string numMesa = (txtMesa.Text ?? "").Trim();
-            //    int numPers = int.TryParse(txtNPersonas.Text, out var n) ? n : 0;
-
-            //    // === Generación de TXT vía wrapper ===
-            //    // (El wrapper arma ceMPedido/ceDPedido y llama a cnPedido/DAOPedidoTxt)
-            //    var resultado = TxtPedidoWriter.GenerarTxts(
-            //        lineas: flpLineas.Controls,
-            //        resolverImpresora: ResolverImpresoraPorProducto,
-            //        cdgVend: cdgVend,
-            //        cdgUsr: cdgUsr,
-            //        cdgLoc: cdgLoc,
-            //        cdgCaja: cdgCaja,
-            //        numMesa: numMesa,
-            //        numPers: numPers
-            //    );
-
-            //    // === Popup de confirmación ===
-            //    MessageBox.Show(
-            //        "Pedido exportado.\n\n" +
-            //        $"NUM_PED:  {resultado.NumPed}\n" +
-            //        $"Cabecera: {resultado.RutaH}\n" +
-            //        $"Detalle : {resultado.RutaD}\n\n" +
-            //        $"Items   : {resultado.CantItems}\n" +
-            //        $"SubTotal: S/ {resultado.SubTotal:0.00}\n" +
-            //        $"IGV     : S/ {resultado.Igv:0.00}\n" +
-            //        $"Total   : S/ {resultado.Total:0.00}",
-            //        "TXT generado",
-            //        MessageBoxButtons.OK,
-            //        MessageBoxIcon.Information
-            //    );
-
-            //    // (Opcional) Abrir la carpeta y resaltar el archivo de cabecera
-            //    // System.Diagnostics.Process.Start("explorer.exe", "/select,\"" + resultado.RutaH + "\"");
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show("Error al generar el TXT: " + ex.Message,
-            //        "Actualizar", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //}
-            //finally
-            //{
-            //    Cursor = Cursors.Default;
-            //    btnActualizar.Enabled = true;
-            //    btnEliminar.Enabled = (LineaSelection.Actual != null);
-            //    btnComentarioLbr.Enabled = (LineaSelection.Actual != null);
-            //}
             try
             {
                 // Validación rápida
                 if (flpLineas.Controls.Count == 0)
                 {
-                    MessageBox.Show("No hay ítems para exportar.", "Actualizar",
+                    MessageBox.Show("No hay ítems para guardar.", "Actualizar",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
@@ -1669,71 +1612,84 @@ namespace CapaPresentacion
                 btnActualizar.Enabled = btnEliminar.Enabled = btnComentarioLbr.Enabled = false;
                 Cursor = Cursors.WaitCursor;
 
-                // === Datos de sesión/encabezado ===
-                string cdgVend = SesionActual.Vendedor?.Codigo ?? "";
+                // === Datos de sesión / encabezado ===
+                string cdgVend = (SesionActual.Vendedor != null) ? (SesionActual.Vendedor.Codigo ?? "") : "";
                 string cdgUsr = SesionActual.Usuario ?? "";
-                string cdgLoc = SesionActual.Local ?? "001";
-                string cdgCaja = SesionActual.Caja ?? "001";
+                string cdgLoc = SesionActual.Local ?? "000";   // por defecto 000
+                string cdgCaja = SesionActual.Caja ?? "";      // puede ir vacío
 
                 string numMesa = (txtMesa.Text ?? "").Trim();
-                int numPers = int.TryParse(txtNPersonas.Text, out var n) ? n : 0;
+                int numPers; if (!int.TryParse(txtNPersonas.Text, out numPers)) numPers = 0;
 
-                // === Generación de TXT vía wrapper ===
-                var resultado = TxtPedidoWriter.GenerarTxts(
+                // Resolver impresora
+                Func<string, string> resolverImpresora = ResolverImpresoraPorProducto;
+
+                // === Resolver tributario (ValueTuple para TxtPedidoWriter) ===
+                // Devuelve (porIgv?, swtIgv?) o null si no se puede resolver.
+                Func<string, System.ValueTuple<decimal?, bool?>?> resolverTribVT = (cod10) =>
+                {
+                    try
+                    {
+                        ceProductos p; // <-- IMPORTANTE: usar ceProductos, no object
+                        if (_cachePorCodigo != null &&
+                            _cachePorCodigo.TryGetValue((cod10 ?? "").Trim(), out p) &&
+                            p != null)
+                        {
+                            // POR_IGV puede venir como 10.00 o 0.10 en tu maestro; ajusta si lo necesitas
+                            decimal porIgv = TryGet<decimal>(p, "POR_IGV", -1m);
+                            bool swtIgv = TryGet<bool>(p, "SWT_IGV", TryGet<bool>(p, "AFECTO_IGV", false));
+
+                            bool hasPor = (porIgv >= 0m);
+                            if (hasPor || swtIgv)
+                                return new System.ValueTuple<decimal?, bool?>(hasPor ? (decimal?)porIgv : null, (bool?)swtIgv);
+                        }
+                    }
+                    catch { /* opcional */ }
+                    return null;
+                };
+
+                // Wrapper a Tuple para pasarlo a cnPedido/DAOPedido (que esperan Tuple en C# 7.3)
+                Func<string, Tuple<decimal?, bool?>> resolverTribTuple = (cod10) =>
+                {
+                    var r = resolverTribVT(cod10);
+                    if (r.HasValue) return new Tuple<decimal?, bool?>(r.Value.Item1, r.Value.Item2);
+                    return null;
+                };
+
+                // === Construir el pedido (cabecera + detalles) desde la UI ===
+                var res = TxtPedidoWriter.Generar(
                     lineas: flpLineas.Controls,
-                    resolverImpresora: ResolverImpresoraPorProducto,
+                    resolverImpresora: resolverImpresora,
                     cdgVend: cdgVend,
                     cdgUsr: cdgUsr,
                     cdgLoc: cdgLoc,
                     cdgCaja: cdgCaja,
                     numMesa: numMesa,
                     numPers: numPers,
-                    resolverTrib: (cod10) =>
-                    {
-                        // Opcional: intenta obtener POR_IGV / SWT_IGV del maestro (si existen).
-                        try
-                        {
-                            if (_cachePorCodigo != null &&
-                                _cachePorCodigo.TryGetValue((cod10 ?? "").Trim(), out var p) &&
-                                p != null)
-                            {
-                                // Ajusta los nombres si en ceProductos son distintos.
-                                decimal porIgv = TryGet<decimal>(p, "POR_IGV", -1m);
-                                bool swtIgv = TryGet<bool>(p, "SWT_IGV",
-                                                TryGet<bool>(p, "AFECTO_IGV", false));
-
-                                bool hasPor = porIgv >= 0m; // -1m => no disponible
-                                if (hasPor || swtIgv)
-                                    return (hasPor ? (decimal?)porIgv : null, (bool?)swtIgv);
-                            }
-                        }
-                        catch { /* es opcional; ignorar errores */ }
-
-                        return null;
-                    }
+                    // <-- IMPORTANTE: castear a delegado propio de TxtPedidoWriter
+                    resolverTrib: (cod => resolverTribVT(cod))
                 );
+
+                // === Guardar en BD (M_PEDIDO + D_PEDIDO) ===
+                var svc = new CapaNegocio.cnPedido();
+                string numPedAsignado = svc.GuardarDb(res.Cabecera, resolverImpresora, resolverTribTuple);
 
                 // === Popup de confirmación ===
                 MessageBox.Show(
-                    "Pedido exportado.\n\n" +
-                    $"NUM_PED:  {resultado.NumPed}\n" +
-                    $"Cabecera: {resultado.RutaH}\n" +
-                    $"Detalle : {resultado.RutaD}\n\n" +
-                    $"Items   : {resultado.CantItems}\n" +
-                    $"SubTotal: S/ {resultado.SubTotal:0.00}\n" +
-                    $"IGV     : S/ {resultado.Igv:0.00}\n" +
-                    $"Total   : S/ {resultado.Total:0.00}",
-                    "TXT generado",
+                    "Pedido guardado en BD.\n\n" +
+                    "NUM_PED : " + numPedAsignado + "\n" +
+                    "Items   : " + res.CantItems + "\n" +
+                    "SubTotal: S/ " + res.Cabecera.IMP_BASE.ToString("0.00") + "\n" +
+                    "IGV     : S/ " + res.Cabecera.IMP_IGV.ToString("0.00") + "\n" +
+                    "Total   : S/ " + res.Cabecera.IMP_TOT.ToString("0.00"),
+                    "OK",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information
                 );
-
-                // (Opcional) Abrir la carpeta y resaltar el archivo de cabecera
-                // System.Diagnostics.Process.Start("explorer.exe", "/select,\"" + resultado.RutaH + "\"");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error al generar el TXT: " + ex.Message,
+                MessageBox.Show("Error al guardar el pedido: " + ex.Message,
                     "Actualizar", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally

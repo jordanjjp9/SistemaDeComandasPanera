@@ -280,12 +280,6 @@
     <Compile Include="frmNumeroPersonas.Designer.cs">
       <DependentUpon>frmNumeroPersonas.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmSalonPrincipal.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmSalonPrincipal.Designer.cs">
-      <DependentUpon>frmSalonPrincipal.cs</DependentUpon>
-    </Compile>
     <Compile Include="frmValidacion.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -479,9 +473,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmNumeroPersonas.resx">
       <DependentUpon>frmNumeroPersonas.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmSalonPrincipal.resx">
-      <DependentUpon>frmSalonPrincipal.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmValidacion.resx">
       <DependentUpon>frmValidacion.cs</DependentUpon>

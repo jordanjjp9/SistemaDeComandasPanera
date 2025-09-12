@@ -57,22 +57,41 @@ namespace CapaPresentacion.Ambientes
 
         private void BtnMesa_Click(object sender, EventArgs e)
         {
-            var ctrl = sender as Control;               // sirve para Button y Guna2Button
+            //var ctrl = sender as Control;               // sirve para Button y Guna2Button
+            //string name = ctrl?.Name ?? "";
+            //string text = ctrl?.Text ?? "";
+
+            //int num = ExtraerNumero(name);
+            //if (num == 0) num = ExtraerNumero(text);
+
+            //// Guarda selección
+            //SesionActual.Ambiente = "SALON";
+            //SesionActual.Mesa = new ceMesa { Numero = num };
+
+            //// pídelo al host (frmMesas). FindForm funciona aunque este form esté embebido.
+            //var host = this.FindForm() as frmMesas
+            //        ?? this.TopLevelControl as frmMesas
+            //        ?? Application.OpenForms.OfType<frmMesas>().FirstOrDefault();
+
+            //host?.MostrarValidacion();
+
+            var ctrl = sender as Control;
             string name = ctrl?.Name ?? "";
             string text = ctrl?.Text ?? "";
 
             int num = ExtraerNumero(name);
             if (num == 0) num = ExtraerNumero(text);
 
-            // Guarda selección
-            SesionActual.Ambiente = "SALON";
+            // Ambiente => código "001"
+            SesionActual.SetAmbiente(AmbienteTipo.Salon);
+
+            // Mesa seleccionada
             SesionActual.Mesa = new ceMesa { Numero = num };
 
-            // pídelo al host (frmMesas). FindForm funciona aunque este form esté embebido.
+            // ... continuar con tu flujo (validación / abrir form etc.)
             var host = this.FindForm() as frmMesas
-                    ?? this.TopLevelControl as frmMesas
-                    ?? Application.OpenForms.OfType<frmMesas>().FirstOrDefault();
-
+                       ?? this.TopLevelControl as frmMesas
+                       ?? Application.OpenForms.OfType<frmMesas>().FirstOrDefault();
             host?.MostrarValidacion();
         }
 
