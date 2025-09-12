@@ -11,5 +11,6 @@ namespace CapaEntidad
         public string Codigo { get; set; }   // CDG_VEND
         public string Nombre { get; set; }   // DES_VEND
         public bool Activo { get; set; }    // SWT_VEND == 1
+        public string CdgUsr { get; set; }
     }
 }

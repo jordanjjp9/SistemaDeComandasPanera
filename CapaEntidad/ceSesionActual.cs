@@ -10,5 +10,6 @@ namespace CapaEntidad
     {
         public static ceVendedor Vendedor { get; set; }
         public static ceMesa Mesa { get; set; }
+        public string CdgUsr { get; set; }
     }
 }

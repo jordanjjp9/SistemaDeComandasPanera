@@ -29,10 +29,10 @@
         private void InitializeComponent()
         {
             this.pnlCabecera = new System.Windows.Forms.Panel();
+            this.btnCerrar = new Guna.UI2.WinForms.Guna2Button();
             this.guna2HtmlLabel1 = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.txtIngCod = new Guna.UI2.WinForms.Guna2TextBox();
             this.btnAceptar = new Guna.UI2.WinForms.Guna2Button();
-            this.btnCerrar = new Guna.UI2.WinForms.Guna2Button();
             this.pnlCabecera.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -45,6 +45,22 @@
             this.pnlCabecera.Name = "pnlCabecera";
             this.pnlCabecera.Size = new System.Drawing.Size(429, 33);
             this.pnlCabecera.TabIndex = 2;
+            // 
+            // btnCerrar
+            // 
+            this.btnCerrar.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnCerrar.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnCerrar.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnCerrar.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnCerrar.Dock = System.Windows.Forms.DockStyle.Right;
+            this.btnCerrar.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.btnCerrar.ForeColor = System.Drawing.Color.White;
+            this.btnCerrar.Location = new System.Drawing.Point(374, 0);
+            this.btnCerrar.Name = "btnCerrar";
+            this.btnCerrar.Size = new System.Drawing.Size(55, 33);
+            this.btnCerrar.TabIndex = 1;
+            this.btnCerrar.Text = "X";
+            this.btnCerrar.Click += new System.EventHandler(this.btnCerrar_Click);
             // 
             // guna2HtmlLabel1
             // 
@@ -90,22 +106,6 @@
             this.btnAceptar.TabIndex = 4;
             this.btnAceptar.Click += new System.EventHandler(this.btnAceptar_Click);
             // 
-            // btnCerrar
-            // 
-            this.btnCerrar.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnCerrar.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnCerrar.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnCerrar.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnCerrar.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnCerrar.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.btnCerrar.ForeColor = System.Drawing.Color.White;
-            this.btnCerrar.Location = new System.Drawing.Point(374, 0);
-            this.btnCerrar.Name = "btnCerrar";
-            this.btnCerrar.Size = new System.Drawing.Size(55, 33);
-            this.btnCerrar.TabIndex = 1;
-            this.btnCerrar.Text = "X";
-            this.btnCerrar.Click += new System.EventHandler(this.btnCerrar_Click);
-            // 
             // frmCodigoUser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -117,6 +117,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "frmCodigoUser";
             this.Text = "frmCodigoUser";
+            this.Shown += new System.EventHandler(this.frmCodigoUser_Shown);
             this.pnlCabecera.ResumeLayout(false);
             this.pnlCabecera.PerformLayout();
             this.ResumeLayout(false);

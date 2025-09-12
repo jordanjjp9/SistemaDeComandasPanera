@@ -32,6 +32,7 @@
             this.pnlCabecera = new System.Windows.Forms.Panel();
             this.guna2HtmlLabel1 = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.btnAceptar = new Guna.UI2.WinForms.Guna2Button();
+            this.btnClose = new Guna.UI2.WinForms.Guna2Button();
             this.pnlCabecera.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -52,6 +53,7 @@
             // 
             // pnlCabecera
             // 
+            this.pnlCabecera.Controls.Add(this.btnClose);
             this.pnlCabecera.Controls.Add(this.guna2HtmlLabel1);
             this.pnlCabecera.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlCabecera.Location = new System.Drawing.Point(0, 0);
@@ -82,6 +84,24 @@
             this.btnAceptar.Name = "btnAceptar";
             this.btnAceptar.Size = new System.Drawing.Size(53, 36);
             this.btnAceptar.TabIndex = 2;
+            this.btnAceptar.Click += new System.EventHandler(this.btnAceptar_Click);
+            // 
+            // btnClose
+            // 
+            this.btnClose.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnClose.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnClose.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnClose.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnClose.Dock = System.Windows.Forms.DockStyle.Right;
+            this.btnClose.FillColor = System.Drawing.Color.Transparent;
+            this.btnClose.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnClose.ForeColor = System.Drawing.Color.Black;
+            this.btnClose.Location = new System.Drawing.Point(386, 0);
+            this.btnClose.Name = "btnClose";
+            this.btnClose.Size = new System.Drawing.Size(43, 33);
+            this.btnClose.TabIndex = 1;
+            this.btnClose.Text = "X";
+            this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
             // frmListImpresoras
             // 
@@ -94,6 +114,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "frmListImpresoras";
             this.Text = "frmListImpresoras";
+            this.Load += new System.EventHandler(this.frmListImpresoras_Load);
             this.pnlCabecera.ResumeLayout(false);
             this.pnlCabecera.PerformLayout();
             this.ResumeLayout(false);
@@ -106,5 +127,6 @@
         private System.Windows.Forms.Panel pnlCabecera;
         private Guna.UI2.WinForms.Guna2HtmlLabel guna2HtmlLabel1;
         private Guna.UI2.WinForms.Guna2Button btnAceptar;
+        private Guna.UI2.WinForms.Guna2Button btnClose;
     }
 }
