@@ -5,6 +5,10 @@ using System.Data.SqlClient;
 
 namespace CapaDatos
 {
+    /// <summary>
+    /// Acceso a datos para mapeo de productos ↔ impresoras (principal/secundaria)
+    /// y catálogo de formatos/impresoras.
+    /// </summary>
     public class DAOImpresora
     {
         private readonly string _cs;
@@ -27,8 +31,8 @@ namespace CapaDatos
             SELECT
                 LTRIM(RTRIM(mprec.CDG_PROD)) AS CDG_PROD,
                 LTRIM(RTRIM(mprod.DES_PROD)) AS Producto,
-                LTRIM(RTRIM(f1.DES_FORM))    AS ImprePrin,  -- nombre impresora principal
-                LTRIM(RTRIM(f2.DES_FORM))    AS ImpreSec    -- nombre impresora secundaria
+                LTRIM(RTRIM(f1.DES_FORM))    AS ImprePrin,  -- nombre impresora principal (lógico)
+                LTRIM(RTRIM(f2.DES_FORM))    AS ImpreSec    -- nombre impresora secundaria (lógico)
             FROM dbo.M_PRECIO  AS mprec
             JOIN dbo.M_PRODUC  AS mprod ON mprod.CDG_PROD = mprec.CDG_PROD
             LEFT JOIN dbo.M_FRMIMP AS f1 ON f1.CDG_FORM = mprod.IMP_PROD
@@ -107,9 +111,9 @@ namespace CapaDatos
         public int ActualizarImpresoraSec(string cdgProd, string cdgImp)
         {
             const string sql = @"
-UPDATE dbo.M_PRODUC
-   SET CDG_IMP = @cdgImp
- WHERE CDG_PROD = @cdgProd;";
+            UPDATE dbo.M_PRODUC
+               SET CDG_IMP = @cdgImp
+             WHERE CDG_PROD = @cdgProd;";
 
             using (var cn = new SqlConnection(_cs))
             using (var cmd = new SqlCommand(sql, cn))

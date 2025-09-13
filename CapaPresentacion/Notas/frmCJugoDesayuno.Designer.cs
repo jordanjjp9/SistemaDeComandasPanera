@@ -34,7 +34,7 @@
             this.btnContinuar = new Guna.UI2.WinForms.Guna2Button();
             this.flpCJugoDes = new System.Windows.Forms.FlowLayoutPanel();
             this.btnProd0000001529 = new Guna.UI2.WinForms.Guna2Button();
-            this.btnJugPapay = new Guna.UI2.WinForms.Guna2Button();
+            this.btnProd0000001533 = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000001528 = new Guna.UI2.WinForms.Guna2Button();
             this.btnSnJug = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000000232 = new Guna.UI2.WinForms.Guna2Button();
@@ -113,7 +113,7 @@
             // flpCJugoDes
             // 
             this.flpCJugoDes.Controls.Add(this.btnProd0000001529);
-            this.flpCJugoDes.Controls.Add(this.btnJugPapay);
+            this.flpCJugoDes.Controls.Add(this.btnProd0000001533);
             this.flpCJugoDes.Controls.Add(this.btnProd0000001528);
             this.flpCJugoDes.Controls.Add(this.btnSnJug);
             this.flpCJugoDes.Controls.Add(this.btnProd0000000232);
@@ -141,22 +141,22 @@
             this.btnProd0000001529.Text = "JUGO DE PIÑA";
             this.btnProd0000001529.TextOffset = new System.Drawing.Point(0, 70);
             // 
-            // btnJugPapay
+            // btnProd0000001533
             // 
-            this.btnJugPapay.BorderRadius = 22;
-            this.btnJugPapay.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnJugPapay.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnJugPapay.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnJugPapay.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnJugPapay.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnJugPapay.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnJugPapay.ForeColor = System.Drawing.Color.White;
-            this.btnJugPapay.Location = new System.Drawing.Point(211, 3);
-            this.btnJugPapay.Name = "btnJugPapay";
-            this.btnJugPapay.Size = new System.Drawing.Size(202, 205);
-            this.btnJugPapay.TabIndex = 111;
-            this.btnJugPapay.Text = "JUGO DE PAPAYA";
-            this.btnJugPapay.TextOffset = new System.Drawing.Point(0, 70);
+            this.btnProd0000001533.BorderRadius = 22;
+            this.btnProd0000001533.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000001533.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000001533.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnProd0000001533.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnProd0000001533.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000001533.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProd0000001533.ForeColor = System.Drawing.Color.White;
+            this.btnProd0000001533.Location = new System.Drawing.Point(211, 3);
+            this.btnProd0000001533.Name = "btnProd0000001533";
+            this.btnProd0000001533.Size = new System.Drawing.Size(202, 205);
+            this.btnProd0000001533.TabIndex = 111;
+            this.btnProd0000001533.Text = "JUGO DE PAPAYA";
+            this.btnProd0000001533.TextOffset = new System.Drawing.Point(0, 70);
             // 
             // btnProd0000001528
             // 
@@ -374,7 +374,7 @@
         private Guna.UI2.WinForms.Guna2Button btnEliminar;
         private Guna.UI2.WinForms.Guna2Button btnContinuar;
         private Guna.UI2.WinForms.Guna2Button btnProd0000001529;
-        private Guna.UI2.WinForms.Guna2Button btnJugPapay;
+        private Guna.UI2.WinForms.Guna2Button btnProd0000001533;
         private Guna.UI2.WinForms.Guna2Button btnProd0000001528;
         private Guna.UI2.WinForms.Guna2Button btnSnJug;
         private Guna.UI2.WinForms.Guna2Button btnProd0000000232;

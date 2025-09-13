@@ -13,6 +13,7 @@ namespace CapaDatos
     public class DAOProductos
     {
         private readonly string _cs;
+        Conexion conex = new Conexion();
 
 
         public DAOProductos()
@@ -74,50 +75,6 @@ namespace CapaDatos
             }
         }
 
-        //public List<ceProductos> ListarBasico(string lprc = "001")
-        //{
-        //    const string sql = @"
-        //    SELECT
-        //        mpre.CDG_PROD,
-        //        LTRIM(RTRIM(prd.DES_PROD)) AS DES_PROD,
-        //        mpre.PRE_SOL,
-        //        prd.CDG_TPRD                 -- << NUEVO
-        //    FROM M_PRECIO mpre
-        //    INNER JOIN M_PRODUC prd ON prd.CDG_PROD = mpre.CDG_PROD
-        //    WHERE mpre.CDG_LPRC = @lprc
-        //    ORDER BY prd.DES_PROD;";
-
-        //    var lista = new List<ceProductos>();
-
-        //    using (var cn = new SqlConnection(_cs))
-        //    using (var cmd = new SqlCommand(sql, cn))
-        //    {
-        //        cmd.Parameters.Add("@lprc", SqlDbType.VarChar, 10).Value = (lprc ?? "001").Trim();
-        //        cn.Open();
-
-        //        using (var dr = cmd.ExecuteReader(CommandBehavior.CloseConnection))
-        //        {
-        //            int oCod = dr.GetOrdinal("CDG_PROD");
-        //            int oDesc = dr.GetOrdinal("DES_PROD");
-        //            int oPrec = dr.GetOrdinal("PRE_SOL");
-        //            int oTprd = dr.GetOrdinal("CDG_TPRD");     // << NUEVO
-
-        //            while (dr.Read())
-        //            {
-        //                var prod = new ceProductos
-        //                {
-        //                    Codigo = LeerString(dr, oCod),
-        //                    Descripcion = LeerString(dr, oDesc),
-        //                    PrecioUnitario = LeerDecimal(dr, oPrec),
-        //                    TipoProductoCodigo = LeerString(dr, oTprd),  // << NUEVO
-        //                    Activo = true
-        //                };
-        //                lista.Add(prod);
-        //            }
-        //        }
-        //    }
-        //    return lista;
-        //}
         public List<ceProductos> ListarBasico(string lprc = "001")
         {
             const string sql = @"
@@ -164,52 +121,6 @@ namespace CapaDatos
             }
             return lista;
         }
-        // =======================
-        // 3) ObtenerPorCodigo  (AÑADE prd.CDG_TPRD y mapéalo)
-        // =======================
-        //public ceProductos ObtenerPorCodigo(string codigo, string lprc = "001")
-        //{
-        //    const string sql = @"
-        //    SELECT TOP 1
-        //        mpre.CDG_PROD,
-        //        LTRIM(RTRIM(prd.DES_PROD)) AS DES_PROD,
-        //        mpre.PRE_SOL,
-        //        prd.CDG_TPRD                -- << NUEVO
-        //    FROM M_PRECIO mpre
-        //    INNER JOIN M_PRODUC prd ON prd.CDG_PROD = mpre.CDG_PROD
-        //    WHERE mpre.CDG_LPRC = @lprc AND mpre.CDG_PROD = @cod;";
-
-        //    if (string.IsNullOrWhiteSpace(codigo))
-        //        return null;
-
-        //    using (var cn = new SqlConnection(_cs))
-        //    using (var cmd = new SqlCommand(sql, cn))
-        //    {
-        //        cmd.Parameters.Add("@lprc", SqlDbType.VarChar, 10).Value = (lprc ?? "001").Trim();
-        //        cmd.Parameters.Add("@cod", SqlDbType.VarChar, 40).Value = codigo.Trim();
-
-        //        cn.Open();
-        //        using (var dr = cmd.ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.CloseConnection))
-        //        {
-        //            if (!dr.Read()) return null;
-
-        //            int oCod = dr.GetOrdinal("CDG_PROD");
-        //            int oDesc = dr.GetOrdinal("DES_PROD");
-        //            int oPrec = dr.GetOrdinal("PRE_SOL");
-        //            int oTprd = dr.GetOrdinal("CDG_TPRD");      // << NUEVO
-
-        //            var prod = new ceProductos
-        //            {
-        //                Codigo = LeerString(dr, oCod),
-        //                Descripcion = LeerString(dr, oDesc),
-        //                PrecioUnitario = LeerDecimal(dr, oPrec),
-        //                TipoProductoCodigo = LeerString(dr, oTprd),  // << NUEVO
-        //                Activo = true
-        //            };
-        //            return prod;
-        //        }
-        //    }
-        //}
         public ceProductos ObtenerPorCodigo(string codigo, string lprc = "001")
         {
             const string sql = @"
@@ -256,64 +167,6 @@ namespace CapaDatos
         }
 
 
-        // =======================
-        // 4) ListarPorCategoria  (AÑADE p.CDG_TPRD y mapéalo)
-        // =======================
-        //public List<ceProductos> ListarPorCategoria(string categoriaCod, string lprc = "001")
-        //{
-        //    string sql = @"
-        //        SELECT p.CDG_PROD,
-        //               LTRIM(RTRIM(p.DES_PROD)) AS DES_PROD,
-        //               p.CDG_UMED,
-        //               unm.ABR_ITEM AS UMD,
-        //               pr.VAL_SOL,
-        //               pr.PRE_SOL,
-        //               pr.CDG_LPRC,
-        //               p.CDG_TPRD                    -- << NUEVO
-        //        FROM M_PRODUC p
-        //        JOIN M_PRECIO pr ON pr.CDG_PROD = p.CDG_PROD AND pr.CDG_LPRC=@lprc
-        //        JOIN D_TABLAS unm ON unm.CDG_TAB='UNM' AND unm.NUM_ITEM=p.CDG_UMED
-        //        WHERE p.CDG_FAM = @cat
-        //        ORDER BY p.DES_PROD;";
-
-        //    var lst = new List<ceProductos>();
-        //    using (var cn = new SqlConnection(_cs))
-        //    using (var cmd = new SqlCommand(sql, cn))
-        //    {
-        //        cmd.Parameters.Add("@cat", SqlDbType.VarChar, 10).Value = categoriaCod;
-        //        cmd.Parameters.Add("@lprc", SqlDbType.VarChar, 10).Value = lprc;
-
-        //        cn.Open();
-        //        using (var dr = cmd.ExecuteReader())
-        //        {
-        //            int oCod = dr.GetOrdinal("CDG_PROD");
-        //            int oDesc = dr.GetOrdinal("DES_PROD");
-        //            int oUmed = dr.GetOrdinal("CDG_UMED");
-        //            int oUmd = dr.GetOrdinal("UMD");
-        //            int oVal = dr.GetOrdinal("VAL_SOL");
-        //            int oPre = dr.GetOrdinal("PRE_SOL");
-        //            int oLprc = dr.GetOrdinal("CDG_LPRC");
-        //            int oTprd = dr.GetOrdinal("CDG_TPRD");      // << NUEVO
-
-        //            while (dr.Read())
-        //            {
-        //                lst.Add(new ceProductos
-        //                {
-        //                    Codigo = LeerString(dr, oCod),
-        //                    Descripcion = LeerString(dr, oDesc),
-        //                    UnidadCodigo = LeerString(dr, oUmed),
-        //                    UnidadDescripcion = LeerString(dr, oUmd),
-        //                    ValorUnitario = LeerDecimal(dr, oVal),
-        //                    PrecioUnitario = LeerDecimal(dr, oPre),
-        //                    ListaPrecioCodigo = LeerString(dr, oLprc),
-        //                    TipoProductoCodigo = LeerString(dr, oTprd),  // << NUEVO
-        //                    Activo = true
-        //                });
-        //            }
-        //        }
-        //    }
-        //    return lst;
-        //}
         public List<ceProductos> ListarPorCategoria(string categoriaCod, string lprc = "001")
         {
             string sql = @"
@@ -373,6 +226,46 @@ namespace CapaDatos
             return lst;
         }
 
+        /////-----------IMPRESION-------------------------------
+        public static (string ImpPrin, string ImpSec) ObtenerRuteoPorProducto(int cdgProd)
+        {
+            using (var cn = Conexion.CrearConexion())
+            using (var cmd = new SqlCommand(@"
+            SELECT 
+                ISNULL(NULLIF(RTRIM(LTRIM(IMP_PROD)), ''), NULL) AS IMP_PROD,
+                ISNULL(NULLIF(RTRIM(LTRIM(CDG_IMP)), ''), NULL) AS CDG_IMP
+            FROM dbo.M_PRODUC
+            WHERE CDG_PROD = @CDG_PROD;", cn))
+            {
+                cmd.Parameters.AddWithValue("@CDG_PROD", cdgProd);
 
+                cn.Open();
+                using (var rd = cmd.ExecuteReader())
+                {
+                    if (rd.Read())
+                    {
+                        string impPrin = rd["IMP_PROD"] as string;
+                        string impSec = rd["CDG_IMP"] as string;
+                        return (impPrin, impSec);
+                    }
+                }
+            }
+            return (null, null);
+        }
+        public static string ObtenerDescripcion(int cdgProd)
+        {
+            const string sql = @"SELECT LTRIM(RTRIM(DES_PROD)) 
+                         FROM dbo.M_PRODUC 
+                         WHERE CDG_PROD = @CDG_PROD;";
+
+            using (var cn = Conexion.CrearConexion())
+            using (var cmd = new SqlCommand(sql, cn))
+            {
+                cmd.Parameters.Add("@CDG_PROD", SqlDbType.Int).Value = cdgProd;
+                cn.Open();
+                var o = cmd.ExecuteScalar();
+                return (o == null || o == DBNull.Value) ? null : o.ToString();
+            }
+        }
     }
 }

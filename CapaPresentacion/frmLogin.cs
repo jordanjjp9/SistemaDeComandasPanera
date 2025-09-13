@@ -26,6 +26,10 @@ namespace CapaPresentacion
             this.StartPosition = FormStartPosition.CenterScreen;
             txtPassword.UseSystemPasswordChar = true;
             this.AcceptButton = btnIngresar;
+            // en el constructor, después de InitializeComponent():
+            this.Load += frmLogin_Load;
+
+            //   txtUser.Focus();
         }
 
         private void btnIngresar_Click(object sender, EventArgs e)
@@ -76,6 +80,17 @@ namespace CapaPresentacion
         private void btnClose_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        private void frmLogin_Load(object sender, EventArgs e)
+        {
+            txtUser.Focus();
+        }
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            txtUser.Focus();
+         //   txtUser.SelectAll(); // si quieres seleccionar el texto existente
         }
     }
 }
