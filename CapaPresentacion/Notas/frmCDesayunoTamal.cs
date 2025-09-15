@@ -14,9 +14,10 @@ namespace CapaPresentacion.Notas
         // ===== DTO =====
         public class SeleccionSimple
         {
-            public string Codigo { get; set; }
+            public string Codigo { get; set; }       // CDG_PROD (10 dígitos)
             public string Descripcion { get; set; }
             public decimal PrecioExtra { get; set; }
+            public string Notas { get; set; }
         }
 
         // ===== Entradas =====
@@ -33,12 +34,14 @@ namespace CapaPresentacion.Notas
         private readonly cnProducto _svcProductos = new cnProducto();
 
         private Control _txtProducto;      // txtProductoSelect
-        private Control _txtNotasTamal;    // txtNotasTamal (puede ser Guna2TextBox o TextBox)
-        //private Button _btnContinuar;
-        //private Button _btnEliminar;
+        private Control _txtNotasTamal;    // txtNotasTamal (Guna2TextBox o TextBox)
         private Control _btnContinuar;
         private Control _btnEliminar;
         private FlowLayoutPanel _flpOpciones;
+
+        // === AJUSTA AQUÍ si tus códigos reales son distintos ===
+        private const string COD_TAMAL_CERDO = "0000001106";
+        private const string COD_TAMAL_POLLO = "0000001107";
 
         public frmCDesayunoTamal()
         {
@@ -57,9 +60,7 @@ namespace CapaPresentacion.Notas
             if (_txtProducto != null && !string.IsNullOrWhiteSpace(ProductoBaseTexto))
                 TrySetText(_txtProducto, ProductoBaseTexto);
 
-            // IMPORTANTE: buscar como Control (Guna2TextBox no es TextBoxBase)
             _txtNotasTamal = Controls.Find("txtNotasTamal", true).FirstOrDefault();
-
             _btnContinuar = Controls.Find("btnContinuar", true).FirstOrDefault();
             _btnEliminar = Controls.Find("btnEliminar", true).FirstOrDefault();
 
@@ -68,11 +69,10 @@ namespace CapaPresentacion.Notas
                 _btnContinuar.Click -= btnContinuar_Click;
                 _btnContinuar.Click += btnContinuar_Click;
 
-                if (_btnContinuar is IButtonControl ib)   // Guna2Button suele implementarlo
-                    this.AcceptButton = ib;
+                if (_btnContinuar is IButtonControl ib) this.AcceptButton = ib;
             }
 
-            // MUY IMPORTANTE: que no queden cableados como opción
+            // Asegurar que no queden como “opción”
             if (_btnContinuar != null) _btnContinuar.Click -= Opcion_Click;
             if (_btnEliminar != null)
             {
@@ -84,7 +84,7 @@ namespace CapaPresentacion.Notas
             // 2) Cablear botones de opciones
             _flpOpciones = Controls.Find("flpOpciones", true).OfType<FlowLayoutPanel>().FirstOrDefault();
             if (_flpOpciones != null) WireOptionButtonsRecursive(_flpOpciones);
-            else WireOptionButtonsRecursive(this); // fallback: todo el form
+            else WireOptionButtonsRecursive(this);
 
             // 3) Estado inicial
             RedibujarNotasTamal();
@@ -99,7 +99,7 @@ namespace CapaPresentacion.Notas
             foreach (Control c in root.Controls)
                 WireOptionButtonsRecursive(c);
 
-            if (EsAccion(root)) return;              // <- excluye Continuar/Eliminar
+            if (EsAccion(root)) return;
 
             if (EsBotonOpcion(root))
             {
@@ -110,36 +110,22 @@ namespace CapaPresentacion.Notas
         private bool EsAccion(Control c)
         {
             if (c == null) return false;
+            if (ReferenceEquals(c, _btnContinuar) || ReferenceEquals(c, _btnEliminar)) return true;
 
-            // por referencia
-            if (ReferenceEquals(c, _btnContinuar) || ReferenceEquals(c, _btnEliminar))
-                return true;
-
-            // por nombre (por si no los resolvió)
             var n = (c.Name ?? "").ToLowerInvariant();
-            if (n == "btncontinuar" || n == "btneliminar")
-                return true;
+            if (n == "btncontinuar" || n == "btneliminar") return true;
 
-            // opcional: si marcas Tag="accion" en los botones de pie
-            if (string.Equals(c.Tag as string, "accion", StringComparison.OrdinalIgnoreCase))
-                return true;
-
+            if (string.Equals(c.Tag as string, "accion", StringComparison.OrdinalIgnoreCase)) return true;
             return false;
         }
 
         private static bool EsBotonOpcion(Control c)
         {
             if (c == null) return false;
-
-            // Lo típico: Button o controles cuyo tipo contiene "Button"
             if (c is Button) return true;
             var typeName = c.GetType().Name ?? "";
             if (typeName.IndexOf("Button", StringComparison.OrdinalIgnoreCase) >= 0) return true;
-
-            // También aceptamos controles "tile/panel" que tengan una propiedad Text visible
-            // (Guna2TileButton, etc.). Si no quieres que algo cuente, marca su Tag = "no-opcion".
             if (string.Equals(c.Tag as string, "no-opcion", StringComparison.OrdinalIgnoreCase)) return false;
-
             return c.GetType().GetProperty("Text") != null;
         }
 
@@ -184,22 +170,25 @@ namespace CapaPresentacion.Notas
         // ==================== CONTINUAR ====================
         private void btnContinuar_Click(object sender, EventArgs e)
         {
-            if (_seleccionados < CantidadRequerida)
+            if (CantidadRequerida > 0 && _seleccionados < CantidadRequerida)
             {
-                MessageBox.Show($"Debes seleccionar {CantidadRequerida} opción(es).",
-                                "Tamal", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"Debes seleccionar {CantidadRequerida} tamal(es).",
+                                "Tamales", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            DialogResult = DialogResult.OK;
-            Close();
+            // Asegura normalizar código a 10 dígitos por si alguna opción entró sin pad
+            foreach (var s in Selecciones)
+                s.Codigo = (s.Codigo ?? "").Trim().PadLeft(10, '0');
+
+            this.DialogResult = DialogResult.OK;
+            this.Close();
         }
 
         // ==================== RESUMEN ====================
         private void RedibujarNotasTamal()
         {
             if (_txtNotasTamal == null) return;
-
             string s = BuildNotasTamal();
             TrySetText(_txtNotasTamal, s);
         }
@@ -256,16 +245,31 @@ namespace CapaPresentacion.Notas
             string desc = (c.Text ?? string.Empty).Trim();
             if (desc.Length == 0) return null;
 
-            // Si usas Tag para código/precio, levántalos aquí; por defecto usamos Name y 0 extra:
-            string codigo = c.Name ?? string.Empty;
-            decimal precio = 0m;
-            // if (c.Tag is decimal d) precio = d;
+            // 1) Preferir Tag como código si el diseñador lo trae (ideal)
+            string codigo = c.Tag as string;
+
+            // 2) Si no hay Tag, inferir por texto (ajusta según tus botones)
+            if (string.IsNullOrWhiteSpace(codigo))
+            {
+                var txt = desc.ToUpperInvariant();
+                if (txt.Contains("CERDO")) codigo = COD_TAMAL_CERDO;
+                else if (txt.Contains("POLLO")) codigo = COD_TAMAL_POLLO;
+                else
+                {
+                    // fallback: por Name del control (NO recomendado si no es el código real)
+                    codigo = (c.Name ?? "").Trim();
+                }
+            }
+
+            // Normaliza a 10 dígitos
+            codigo = (codigo ?? "").Trim().PadLeft(10, '0');
 
             return new SeleccionSimple
             {
                 Codigo = codigo,
                 Descripcion = desc,
-                PrecioExtra = precio
+                PrecioExtra = 0m,
+                Notas = string.Empty
             };
         }
 

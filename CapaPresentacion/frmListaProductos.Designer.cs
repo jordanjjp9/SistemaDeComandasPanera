@@ -41,7 +41,7 @@
             // 
             // pnlListPrd
             // 
-            this.pnlListPrd.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.pnlListPrd.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
             this.pnlListPrd.Controls.Add(this.pnlCabecera);
             this.pnlListPrd.Controls.Add(this.dgvListPrd);
             this.pnlListPrd.Controls.Add(this.txtBusqProd);
@@ -77,6 +77,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(239)))), ((int)(((byte)(228)))), ((int)(((byte)(214)))));
             this.label1.Location = new System.Drawing.Point(335, 8);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(257, 31);
@@ -100,11 +101,12 @@
             // 
             this.txtBusqProd.BackColor = System.Drawing.SystemColors.InactiveCaption;
             this.txtBusqProd.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtBusqProd.Location = new System.Drawing.Point(188, 69);
+            this.txtBusqProd.Location = new System.Drawing.Point(188, 70);
             this.txtBusqProd.Name = "txtBusqProd";
             this.txtBusqProd.Size = new System.Drawing.Size(532, 26);
             this.txtBusqProd.TabIndex = 0;
             this.txtBusqProd.TextChanged += new System.EventHandler(this.txtBusqProd_TextChanged);
+            this.txtBusqProd.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtBusqProd_KeyDown);
             // 
             // frmListaProductos
             // 

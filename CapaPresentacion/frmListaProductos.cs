@@ -32,6 +32,11 @@ namespace CapaPresentacion
             InitializeComponent();
             pnlCabecera.MouseDown += pnlCabecera_MouseDown;
             this.Load += frmListaProductos_Load;
+
+            btnClose.DialogResult = DialogResult.Cancel;
+            this.CancelButton = btnClose;
+
+            txtBusqProd.KeyDown += txtBusqProd_KeyDown;
         }
 
         private void btnClose_Click(object sender, EventArgs e)
@@ -210,5 +215,35 @@ namespace CapaPresentacion
             return Convert.ToString(row.Cells[0].Value);
         }
 
+        private void txtBusqProd_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Down)
+            {
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+
+                if (dgvListPrd.Rows.Count > 0)
+                {
+                    dgvListPrd.Focus();
+
+                    // Si no hay celda actual, posiciona en la primera fila/columna visible
+                    int row = (dgvListPrd.CurrentCell != null) ? dgvListPrd.CurrentCell.RowIndex : 0;
+                    if (row < 0 || row >= dgvListPrd.Rows.Count) row = 0;
+
+                    int col = 0;
+                    // Busca la primera columna visible
+                    for (int c = 0; c < dgvListPrd.Columns.Count; c++)
+                        if (dgvListPrd.Columns[c].Visible) { col = c; break; }
+
+                    dgvListPrd.CurrentCell = dgvListPrd.Rows[row].Cells[col];
+                    dgvListPrd.Rows[row].Selected = true;
+                }
+                else
+                {
+                    // Si no hay filas, emula TAB al siguiente control
+                    this.SelectNextControl(txtBusqProd, true, true, true, true);
+                }
+            }
+        }
     }
 }

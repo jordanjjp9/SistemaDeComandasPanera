@@ -38,14 +38,19 @@ namespace CapaPresentacion
         private const int LARGO_CODIGO = 10; // ej. 0000001123
 
         private bool _pidioNumeroPersonas = false;
-        private const string COD_DESAYUNO_CONTINENTAL = "0000000457";
+        //private const string COD_DESAYUNO_CONTINENTAL = "0000000457";
 
         private const string COD_DESAYUNO_CRIOLLO = "0000000458";
         private const string COD_DESAYUNO_PANERA = "0000000461";
 
-        private const string CHICHA_ALMUERZO_CODE = "0000000868";
+        //private const string CHICHA_ALMUERZO_CODE = "0000000868";
 
         private int? _cantidadForzada;  // prioridad sobre txtCantidad cuando no es null
+        //private bool _abriendoListaProductos = false;
+
+        private bool _listaProductosAbierta = false;
+
+        private bool _f2Bloqueado = false;
 
         // === PASTAS que disparan MenuPedidoItem ===
         private static readonly string[] COD_PASTAS =
@@ -71,6 +76,10 @@ namespace CapaPresentacion
             this.Load += frmMenuPrincipal_Load;
 
             this.Shown += frmMenuPrincipal_Shown;
+            this.KeyPreview = true;
+            this.KeyDown += frmMenuPrincipal_KeyDown;
+
+            _unlockF2Timer.Tick += (s, e) => { _unlockF2Timer.Stop(); _f2Bloqueado = false; };
         }
 
         public void MostrarEnCentral(Form form)
@@ -162,7 +171,9 @@ namespace CapaPresentacion
             flpLineas.ControlAdded += (_, __) => ActualizarSubtotal();
             flpLineas.ControlRemoved += (_, __) => ActualizarSubtotal();
 
-           // MostrarEnCentral(new CapaPresentacion.Botoneras.frmPastas());
+            chbNImpre.Checked = true;
+
+            // MostrarEnCentral(new CapaPresentacion.Botoneras.frmPastas());
         }
 
         private int CantidadActual()
@@ -624,19 +635,39 @@ namespace CapaPresentacion
             if (!tieneAsterisco) { if (!char.IsDigit(e.KeyChar)) e.Handled = true; return; }
             if (!char.IsDigit(e.KeyChar)) e.Handled = true; // código numérico
         }
+        private void AbrirListaProductos()
+        {
+            if (_listaProductosAbierta) return;     // evita reentrar / abrir doble
+            _listaProductosAbierta = true;
+            try
+            {
+                using (var lstprd = new frmListaProductos())
+                {
+                    lstprd.StartPosition = FormStartPosition.CenterParent;
+                    var r = lstprd.ShowDialog(this);
+                    if (r == DialogResult.OK && !string.IsNullOrWhiteSpace(lstprd.SelectedCodigo))
+                        Hijo_ProductoSeleccionado(lstprd.SelectedCodigo);
+                }
+            }
+            finally
+            {
+                _listaProductosAbierta = false;
+            }
+        }
 
         private void btnListarProductos_Click(object sender, EventArgs e)
         {
-            using (var lstprd = new frmListaProductos())
-            {
-                lstprd.StartPosition = FormStartPosition.CenterParent;
-                var r = lstprd.ShowDialog(this);
-                if (r == DialogResult.OK && !string.IsNullOrWhiteSpace(lstprd.SelectedCodigo))
-                {
-                    // Reutiliza tu flujo actual: respeta txtCantidad y muestra en txtProducto
-                    Hijo_ProductoSeleccionado(lstprd.SelectedCodigo);
-                }
-            }
+            //using (var lstprd = new frmListaProductos())
+            //{
+            //    lstprd.StartPosition = FormStartPosition.CenterParent;
+            //    var r = lstprd.ShowDialog(this);
+            //    if (r == DialogResult.OK && !string.IsNullOrWhiteSpace(lstprd.SelectedCodigo))
+            //    {
+            //        // Reutiliza tu flujo actual: respeta txtCantidad y muestra en txtProducto
+            //        Hijo_ProductoSeleccionado(lstprd.SelectedCodigo);
+            //    }
+            //}
+            AbrirListaProductos();
         }
 
         // Códigos que requieren el diálogo de notas (puedes agregar más a futuro)
@@ -784,6 +815,115 @@ namespace CapaPresentacion
             txtSubtotal.Text = $"S/ {total:0.00}";
         }
 
+        //private void EjecutarWizardDesayunoConTamal(ceProductos prod, int cantidad, int tamalesPorUnidad)
+        //{
+        //    if (prod == null || cantidad <= 0) return;
+
+        //    var item = new CapaPresentacion.Controles.ComboPedidoItem
+        //    {
+        //        AgruparJugosIguales = true,
+        //        AgruparBebidasIguales = true,
+        //        AgruparTamalesIguales = true
+        //    };
+
+        //    // ===== 1) J U G O (1 por desayuno) + notas de jugo (NBebidas) =====
+        //    int calientesPendientes = cantidad; // 1 caliente por desayuno
+
+        //    for (int i = 1; i <= cantidad; i++)
+        //    {
+        //        // Elegir jugo de ESTE desayuno
+        //        List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple> sel = null;
+        //        using (var frmJ = new CapaPresentacion.Notas.frmCJugoDesayuno())
+        //        {
+        //            frmJ.CantidadRequerida = 1;              // <-- SIEMPRE 1 por desayuno
+        //            frmJ.ListaPrecio = "001";
+        //            frmJ.ProductoBaseTexto = $"1 x {prod.Descripcion}  ({i}/{cantidad})";
+
+        //            if (frmJ.ShowDialog(this) != DialogResult.OK) return;
+
+        //            sel = frmJ.Selecciones ?? new List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple>();
+        //            if (sel.Count == 0) return;
+        //        }
+
+        //        var jugo = sel[0];
+
+        //        // Notas rápidas del jugo (y posible “GRANDE” que consume 1 caliente)
+        //        string notasJugo = string.Empty;
+        //        using (var frmN = new CapaPresentacion.Notas.frmNBebidas())
+        //        {
+        //            if (frmN.ShowDialog(this) == DialogResult.OK)
+        //            {
+        //                notasJugo = frmN.Notas ?? string.Empty;
+        //                if (frmN.CuposCalienteConsumidos > 0 && calientesPendientes > 0)
+        //                    calientesPendientes -= 1;          // “GRANDE” descuenta 1 caliente
+        //            }
+        //        }
+
+        //        item.AddJugoUnidad(jugo.Descripcion, jugo.PrecioExtra, notasJugo, /*forzarIndividual*/ null);
+        //    }
+
+        //    // ===== 2) B E B I D A S  C A L I E N T E S  (1 por desayuno, menos “GRANDE”) =====
+        //    if (calientesPendientes > 0)
+        //    {
+        //        using (var frmB = new CapaPresentacion.Notas.frmCBebidasCalientes())
+        //        {
+        //            frmB.CantidadRequerida = calientesPendientes;    // <-- NO depende de los tamales
+        //            frmB.ListaPrecio = "001";
+        //            frmB.ProductoBaseTexto = $"{cantidad} x {prod.Descripcion}";
+
+        //            if (frmB.ShowDialog(this) == DialogResult.OK)
+        //            {
+        //                var seleB = frmB.Selecciones ?? new List<CapaPresentacion.Notas.frmCBebidasCalientes.SeleccionSimple>();
+        //                foreach (var b in seleB)
+        //                    item.AddBebidaUnidad(b.Descripcion, b.PrecioExtra, string.Empty, /*forzarIndividual*/ false);
+        //            }
+        //        }
+        //    }
+
+        //    // ===== 3) T A M A L E S  (ÚNICO lugar donde se multiplica) =====
+        //    int totalTamales = tamalesPorUnidad * cantidad;           // <-- SOLO TAMAL multiplica
+        //    if (totalTamales > 0)
+        //    {
+        //        using (var frmT = new CapaPresentacion.Notas.frmCDesayunoTamal())
+        //        {
+        //            frmT.CantidadRequerida = totalTamales;            // p.ej., Panera: 2 * cantidad
+        //            frmT.ListaPrecio = "001";
+        //            frmT.ProductoBaseTexto = $"{cantidad} x {prod.Descripcion}";
+
+        //            if (frmT.ShowDialog(this) == DialogResult.OK)
+        //            {
+        //                var sels = frmT.Selecciones ?? new List<CapaPresentacion.Notas.frmCDesayunoTamal.SeleccionSimple>();
+        //                foreach (var t in sels)
+        //                    item.AddTamalUnidad(t.Descripcion, t.PrecioExtra, /*notas*/ string.Empty, /*forzarIndividual*/ null);
+        //            }
+        //            else
+        //            {
+        //                return;
+        //            }
+        //        }
+        //    }
+
+        //    // ===== 4) Precio por unidad (extras promediados: jugo + bebida; los tamales usualmente 0) =====
+        //    decimal puBase = PrecioDe(prod);
+        //    decimal puFinal = puBase + item.GetExtraPromedioTotalPorUnidad(cantidad);
+
+        //    // ===== 5) Pintar combo =====
+        //    item.SetCombo(prod.Codigo, prod.Descripcion, cantidad, puFinal);
+
+        //    flpLineas.SuspendLayout();
+        //    flpLineas.Controls.Add(item);
+        //    flpLineas.ResumeLayout();
+
+        //    // Seleccionar y habilitar botones conforme a la selección global
+        //    LineaSelection.Select(item, true);
+        //    btnEliminar.Enabled = (LineaSelection.Actual != null);
+        //    btnComentarioLbr.Enabled = (LineaSelection.Actual != null);
+
+        //    ActualizarSubtotal();
+        //}
+
+        //private const string COD_TAMAL_CERDO = "0000001106";
+        //private const string COD_TAMAL_POLLO = "0000001107";
         private void EjecutarWizardDesayunoConTamal(ceProductos prod, int cantidad, int tamalesPorUnidad)
         {
             if (prod == null || cantidad <= 0) return;
@@ -795,21 +935,22 @@ namespace CapaPresentacion
                 AgruparTamalesIguales = true
             };
 
-            // ===== 1) J U G O (1 por desayuno) + notas de jugo (NBebidas) =====
+            // =======================
+            // 1) J U G O  (1 por unidad) + notas del jugo
+            // =======================
             int calientesPendientes = cantidad; // 1 caliente por desayuno
 
             for (int i = 1; i <= cantidad; i++)
             {
                 // Elegir jugo de ESTE desayuno
-                List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple> sel = null;
+                List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple> sel;
                 using (var frmJ = new CapaPresentacion.Notas.frmCJugoDesayuno())
                 {
-                    frmJ.CantidadRequerida = 1;              // <-- SIEMPRE 1 por desayuno
+                    frmJ.CantidadRequerida = 1;     // siempre 1 por desayuno
                     frmJ.ListaPrecio = "001";
                     frmJ.ProductoBaseTexto = $"1 x {prod.Descripcion}  ({i}/{cantidad})";
 
                     if (frmJ.ShowDialog(this) != DialogResult.OK) return;
-
                     sel = frmJ.Selecciones ?? new List<CapaPresentacion.Notas.frmCJugoDesayuno.SeleccionSimple>();
                     if (sel.Count == 0) return;
                 }
@@ -824,46 +965,46 @@ namespace CapaPresentacion
                     {
                         notasJugo = frmN.Notas ?? string.Empty;
                         if (frmN.CuposCalienteConsumidos > 0 && calientesPendientes > 0)
-                            calientesPendientes -= 1;          // “GRANDE” descuenta 1 caliente
+                            calientesPendientes -= 1;   // “GRANDE” descuenta 1 caliente
                     }
                 }
 
-                item.AddJugoUnidad(jugo.Descripcion, jugo.PrecioExtra, notasJugo, /*forzarIndividual*/ null);
+                // Agregar jugo (sub-línea con PU 0.00; el recargo queda en el PU final del combo)
+                item.AddJugoUnidad(
+                    codigo: TryGet<string>(jugo, "Codigo", ""),
+                    descripcion: TryGet<string>(jugo, "Descripcion", "JUGO"),
+                    precioExtra: TryGet<decimal>(jugo, "PrecioExtra", 0m),
+                    notas: notasJugo,
+                    forzarIndividual: null
+                );
             }
 
-            // ===== 2) B E B I D A S  C A L I E N T E S  (1 por desayuno, menos “GRANDE”) =====
+            // =======================
+            // 2) B E B I D A  C A L I E N T E  (si quedaron cupos)
+            // =======================
             if (calientesPendientes > 0)
             {
-                using (var frmB = new CapaPresentacion.Notas.frmCBebidasCalientes())
+                using (var frmB = new CapaPresentacion.Notas.frmCBebidasCalientes
                 {
-                    frmB.CantidadRequerida = calientesPendientes;    // <-- NO depende de los tamales
-                    frmB.ListaPrecio = "001";
-                    frmB.ProductoBaseTexto = $"{cantidad} x {prod.Descripcion}";
-
+                    CantidadRequerida = calientesPendientes,
+                    ListaPrecio = "001",
+                    ProductoBaseTexto = $"{cantidad} x {prod.Descripcion}",
+                    ReglaAdicionalLecheActiva = true   // si la usas
+                })
+                {
                     if (frmB.ShowDialog(this) == DialogResult.OK)
                     {
-                        var seleB = frmB.Selecciones ?? new List<CapaPresentacion.Notas.frmCBebidasCalientes.SeleccionSimple>();
-                        foreach (var b in seleB)
-                            item.AddBebidaUnidad(b.Descripcion, b.PrecioExtra, string.Empty, /*forzarIndividual*/ false);
-                    }
-                }
-            }
-
-            // ===== 3) T A M A L E S  (ÚNICO lugar donde se multiplica) =====
-            int totalTamales = tamalesPorUnidad * cantidad;           // <-- SOLO TAMAL multiplica
-            if (totalTamales > 0)
-            {
-                using (var frmT = new CapaPresentacion.Notas.frmCDesayunoTamal())
-                {
-                    frmT.CantidadRequerida = totalTamales;            // p.ej., Panera: 2 * cantidad
-                    frmT.ListaPrecio = "001";
-                    frmT.ProductoBaseTexto = $"{cantidad} x {prod.Descripcion}";
-
-                    if (frmT.ShowDialog(this) == DialogResult.OK)
-                    {
-                        var sels = frmT.Selecciones ?? new List<CapaPresentacion.Notas.frmCDesayunoTamal.SeleccionSimple>();
-                        foreach (var t in sels)
-                            item.AddTamalUnidad(t.Descripcion, t.PrecioExtra, /*notas*/ string.Empty, /*forzarIndividual*/ null);
+                        var sels = frmB.Selecciones ?? new List<CapaPresentacion.Notas.frmCBebidasCalientes.SeleccionSimple>();
+                        foreach (var b in sels)
+                        {
+                            item.AddBebidaUnidad(
+                                codigo: TryGet<string>(b, "Codigo", ""),
+                                descripcion: TryGet<string>(b, "Descripcion", "BEBIDA"),
+                                precioExtra: TryGet<decimal>(b, "PrecioExtra", 0m),
+                                notas: TryGet<string>(b, "Notas", ""),
+                                forzarIndividual: false
+                            );
+                        }
                     }
                     else
                     {
@@ -872,24 +1013,58 @@ namespace CapaPresentacion
                 }
             }
 
-            // ===== 4) Precio por unidad (extras promediados: jugo + bebida; los tamales usualmente 0) =====
-            decimal puBase = PrecioDe(prod);
+            // =======================
+            // 3) T A M A L E S  (con CÓDIGO, PU = 0.00)
+            //    totalTamales = tamalesPorUnidad * cantidad
+            // =======================
+            int totalTamales = tamalesPorUnidad * cantidad;
+            if (totalTamales > 0)
+            {
+                using (var frmT = new CapaPresentacion.Notas.frmCDesayunoTamal())
+                {
+                    frmT.CantidadRequerida = totalTamales;
+                    frmT.ListaPrecio = "001";
+                    frmT.ProductoBaseTexto = $"{cantidad} x {prod.Descripcion}";
+
+                    if (frmT.ShowDialog(this) != DialogResult.OK) return;
+
+                    var sels = frmT.Selecciones ?? new List<CapaPresentacion.Notas.frmCDesayunoTamal.SeleccionSimple>();
+                    foreach (var t in sels)
+                    {
+                        // 👇 IMPORTANTÍSIMO: usa el CÓDIGO del tamal
+                        string codTam = (t.Codigo ?? "").Trim().PadLeft(10, '0');
+                        string desTam = t.Descripcion ?? "TAMAL";
+                        decimal pxTam = t.PrecioExtra;   // normalmente 0
+
+                        // AddTamalUnidad(codigo, descripcion, precio, notas, forzarIndividual)
+                        item.AddTamalUnidad(codTam, desTam, pxTam, /*notas*/ string.Empty, /*forzarIndividual*/ null);
+                    }
+                }
+            }
+
+            // =======================
+            // 4) Precio del combo = base + (promedio extras jugo/bebida)
+            //    (los tamales no suelen tener extra; si lo tuvieran, ya se promedió arriba)
+            // =======================
+            decimal puBase = PrecioDe(prod); // CON IGV
             decimal puFinal = puBase + item.GetExtraPromedioTotalPorUnidad(cantidad);
 
-            // ===== 5) Pintar combo =====
+            // =======================
+            // 5) Pintar combo
+            // =======================
             item.SetCombo(prod.Codigo, prod.Descripcion, cantidad, puFinal);
 
             flpLineas.SuspendLayout();
             flpLineas.Controls.Add(item);
             flpLineas.ResumeLayout();
 
-            // Seleccionar y habilitar botones conforme a la selección global
             LineaSelection.Select(item, true);
             btnEliminar.Enabled = (LineaSelection.Actual != null);
             btnComentarioLbr.Enabled = (LineaSelection.Actual != null);
 
             ActualizarSubtotal();
         }
+
 
 
         private void EjecutarWizardDesayunoPorUnidad(ceProductos prod, int cantidad)
@@ -1174,6 +1349,103 @@ namespace CapaPresentacion
             //    btnComentarioLbr.Enabled = (LineaSelection.Actual != null);
             //}
 
+            ////try
+            ////{
+            ////    if (flpLineas.Controls.Count == 0)
+            ////    {
+            ////        MessageBox.Show("No hay ítems para guardar.", "Actualizar",
+            ////            MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ////        return;
+            ////    }
+
+            ////    btnActualizar.Enabled = btnEliminar.Enabled = btnComentarioLbr.Enabled = false;
+            ////    Cursor = Cursors.WaitCursor;
+
+            ////    // === Datos de sesión / encabezado ===
+            ////    string cdgVend = (SesionActual.Vendedor != null) ? (SesionActual.Vendedor.Codigo ?? "") : "";
+            ////    string cdgUsr = SesionActual.Usuario ?? "";
+            ////    string cdgLoc = SesionActual.Local ?? "000";
+            ////    string cdgCaja = SesionActual.Caja ?? "";
+
+            ////    string numMesa = (txtMesa.Text ?? "").Trim();
+            ////    int numPers; if (!int.TryParse(txtNPersonas.Text, out numPers)) numPers = 0;
+
+            ////    // IMP_PROD por producto (de tu caché/maestro)
+            ////    Func<string, string> resolverImpresora = ResolverImpresoraPorProducto;
+
+            ////    // === Resolver tributario (ValueTuple para TxtPedidoWriter) ===
+            ////    Func<string, System.ValueTuple<decimal?, bool?>?> resolverTribVT = (cod10) =>
+            ////    {
+            ////        try
+            ////        {
+            ////            ceProductos p;
+            ////            if (_cachePorCodigo != null &&
+            ////                _cachePorCodigo.TryGetValue((cod10 ?? "").Trim(), out p) &&
+            ////                p != null)
+            ////            {
+            ////                decimal porIgv = TryGet<decimal>(p, "POR_IGV", -1m);
+            ////                bool swtIgv = TryGet<bool>(p, "SWT_IGV", TryGet<bool>(p, "AFECTO_IGV", false));
+            ////                bool hasPor = (porIgv >= 0m);
+            ////                if (hasPor || swtIgv)
+            ////                    return new System.ValueTuple<decimal?, bool?>(hasPor ? (decimal?)porIgv : null, (bool?)swtIgv);
+            ////            }
+            ////        }
+            ////        catch { }
+            ////        return null;
+            ////    };
+            ////    Func<string, Tuple<decimal?, bool?>> resolverTribTuple = (cod10) =>
+            ////    {
+            ////        var r = resolverTribVT(cod10);
+            ////        if (r.HasValue) return new Tuple<decimal?, bool?>(r.Value.Item1, r.Value.Item2);
+            ////        return null;
+            ////    };
+
+            ////    // === Construir pedido desde UI ===
+            ////    var res = TxtPedidoWriter.Generar(
+            ////        lineas: flpLineas.Controls,
+            ////        resolverImpresora: resolverImpresora,
+            ////        cdgVend: cdgVend,
+            ////        cdgUsr: cdgUsr,
+            ////        cdgLoc: cdgLoc,
+            ////        cdgCaja: cdgCaja,
+            ////        numMesa: numMesa,
+            ////        numPers: numPers,
+            ////        resolverTrib: (cod => resolverTribVT(cod))
+            ////    );
+
+            ////    // === Guardar en BD ===
+            ////    var svc = new CapaNegocio.cnPedido();
+            ////    string numPedAsignado = svc.GuardarDb(res.Cabecera, resolverImpresora, resolverTribTuple);
+
+            ////    if (string.IsNullOrEmpty(res.Cabecera.NUM_PED))
+            ////        res.Cabecera.NUM_PED = numPedAsignado;
+
+            ////    // === Imprimir comandas por destino (App.config) ===
+            ////    ImprimirImpresoras(res.Cabecera, res.Cabecera.Detalles);
+
+            ////    // === Confirmación ===
+            ////    MessageBox.Show(
+            ////        "Pedido guardado en BD.\n\n" +
+            ////        "NUM_PED : " + res.Cabecera.NUM_PED + "\n" +
+            ////        "Items   : " + res.CantItems + "\n" +
+            ////        "SubTotal: S/ " + res.Cabecera.IMP_BASE.ToString("0.00") + "\n" +
+            ////        "IGV     : S/ " + res.Cabecera.IMP_IGV.ToString("0.00") + "\n" +
+            ////        "Total   : S/ " + res.Cabecera.IMP_TOT.ToString("0.00"),
+            ////        "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ////}
+            ////catch (Exception ex)
+            ////{
+            ////    MessageBox.Show("Error al guardar el pedido: " + ex.Message,
+            ////        "Actualizar", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            ////}
+            ////finally
+            ////{
+            ////    Cursor = Cursors.Default;
+            ////    btnActualizar.Enabled = true;
+            ////    btnEliminar.Enabled = (LineaSelection.Actual != null);
+            ////    btnComentarioLbr.Enabled = (LineaSelection.Actual != null);
+            ////}
+
             try
             {
                 if (flpLineas.Controls.Count == 0)
@@ -1186,69 +1458,66 @@ namespace CapaPresentacion
                 btnActualizar.Enabled = btnEliminar.Enabled = btnComentarioLbr.Enabled = false;
                 Cursor = Cursors.WaitCursor;
 
-                // === Datos de sesión / encabezado ===
-                string cdgVend = (SesionActual.Vendedor != null) ? (SesionActual.Vendedor.Codigo ?? "") : "";
+                string cdgVend = SesionActual.Vendedor?.Codigo ?? "";
                 string cdgUsr = SesionActual.Usuario ?? "";
                 string cdgLoc = SesionActual.Local ?? "000";
                 string cdgCaja = SesionActual.Caja ?? "";
 
                 string numMesa = (txtMesa.Text ?? "").Trim();
-                int numPers; if (!int.TryParse(txtNPersonas.Text, out numPers)) numPers = 0;
+                int numPers = int.TryParse(txtNPersonas.Text, out var np) ? np : 0;
 
-                // IMP_PROD por producto (de tu caché/maestro)
                 Func<string, string> resolverImpresora = ResolverImpresoraPorProducto;
 
-                // === Resolver tributario (ValueTuple para TxtPedidoWriter) ===
-                Func<string, System.ValueTuple<decimal?, bool?>?> resolverTribVT = (cod10) =>
+                Func<string, (decimal?, bool?)?> resolverTribVT = (cod10) =>
                 {
                     try
                     {
-                        ceProductos p;
                         if (_cachePorCodigo != null &&
-                            _cachePorCodigo.TryGetValue((cod10 ?? "").Trim(), out p) &&
+                            _cachePorCodigo.TryGetValue((cod10 ?? "").Trim(), out ceProductos p) &&
                             p != null)
                         {
                             decimal porIgv = TryGet<decimal>(p, "POR_IGV", -1m);
                             bool swtIgv = TryGet<bool>(p, "SWT_IGV", TryGet<bool>(p, "AFECTO_IGV", false));
+
                             bool hasPor = (porIgv >= 0m);
                             if (hasPor || swtIgv)
-                                return new System.ValueTuple<decimal?, bool?>(hasPor ? (decimal?)porIgv : null, (bool?)swtIgv);
+                                return (hasPor ? (decimal?)porIgv : null, (bool?)swtIgv);
                         }
                     }
                     catch { }
                     return null;
                 };
+
                 Func<string, Tuple<decimal?, bool?>> resolverTribTuple = (cod10) =>
                 {
                     var r = resolverTribVT(cod10);
-                    if (r.HasValue) return new Tuple<decimal?, bool?>(r.Value.Item1, r.Value.Item2);
-                    return null;
+                    return r.HasValue ? new Tuple<decimal?, bool?>(r.Value.Item1, r.Value.Item2) : null;
                 };
 
-                // === Construir pedido desde UI ===
                 var res = TxtPedidoWriter.Generar(
-                    lineas: flpLineas.Controls,
-                    resolverImpresora: resolverImpresora,
-                    cdgVend: cdgVend,
-                    cdgUsr: cdgUsr,
-                    cdgLoc: cdgLoc,
-                    cdgCaja: cdgCaja,
-                    numMesa: numMesa,
-                    numPers: numPers,
+                    flpLineas.Controls,
+                    resolverImpresora,
+                    cdgVend,
+                    cdgUsr,
+                    cdgLoc,
+                    cdgCaja,
+                    numMesa,
+                    numPers,
                     resolverTrib: (cod => resolverTribVT(cod))
                 );
 
-                // === Guardar en BD ===
                 var svc = new CapaNegocio.cnPedido();
                 string numPedAsignado = svc.GuardarDb(res.Cabecera, resolverImpresora, resolverTribTuple);
 
                 if (string.IsNullOrEmpty(res.Cabecera.NUM_PED))
                     res.Cabecera.NUM_PED = numPedAsignado;
 
-                // === Imprimir comandas por destino (App.config) ===
-                ImprimirImpresoras(res.Cabecera, res.Cabecera.Detalles);
+                // 🔹 Solo imprimir si el checkbox está activo
+                if (chbNImpre.Checked)
+                {
+                    ImprimirImpresoras(res.Cabecera, res.Cabecera.Detalles);
+                }
 
-                // === Confirmación ===
                 MessageBox.Show(
                     "Pedido guardado en BD.\n\n" +
                     "NUM_PED : " + res.Cabecera.NUM_PED + "\n" +
@@ -1256,7 +1525,10 @@ namespace CapaPresentacion
                     "SubTotal: S/ " + res.Cabecera.IMP_BASE.ToString("0.00") + "\n" +
                     "IGV     : S/ " + res.Cabecera.IMP_IGV.ToString("0.00") + "\n" +
                     "Total   : S/ " + res.Cabecera.IMP_TOT.ToString("0.00"),
-                    "OK", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "OK",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
             }
             catch (Exception ex)
             {
@@ -1360,6 +1632,31 @@ namespace CapaPresentacion
                 return (T)Convert.ChangeType(v, typeof(T), CultureInfo.InvariantCulture);
             }
             catch { return def; }
+        }
+        // private DateTime _lastF2 = DateTime.MinValue;
+        private readonly Timer _unlockF2Timer = new Timer { Interval = 200 };
+        private void frmMenuPrincipal_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.F2 && !_f2Bloqueado)
+            {
+                _f2Bloqueado = true;           // bloquea reentradas
+                e.SuppressKeyPress = true;
+                AbrirListaProductos();         // abre modal
+                _unlockF2Timer.Start();        // al volver, suelta el bloqueo tras 200 ms
+            }
+        }
+
+        private void frmMenuPrincipal_KeyUp(object sender, KeyEventArgs e)
+        {
+            ////if (e.KeyCode == Keys.F2)
+            ////    _f2Bloqueado = false;
+            //if (e.KeyCode == Keys.F2 && !_f2Bloqueado)
+            //{
+            //    _f2Bloqueado = true;           // bloquea reentradas
+            //    e.SuppressKeyPress = true;
+            //    AbrirListaProductos();         // abre modal
+            //    _unlockF2Timer.Start();        // al volver, suelta el bloqueo tras 200 ms
+            //}
         }
     }
 }

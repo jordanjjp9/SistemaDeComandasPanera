@@ -43,7 +43,7 @@
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(188, 9);
+            this.label1.Location = new System.Drawing.Point(213, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(243, 29);
             this.label1.TabIndex = 0;
@@ -56,13 +56,13 @@
             this.pnlTopComLbr.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlTopComLbr.Location = new System.Drawing.Point(0, 0);
             this.pnlTopComLbr.Name = "pnlTopComLbr";
-            this.pnlTopComLbr.Size = new System.Drawing.Size(607, 49);
+            this.pnlTopComLbr.Size = new System.Drawing.Size(651, 49);
             this.pnlTopComLbr.TabIndex = 2;
             // 
             // btnClose
             // 
             this.btnClose.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnClose.Location = new System.Drawing.Point(539, 0);
+            this.btnClose.Location = new System.Drawing.Point(583, 0);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(68, 49);
             this.btnClose.TabIndex = 1;
@@ -80,7 +80,7 @@
             this.btnLlevar.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
             this.btnLlevar.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.btnLlevar.ForeColor = System.Drawing.Color.White;
-            this.btnLlevar.Location = new System.Drawing.Point(137, 230);
+            this.btnLlevar.Location = new System.Drawing.Point(103, 239);
             this.btnLlevar.Name = "btnLlevar";
             this.btnLlevar.Size = new System.Drawing.Size(118, 47);
             this.btnLlevar.TabIndex = 4;
@@ -96,7 +96,7 @@
             this.btnAviso.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
             this.btnAviso.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.btnAviso.ForeColor = System.Drawing.Color.White;
-            this.btnAviso.Location = new System.Drawing.Point(361, 230);
+            this.btnAviso.Location = new System.Drawing.Point(373, 239);
             this.btnAviso.Name = "btnAviso";
             this.btnAviso.Size = new System.Drawing.Size(118, 47);
             this.btnAviso.TabIndex = 5;
@@ -112,7 +112,7 @@
             this.btnEnviar.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
             this.btnEnviar.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.btnEnviar.ForeColor = System.Drawing.Color.White;
-            this.btnEnviar.Location = new System.Drawing.Point(515, 116);
+            this.btnEnviar.Location = new System.Drawing.Point(559, 127);
             this.btnEnviar.Name = "btnEnviar";
             this.btnEnviar.Size = new System.Drawing.Size(80, 54);
             this.btnEnviar.TabIndex = 6;
@@ -141,7 +141,7 @@
             this.txtComentLibr.PlaceholderText = "";
             this.txtComentLibr.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
             this.txtComentLibr.SelectedText = "";
-            this.txtComentLibr.Size = new System.Drawing.Size(475, 115);
+            this.txtComentLibr.Size = new System.Drawing.Size(518, 134);
             this.txtComentLibr.TabIndex = 7;
             // 
             // frmComentarioLbr
@@ -149,7 +149,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(1)))), ((int)(((byte)(145)))), ((int)(((byte)(156)))));
-            this.ClientSize = new System.Drawing.Size(607, 307);
+            this.ClientSize = new System.Drawing.Size(651, 311);
             this.Controls.Add(this.txtComentLibr);
             this.Controls.Add(this.btnEnviar);
             this.Controls.Add(this.btnAviso);

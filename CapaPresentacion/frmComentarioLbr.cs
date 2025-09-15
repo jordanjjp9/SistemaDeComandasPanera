@@ -39,30 +39,34 @@ namespace CapaPresentacion
         {
             InitializeComponent();
             StartPosition = FormStartPosition.CenterParent;
-            // Enter enviará el formulario
-            this.AcceptButton = btnEnviar;
+            AcceptButton = btnEnviar;         // Enter enviará cuando el foco no esté en el textbox
 
-            // Botones rápidos
-            btnLlevar.Click += BotonRapido_Click;
-            btnAviso.Click += BotonRapido_Click;
-
-            // Ajustes para Guna2TextBox como multilínea
-            this.Load += (s, e) =>
+            // Enfocar el textbox cuando el form ya está visible
+            this.Shown += (s, e) =>
             {
-                // Asegura multilínea (Guna2TextBox soporta estas propiedades)
-                txtComentLibr.Multiline = true;
-                txtComentLibr.AcceptsReturn = true;
-                // txtComentLibr.WordWrap = true;  // si lo tienes disponible en tu versión
-
-                // Precarga (solo si no hay texto ya asignado por 'Texto')
-                if (string.IsNullOrEmpty(txtComentLibr.Text) && !string.IsNullOrEmpty(TextoInicial))
+                BeginInvoke(new Action(() =>
                 {
-                    Texto = TextoInicial; // reutilizamos normalización de saltos de línea
-                }
+                    if (txtComentLibr.CanFocus)
+                    {
+                        this.ActiveControl = txtComentLibr;
+                        txtComentLibr.Focus();
+                        txtComentLibr.SelectionStart = txtComentLibr.TextLength;
+                        txtComentLibr.SelectionLength = 0;
+                    }
+                }));
+            };
 
-                // Coloca el cursor al final
-                txtComentLibr.SelectionStart = txtComentLibr.TextLength;
-                txtComentLibr.ScrollToCaret();
+            // Enter = Enviar | Shift+Enter = salto de línea
+            txtComentLibr.Multiline = true;
+            txtComentLibr.AcceptsReturn = true; // mantiene saltos con Shift+Enter
+            txtComentLibr.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter && !e.Shift && !e.Control)
+                {
+                    e.SuppressKeyPress = true;   // no agregues el salto
+                    btnEnviar.PerformClick();    // dispara el envío
+                }
+                // con Shift+Enter seguirá agregando una nueva línea
             };
         }
 

@@ -16,26 +16,41 @@ namespace CapaPresentacion
 
         public frmNumeroPersonas()
         {
-            InitializeComponent();
+            //InitializeComponent();
 
+            //StartPosition = FormStartPosition.CenterParent;
+            //AcceptButton = btnAceptar;
+
+            //Load += (_, __) =>
+            //{
+            //    if (string.IsNullOrWhiteSpace(txtCantPers.Text)) txtCantPers.Text = "1";
+            //    txtCantPers.SelectAll();
+            //    txtCantPers.Focus();
+            //};
+
+            //// Solo dígitos
+            //txtCantPers.KeyPress += (s, e) =>
+            //{
+            //    if (char.IsControl(e.KeyChar)) return;
+            //    if (!char.IsDigit(e.KeyChar)) e.Handled = true;
+            //};
+
+            //btnAceptar.Click += btnAceptar_Click;
+            InitializeComponent();
             StartPosition = FormStartPosition.CenterParent;
             AcceptButton = btnAceptar;
 
             Load += (_, __) =>
             {
                 if (string.IsNullOrWhiteSpace(txtCantPers.Text)) txtCantPers.Text = "1";
+            };
+
+            Shown += (_, __) =>
+            {
                 txtCantPers.SelectAll();
                 txtCantPers.Focus();
+                this.ActiveControl = txtCantPers; // extra
             };
-
-            // Solo dígitos
-            txtCantPers.KeyPress += (s, e) =>
-            {
-                if (char.IsControl(e.KeyChar)) return;
-                if (!char.IsDigit(e.KeyChar)) e.Handled = true;
-            };
-
-            btnAceptar.Click += btnAceptar_Click;
         }
 
         private void btnAceptar_Click(object sender, EventArgs e)

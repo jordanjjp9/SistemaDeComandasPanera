@@ -317,6 +317,56 @@ namespace CapaPresentacion.Controles
         { AddTamalUnidad(string.Empty, descripcion, precioExtra, notas, forzarIndividual); }
 
         // Con código
+        //public void AddTamalUnidad(string codigo, string descripcion, decimal precioExtra, string notas, bool? forzarIndividual)
+        //{
+        //    FlowLayoutPanel flpT;
+        //    if (!TryFindControl("flpTamal", out flpT)) return;
+
+        //    bool individual = (forzarIndividual.HasValue) ? forzarIndividual.Value : !AgruparTamalesIguales;
+
+        //    BloqueTexto bloque = null;
+        //    if (!individual)
+        //    {
+        //        string key = KeyDe(descripcion, precioExtra);
+        //        bloque = _tamales.FirstOrDefault(x => x.Key == key);
+        //    }
+
+        //    if (bloque == null)
+        //    {
+        //        bloque = new BloqueTexto
+        //        {
+        //            Key = KeyDe(descripcion, precioExtra),
+        //            Codigo = (codigo ?? "").Trim(),
+        //            Descripcion = (descripcion ?? "").Trim(),
+        //            PrecioExtra = precioExtra,
+        //            Cantidad = 1,
+        //            TextBox = CrearTextBoxDesdePlantilla(_tplTamal, flpT)
+        //        };
+
+        //        if (!string.IsNullOrWhiteSpace(notas))
+        //            bloque.Notas.AddRange(ToNotas(notas));
+
+        //        bloque.TextBox.Text = TextoDe(bloque);
+        //        VincularBloqueVisual(bloque);
+
+        //        flpT.Controls.Add(bloque.TextBox);
+        //        flpT.PerformLayout();
+
+        //        _tamales.Add(bloque);
+        //        AddExportLine(bloque);
+        //    }
+        //    else
+        //    {
+        //        bloque.Cantidad += 1;
+        //        if (!string.IsNullOrWhiteSpace(notas))
+        //            bloque.Notas.AddRange(ToNotas(notas));
+        //        bloque.TextBox.Text = TextoDe(bloque);
+        //        UpdateExportLine(bloque);
+        //    }
+
+        //    _ultimoTamal = bloque;
+        //    RecalcAutoGrowSafe();
+        //}
         public void AddTamalUnidad(string codigo, string descripcion, decimal precioExtra, string notas, bool? forzarIndividual)
         {
             FlowLayoutPanel flpT;
@@ -336,7 +386,7 @@ namespace CapaPresentacion.Controles
                 bloque = new BloqueTexto
                 {
                     Key = KeyDe(descripcion, precioExtra),
-                    Codigo = (codigo ?? "").Trim(),
+                    Codigo = (codigo ?? "").Trim(),         // 👈 se guarda el CÓDIGO
                     Descripcion = (descripcion ?? "").Trim(),
                     PrecioExtra = precioExtra,
                     Cantidad = 1,
@@ -353,7 +403,7 @@ namespace CapaPresentacion.Controles
                 flpT.PerformLayout();
 
                 _tamales.Add(bloque);
-                AddExportLine(bloque);
+                AddExportLine(bloque);   // esta línea crea LineaExport con Codigo = bloque.Codigo
             }
             else
             {
