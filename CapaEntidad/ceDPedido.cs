@@ -14,7 +14,7 @@ namespace CapaEntidad
         public int CDG_FPRD { get; set; } = 0;
 
         // === Cantidad y precios ===
-        public int CAN_PPRD { get; set; } = 1;
+        public decimal CAN_PPRD { get; set; } = 1;
         public decimal PRE_PPRD { get; set; }        // SIN IGV (4 dec)
         public decimal IMP_TPRD { get; set; }        // importe SIN IGV (2 dec)
         public decimal PRE_IGV { get; set; }        // CON IGV (2 dec)

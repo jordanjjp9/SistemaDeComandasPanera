@@ -268,24 +268,6 @@
     <Compile Include="frmMesas.Designer.cs">
       <DependentUpon>frmMesas.cs</DependentUpon>
     </Compile>
-    <Compile Include="frmNotaHelados.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmNotaHelados.Designer.cs">
-      <DependentUpon>frmNotaHelados.cs</DependentUpon>
-    </Compile>
-    <Compile Include="frmNotasBebidas.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmNotasBebidas.Designer.cs">
-      <DependentUpon>frmNotasBebidas.cs</DependentUpon>
-    </Compile>
-    <Compile Include="frmNotasSandwich.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="frmNotasSandwich.Designer.cs">
-      <DependentUpon>frmNotasSandwich.cs</DependentUpon>
-    </Compile>
     <Compile Include="frmNumeroPersonas.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -486,15 +468,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmMesas.resx">
       <DependentUpon>frmMesas.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmNotaHelados.resx">
-      <DependentUpon>frmNotaHelados.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmNotasBebidas.resx">
-      <DependentUpon>frmNotasBebidas.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="frmNotasSandwich.resx">
-      <DependentUpon>frmNotasSandwich.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmNumeroPersonas.resx">
       <DependentUpon>frmNumeroPersonas.cs</DependentUpon>

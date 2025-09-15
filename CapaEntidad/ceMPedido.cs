@@ -56,5 +56,9 @@ namespace CapaEntidad
             IMP_IGV = Math.Round(igvTotal, 2, MidpointRounding.AwayFromZero);
             IMP_TOT = Math.Round(IMP_BASE + IMP_IGV, 2, MidpointRounding.AwayFromZero);
         }
+
+      ///  public int NUM_PED { get; set; }
+        public string CDG_MESA { get; set; }
+        public string SWT_PED { get; set; } // "" o "T"
     }
 }

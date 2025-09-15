@@ -22,38 +22,6 @@ namespace CapaPresentacion
             pnlTop.SizeChanged += pnlTop_SizeChanged;
         }
 
-        /*
-        private void AbrirEnPanel<T>() where T : Form, new()
-        {
-            // Si ya está abierto ese mismo formulario, no vuelvas a cargarlo
-            if (_formActual is T) return;
-
-            // Cierra/dispone el anterior (si lo hubiera)
-            if (_formActual != null)
-            {
-                _formActual.Close();
-                _formActual.Dispose();
-                _formActual = null;
-            }
-
-            // Crea y configura el nuevo
-            var frm = new T
-            {
-                TopLevel = false,
-                FormBorderStyle = FormBorderStyle.None,
-                Dock = DockStyle.Fill,
-                StartPosition = FormStartPosition.Manual
-            };
-
-            pnlMCentral.SuspendLayout();
-            pnlMCentral.Controls.Clear();
-            pnlMCentral.Controls.Add(frm);
-            frm.Show();
-            pnlMCentral.ResumeLayout();
-
-            _formActual = frm;
-        }*/
-
         private void CentrarEnPanel(Control hijo)
         {
             // importante: sin Dock ni Anchor para que no “se pegue” a los bordes
@@ -137,11 +105,18 @@ namespace CapaPresentacion
         public void AbrirMenuPrincipal()
         {
 
+            //using (var val = new frmMenuPrincipal())
+            //{
+            //    val.StartPosition = FormStartPosition.CenterParent;
+            //    val.ShowDialog(this);
+            //}
+            //RefrescarMesasUI();
             using (var val = new frmMenuPrincipal())
             {
                 val.StartPosition = FormStartPosition.CenterParent;
-                val.ShowDialog(this);
+                val.ShowDialog(this);   // al cerrarse, volvemos acá
             }
+            RefrescarMesasUI();
         }
 
     //    private void btnSalon_Click(object sender, EventArgs e) => AbrirEnPanel<CapaPresentacion.Ambientes.frmSPrincipal>(centrar: true);
@@ -191,11 +166,21 @@ namespace CapaPresentacion
             pnlButons.Left = (pnlTop.Width - pnlButons.Width) / 2;
             pnlButons.Top = (pnlTop.Height - pnlButons.Height) / 2;
         }
+        public void RefrescarMesasUI()
+        {
+            // Busca el formulario de salón embebido y le pide que repinte los colores de mesas
+            var salon = pnlMCentral.Controls
+                .OfType<CapaPresentacion.Ambientes.frmSPrincipal>()
+                .FirstOrDefault();
+
+            salon?.RefrescarColoresMesas();
+        }
 
         private void btnSalon_Click(object sender, EventArgs e) 
         {
             AbrirEnPanel<CapaPresentacion.Ambientes.frmSPrincipal>(centrar: true);
             SesionActual.SetAmbiente(AmbienteTipo.Salon);
+            RefrescarMesasUI();
             //RefrescarMesas();
         }  
 

@@ -48,6 +48,7 @@
     <Compile Include="DAOPedidoTxt.cs" />
     <Compile Include="DAOProductos.cs" />
     <Compile Include="DAOVendedor.cs" />
+    <Compile Include="DataReaderX.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

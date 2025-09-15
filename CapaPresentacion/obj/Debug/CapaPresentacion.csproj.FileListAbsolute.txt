@@ -16,9 +16,6 @@ C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.frmListaProductos.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.frmMenuPrincipal.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.frmMesas.resources
-C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.frmNotaHelados.resources
-C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.frmNotasBebidas.resources
-C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.frmNotasSandwich.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.frmValidacion.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Properties.Resources.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.ucLineaPedido.resources

@@ -3,14 +3,6 @@
   "WorkspaceRootPath": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|c:\\users\\lenovo\\source\\repos\\sistemadecomandaspanera\\capapresentacion\\frmcomentariolbr.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|solutionrelative:capapresentacion\\frmcomentariolbr.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|c:\\users\\lenovo\\source\\repos\\sistemadecomandaspanera\\capapresentacion\\frmcomentariolbr.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|solutionrelative:capapresentacion\\frmcomentariolbr.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\capapresentacion\\frmmenuprincipal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|solutionrelative:capapresentacion\\frmmenuprincipal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -19,8 +11,24 @@
       "RelativeMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|solutionrelative:capapresentacion\\frmmenuprincipal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|c:\\users\\lenovo\\source\\repos\\sistemadecomandaspanera\\capapresentacion\\frmlistaproductos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|solutionrelative:capapresentacion\\frmlistaproductos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{52F1C587-7F2B-47CA-8D8C-BA3B0C1787A5}|CapaDatos\\CapaDatos.csproj|C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\capadatos\\daopedido.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{52F1C587-7F2B-47CA-8D8C-BA3B0C1787A5}|CapaDatos\\CapaDatos.csproj|solutionrelative:capadatos\\daopedido.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\capapresentacion\\ambientes\\frmsalonprincipal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|solutionrelative:capapresentacion\\ambientes\\frmsalonprincipal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\capapresentacion\\ambientes\\frmsalonprincipal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|solutionrelative:capapresentacion\\ambientes\\frmsalonprincipal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|c:\\users\\lenovo\\source\\repos\\sistemadecomandaspanera\\capapresentacion\\frmmesas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|solutionrelative:capapresentacion\\frmmesas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\capapresentacion\\frmmesas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{70390575-5FFE-4A07-ADBF-16632D13290C}|CapaPresentacion\\CapaPresentacion.csproj|solutionrelative:capapresentacion\\frmmesas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
   "DocumentGroupContainers": [
@@ -39,65 +47,89 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "frmComentarioLbr.cs",
-              "DocumentMoniker": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmComentarioLbr.cs",
-              "RelativeDocumentMoniker": "CapaPresentacion\\frmComentarioLbr.cs",
-              "ToolTip": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmComentarioLbr.cs",
-              "RelativeToolTip": "CapaPresentacion\\frmComentarioLbr.cs",
-              "ViewState": "AgIAACAAAAAAAAAAAAAYwDAAAAAvAAAAAAAAAA==",
+              "Title": "frmMenuPrincipal.cs",
+              "DocumentMoniker": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmMenuPrincipal.cs",
+              "RelativeDocumentMoniker": "CapaPresentacion\\frmMenuPrincipal.cs",
+              "ToolTip": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmMenuPrincipal.cs*",
+              "RelativeToolTip": "CapaPresentacion\\frmMenuPrincipal.cs*",
+              "ViewState": "AgIAAF0FAAAAAAAAAAAYwGoFAABRAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T01:32:18.129Z",
+              "WhenOpened": "2025-09-15T04:29:07.802Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "frmComentarioLbr.cs [Dise\u00F1o]",
-              "DocumentMoniker": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmComentarioLbr.cs",
-              "RelativeDocumentMoniker": "CapaPresentacion\\frmComentarioLbr.cs",
-              "ToolTip": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmComentarioLbr.cs [Dise\u00F1o]",
-              "RelativeToolTip": "CapaPresentacion\\frmComentarioLbr.cs [Dise\u00F1o]",
+              "Title": "frmMenuPrincipal.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmMenuPrincipal.cs",
+              "RelativeDocumentMoniker": "CapaPresentacion\\frmMenuPrincipal.cs",
+              "ToolTip": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmMenuPrincipal.cs [Dise\u00F1o]*",
+              "RelativeToolTip": "CapaPresentacion\\frmMenuPrincipal.cs [Dise\u00F1o]*",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T01:31:11.467Z",
+              "WhenOpened": "2025-09-15T04:29:04.589Z",
               "EditorCaption": " [Dise\u00F1o]"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "frmListaProductos.cs",
-              "DocumentMoniker": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmListaProductos.cs",
-              "RelativeDocumentMoniker": "CapaPresentacion\\frmListaProductos.cs",
-              "ToolTip": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmListaProductos.cs",
-              "RelativeToolTip": "CapaPresentacion\\frmListaProductos.cs",
-              "ViewState": "AgIAALoAAAAAAAAAAAAswM4AAAANAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-14T06:16:20.388Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "frmMenuPrincipal.cs",
-              "DocumentMoniker": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmMenuPrincipal.cs",
-              "RelativeDocumentMoniker": "CapaPresentacion\\frmMenuPrincipal.cs",
-              "ToolTip": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmMenuPrincipal.cs",
-              "RelativeToolTip": "CapaPresentacion\\frmMenuPrincipal.cs",
-              "ViewState": "AgIAADQAAAAAAAAAAAApwFIAAAAJAAAAAAAAAA==",
+              "Title": "DAOPedido.cs",
+              "DocumentMoniker": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaDatos\\DAOPedido.cs",
+              "RelativeDocumentMoniker": "CapaDatos\\DAOPedido.cs",
+              "ToolTip": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaDatos\\DAOPedido.cs*",
+              "RelativeToolTip": "CapaDatos\\DAOPedido.cs*",
+              "ViewState": "AgIAAKcCAAAAAAAAAAAYwNcCAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-14T06:14:08.191Z",
+              "WhenOpened": "2025-09-15T04:19:24.006Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "frmMenuPrincipal.cs [Dise\u00F1o]",
-              "DocumentMoniker": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmMenuPrincipal.cs",
-              "RelativeDocumentMoniker": "CapaPresentacion\\frmMenuPrincipal.cs",
-              "ToolTip": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmMenuPrincipal.cs [Dise\u00F1o]",
-              "RelativeToolTip": "CapaPresentacion\\frmMenuPrincipal.cs [Dise\u00F1o]",
+              "Title": "frmSalonPrincipal.cs",
+              "DocumentMoniker": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\Ambientes\\frmSalonPrincipal.cs",
+              "RelativeDocumentMoniker": "CapaPresentacion\\Ambientes\\frmSalonPrincipal.cs",
+              "ToolTip": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\Ambientes\\frmSalonPrincipal.cs",
+              "RelativeToolTip": "CapaPresentacion\\Ambientes\\frmSalonPrincipal.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAA5AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-14T06:14:07.021Z",
+              "WhenOpened": "2025-09-15T03:57:01.209Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "frmSalonPrincipal.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\Ambientes\\frmSalonPrincipal.cs",
+              "RelativeDocumentMoniker": "CapaPresentacion\\Ambientes\\frmSalonPrincipal.cs",
+              "ToolTip": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\Ambientes\\frmSalonPrincipal.cs [Dise\u00F1o]",
+              "RelativeToolTip": "CapaPresentacion\\Ambientes\\frmSalonPrincipal.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T03:56:51.422Z",
               "EditorCaption": " [Dise\u00F1o]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "frmMesas.cs",
+              "DocumentMoniker": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmMesas.cs",
+              "RelativeDocumentMoniker": "CapaPresentacion\\frmMesas.cs",
+              "ToolTip": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmMesas.cs",
+              "RelativeToolTip": "CapaPresentacion\\frmMesas.cs",
+              "ViewState": "AgIAAEkAAAAAAAAAAAAnwGgAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T03:56:33.945Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "frmMesas.cs [Dise\u00F1o]",
+              "DocumentMoniker": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmMesas.cs",
+              "RelativeDocumentMoniker": "CapaPresentacion\\frmMesas.cs",
+              "ToolTip": "C:\\Users\\lenovo\\source\\repos\\SistemaDeComandasPanera\\CapaPresentacion\\frmMesas.cs [Dise\u00F1o]",
+              "RelativeToolTip": "CapaPresentacion\\frmMesas.cs [Dise\u00F1o]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T03:56:22.277Z"
             }
           ]
         }
