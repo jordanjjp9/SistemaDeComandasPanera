@@ -21,6 +21,8 @@ namespace CapaEntidad
         public decimal IMP_IGV { get; set; }        // importe CON IGV (2 dec)
 
         // === Otros D_PED ===
+        public string CDG_COMB { get; set; }  // id de grupo (p.ej. "100","101"...). El DAO lo acolcha a 10 dígitos.
+
         public string OBS_PPRD { get; set; } = "";  // dejar BLANCO si no hay (no "0")
         public int CDG_LPRC { get; set; } = 1;   // Lista 001
         public string IMP_PROD { get; set; } = "";  // impresora (si aplica)

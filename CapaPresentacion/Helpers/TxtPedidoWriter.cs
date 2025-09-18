@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Windows.Forms;
 using CapaEntidad;
-using CapaNegocio;
 using CapaPresentacion.Controles;
 using CapaPresentacion.Helpers;
 
@@ -15,6 +12,8 @@ namespace CapaPresentacion
 {
     public static class TxtPedidoWriter
     {
+        private static readonly bool SIN_TAGS = true;
+
         public sealed class Resultado
         {
             public string NumPed { get; set; }
@@ -22,48 +21,54 @@ namespace CapaPresentacion
             public decimal SubTotal { get; set; }
             public decimal Igv { get; set; }
             public decimal Total { get; set; }
-
-            /// <summary>Cabecera lista para guardar en la BD (incluye Detalles).</summary>
             public ceMPedido Cabecera { get; set; }
         }
 
-        // Línea plana intermedia
         private sealed class Plano
         {
-            public string Cod10;             // CDG_PROD (10 dígitos si aplica)
+            public string Cod10;
             public string Descripcion;
             public int Cantidad;
-            public decimal PuConIgv;         // Precio unitario mostrado en UI (CON IGV)
-            public string Notas;             // OBS_PPRD
+            public decimal PuConIgv;
+            public string Notas;
+            public string CdgComb; // "100","101",...
         }
 
-        /// <summary>
-        /// Resolver opcional (si quieres obtener POR_IGV/SWT_IGV del maestro por producto).
-        /// Devuelve (porIgv, swtIgv). Si no puedes resolver, retorna null.
-        /// </summary>
         public delegate (decimal? porIgv, bool? swtIgv)? ResolverTributario(string cod10);
 
-        /// <summary>
-        /// Mapea la UI a ceMPedido (+ ceDPedido). NO exporta TXT. Devuelve resumen y la cabecera para BD.
-        /// </summary>
+        public static IEnumerable<string> ExtraerCodigosParaFiltrar(IEnumerable<Control> controles)
+        {
+            if (controles == null) yield break;
+            Func<string> nextId = () => "0";
+            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var p in FlattenSinTags(controles, nextId))
+            {
+                var cod = (p.Cod10 ?? "").Trim();
+                if (cod.Length > 0 && set.Add(cod))
+                    yield return cod;
+            }
+        }
+
         public static Resultado Generar(
-            Control.ControlCollection lineas,
-            Func<string, string> resolverImpresora,   // IMP_PROD
+            IEnumerable<Control> controles,
+            Func<string, string> resolverImpresora,
             string cdgVend,
             string cdgUsr,
             string cdgLoc,
             string cdgCaja,
             string numMesa,
             int numPers,
-            ResolverTributario resolverTrib = null    // opcional
+            ResolverTributario resolverTrib = null
         )
         {
-            if (lineas == null) throw new ArgumentNullException(nameof(lineas));
+            if (controles == null) throw new ArgumentNullException(nameof(controles));
 
-            // 1) Aplanar controles a líneas planas (respeta ComboPedidoItem y MenuPedidoItem)
-            var planos = Flatten(lineas).ToList();
+            // ← arranca en 99 para que el primer grupo sea "100"
+            int combSeq = 99;
+            Func<string> nextGroupId = () => (++combSeq).ToString(CultureInfo.InvariantCulture);
 
-            // 2) Cabecera
+            var planos = FlattenSinTags(controles, nextGroupId).ToList();
+
             string numPed = DateTime.Now.ToString("yyMMddHHmmss", CultureInfo.InvariantCulture);
             var cab = new ceMPedido
             {
@@ -79,7 +84,6 @@ namespace CapaPresentacion
             };
             if (numPers > 0) cab.NUM_PERS = numPers;
 
-            // 3) Detalles
             foreach (var p in planos)
             {
                 var det = new ceDPedido
@@ -88,23 +92,36 @@ namespace CapaPresentacion
                     CDG_PROD = ceDPedido.CodigoToInt(p.Cod10),
                     CAN_PPRD = Math.Max(1, p.Cantidad),
                     DESCRIPCION = p.Descripcion ?? "",
-                    OBS_PPRD = p.Notas?.Trim() ?? "",
+                    OBS_PPRD = p.NotesTrimOrEmpty(),
                     CDG_LPRC = 1
                 };
 
-                // Precio SIN/CON IGV desde PU mostrado en UI (CON IGV)
                 det.SetPreciosDesdePuConIgv(p.PuConIgv, ceMPedido.IGV_TASA);
 
-                // IMP_PROD (impresora) si te interesa conservarlo en entidad
                 if (resolverImpresora != null)
                     det.IMP_PROD = resolverImpresora(p.Cod10) ?? "";
+
+                if (resolverTrib != null)
+                {
+                    var trib = resolverTrib(p.Cod10);
+                    if (trib.HasValue)
+                    {
+                        if (trib.Value.porIgv.HasValue)
+                            SetPropIfExists(det, "POR_IGV", trib.Value.porIgv.Value);
+                        if (trib.Value.swtIgv.HasValue)
+                            SetPropIfExists(det, "SWT_IGV", trib.Value.swtIgv.Value);
+                    }
+                }
+
+                // ← asigna el grupo al detalle (la BD lo acolcha)
+                if (!string.IsNullOrWhiteSpace(p.CdgComb))
+                    det.CDG_COMB = p.CdgComb;
 
                 cab.Detalles.Add(det);
             }
 
             cab.RecalcularTotales();
 
-            // 4) Resultado
             return new Resultado
             {
                 NumPed = cab.NUM_PED,
@@ -116,66 +133,64 @@ namespace CapaPresentacion
             };
         }
 
-        // ——————————————————————
-        // Helpers
-        // ——————————————————————
-
-        /// <summary>
-        /// Devuelve una secuencia de líneas “planas” a partir de los controles (incluye sublíneas).
-        /// </summary>
-        private static IEnumerable<Plano> Flatten(Control.ControlCollection lineas)
+        public static Resultado Generar(
+            Control.ControlCollection lineas,
+            Func<string, string> resolverImpresora,
+            string cdgVend,
+            string cdgUsr,
+            string cdgLoc,
+            string cdgCaja,
+            string numMesa,
+            int numPers,
+            ResolverTributario resolverTrib = null
+        )
         {
-            foreach (Control c in EnumerarControles(lineas))
+            if (lineas == null) throw new ArgumentNullException(nameof(lineas));
+            return Generar(
+                controles: EnumerarControles(lineas),
+                resolverImpresora: resolverImpresora,
+                cdgVend: cdgVend,
+                cdgUsr: cdgUsr,
+                cdgLoc: cdgLoc,
+                cdgCaja: cdgCaja,
+                numMesa: numMesa,
+                numPers: numPers,
+                resolverTrib: resolverTrib
+            );
+        }
+
+        private static void SetPropIfExists(object target, string propName, object value)
+        {
+            if (target == null || value == null) return;
+            var t = target.GetType();
+            var p = t.GetProperty(propName, BindingFlags.Public | BindingFlags.Instance);
+            if (p == null || !p.CanWrite) return;
+            try
             {
-                // 1) ComboPedidoItem -> usa su GetLineasExport (ya incluye encabezado + subítems)
-                if (c is ComboPedidoItem ci)
-                {
-                    foreach (var ln in ci.GetLineasExport())
-                    {
-                        // ln es ComboPedidoItem.LineaExport
-                        string cod = TryGet<string>(ln, "Codigo", "");
-                        string desc = TryGet<string>(ln, "Descripcion", "");
-                        int can = TryGet<int>(ln, "Cantidad", 1);
-                        decimal pu = TryGet<decimal>(ln, "PrecioUnitarioConIgv", 0m);
-                        string notas = TryGet<string>(ln, "Notas", "");
+                var converted = Convert.ChangeType(value, p.PropertyType, CultureInfo.InvariantCulture);
+                p.SetValue(target, converted, null);
+            }
+            catch { }
+        }
 
-                        yield return new Plano
-                        {
-                            Cod10 = cod,
-                            Descripcion = desc,
-                            Cantidad = can,
-                            PuConIgv = pu,
-                            Notas = notas
-                        };
-                    }
+        private static IEnumerable<Plano> FlattenSinTags(IEnumerable<Control> controles, Func<string> nextGroupId)
+        {
+            foreach (var c in controles)
+            {
+                if (c is ComboPedidoItem combo)
+                {
+                    foreach (var p in ExportComboSinTags(combo, nextGroupId()))
+                        yield return p;
                     continue;
                 }
 
-                // 2) MenuPedidoItem -> usa su GetLineasExport (menú + chicha)
-                if (c is MenuPedidoItem mi)
+                if (c is MenuPedidoItem menu)
                 {
-                    foreach (var ln in mi.GetLineasExport())
-                    {
-                        // ln es MenuPedidoItem.LineaExport
-                        string cod = TryGet<string>(ln, "Codigo", "");
-                        string desc = TryGet<string>(ln, "Descripcion", "");
-                        int can = TryGet<int>(ln, "Cantidad", 1);
-                        decimal pu = TryGet<decimal>(ln, "PrecioUnitarioConIgv", 0m);
-                        string notas = TryGet<string>(ln, "Notas", "");
-
-                        yield return new Plano
-                        {
-                            Cod10 = cod,
-                            Descripcion = desc,
-                            Cantidad = can,
-                            PuConIgv = pu,
-                            Notas = notas
-                        };
-                    }
+                    foreach (var p in ExportMenuSinTags(menu, nextGroupId()))
+                        yield return p;
                     continue;
                 }
 
-                // 3) Línea normal (Lineas sueltas)
                 if (HasProp(c, "Codigo"))
                 {
                     string cod = Get<string>(c, "Codigo", "") ?? "";
@@ -190,13 +205,245 @@ namespace CapaPresentacion
                         Descripcion = desc,
                         Cantidad = can,
                         PuConIgv = pu,
-                        Notas = notas
+                        Notas = notas,
+                        CdgComb = ""
                     };
                 }
             }
         }
+        // Lee “Notas”, “NotasEncabezado” o “GetNotasEncabezadoRaw” si existen en el control.
+        private static string GetNotasAmigable(object obj)
+        {
+            if (obj == null) return string.Empty;
 
-        /// <summary>Enumera recursivamente todos los controles.</summary>
+            // Propiedad Notas
+            var p1 = obj.GetType().GetProperty("Notas", BindingFlags.Public | BindingFlags.Instance);
+            if (p1 != null)
+            {
+                try { return Convert.ToString(p1.GetValue(obj, null)) ?? ""; }
+                catch { /* ignore */ }
+            }
+
+            // Propiedad NotasEncabezado
+            var p2 = obj.GetType().GetProperty("NotasEncabezado", BindingFlags.Public | BindingFlags.Instance);
+            if (p2 != null)
+            {
+                try { return Convert.ToString(p2.GetValue(obj, null)) ?? ""; }
+                catch { /* ignore */ }
+            }
+
+            // Método GetNotasEncabezadoRaw()
+            var m = obj.GetType().GetMethod("GetNotasEncabezadoRaw", BindingFlags.Public | BindingFlags.Instance);
+            if (m != null)
+            {
+                try { return Convert.ToString(m.Invoke(obj, null)) ?? ""; }
+                catch { /* ignore */ }
+            }
+
+            return string.Empty;
+        }
+
+        private static IEnumerable<Plano> ExportComboSinTags(ComboPedidoItem combo, string gid)
+        {
+            var tipo = combo.GetType();
+
+            string codHead = Get<string>(combo, "Codigo", "");
+            string descHead = Get<string>(combo, "Descripcion", "");
+            int qHead = Get<int>(combo, "Cantidad", 1);
+            decimal puHead = GetHeadPuConIgv(tipo, combo);
+            string notasHead = GetNotasEncabezadoAmigable(combo);
+
+            yield return new Plano
+            {
+                Cod10 = codHead,
+                Descripcion = descHead,
+                Cantidad = qHead,
+                PuConIgv = puHead,
+                Notas = (notasHead ?? string.Empty).Trim(),
+                CdgComb = gid
+            };
+
+            foreach (var j in ExportSubitems(tipo, combo, "ExportJugos"))
+            {
+                string cod = TryGet<string>(j, "Codigo", "");
+                string des = TryGet<string>(j, "Descripcion", "");
+                int can = Math.Max(1, TryGet<int>(j, "Cantidad", 1));
+                string notas = TryGet<string>(j, "Notas", "");
+
+                yield return new Plano
+                {
+                    Cod10 = cod,
+                    Descripcion = des,
+                    Cantidad = can,
+                    PuConIgv = 0m,
+                    Notas = (notas ?? string.Empty).Trim(),
+                    CdgComb = gid
+                };
+            }
+
+            foreach (var b in ExportSubitems(tipo, combo, "ExportBebidas"))
+            {
+                string cod = TryGet<string>(b, "Codigo", "");
+                string des = TryGet<string>(b, "Descripcion", "");
+                int can = Math.Max(1, TryGet<int>(b, "Cantidad", 1));
+                string notas = TryGet<string>(b, "Notas", "");
+
+                yield return new Plano
+                {
+                    Cod10 = cod,
+                    Descripcion = des,
+                    Cantidad = can,
+                    PuConIgv = 0m,
+                    Notas = (notas ?? string.Empty).Trim(),
+                    CdgComb = gid
+                };
+            }
+
+            foreach (var t in ExportSubitems(tipo, combo, "ExportTamales"))
+            {
+                string cod = TryGet<string>(t, "Codigo", "");
+                string des = TryGet<string>(t, "Descripcion", "");
+                int can = Math.Max(1, TryGet<int>(t, "Cantidad", 1));
+
+                yield return new Plano
+                {
+                    Cod10 = cod,
+                    Descripcion = des,
+                    Cantidad = can,
+                    PuConIgv = 0m,
+                    Notas = string.Empty,
+                    CdgComb = gid
+                };
+            }
+
+            var m = GetMethod(tipo, "GetLineasExport");
+            if (m != null)
+            {
+                var list = m.Invoke(combo, null) as System.Collections.IEnumerable;
+                if (list != null)
+                {
+                    bool first = true;
+                    foreach (var ln in list)
+                    {
+                        string cod = TryGet<string>(ln, "Codigo", "");
+                        string des = TryGet<string>(ln, "Descripcion", "");
+                        int can = Math.Max(1, TryGet<int>(ln, "Cantidad", 1));
+                        decimal pu = TryGet<decimal>(ln, "PrecioUnitarioConIgv", 0m);
+                        string notas = TryGet<string>(ln, "Notas", "");
+
+                        if (first) { first = false; continue; }
+
+                        yield return new Plano
+                        {
+                            Cod10 = cod,
+                            Descripcion = des,
+                            Cantidad = can,
+                            PuConIgv = 0m,
+                            Notas = (notas ?? string.Empty).Trim(),
+                            CdgComb = gid
+                        };
+                    }
+                }
+            }
+        }
+
+        private static IEnumerable<Plano> ExportMenuSinTags(MenuPedidoItem menu, string gid)
+        {
+            var tipo = menu.GetType();
+
+            var m = GetMethod(tipo, "GetLineasExport");
+            if (m != null)
+            {
+                var list = m.Invoke(menu, null) as System.Collections.IEnumerable;
+                if (list != null)
+                {
+                    bool first = true;
+                    foreach (var ln in list)
+                    {
+                        string cod = TryGet<string>(ln, "Codigo", "");
+                        string des = TryGet<string>(ln, "Descripcion", "");
+                        int can = Math.Max(1, TryGet<int>(ln, "Cantidad", 1));
+                        decimal pu = TryGet<decimal>(ln, "PrecioUnitarioConIgv", 0m);
+                        string notas = TryGet<string>(ln, "Notas", "");
+
+                        if (first)
+                        {
+                            first = false;
+                            yield return new Plano
+                            {
+                                Cod10 = cod,
+                                Descripcion = des,
+                                Cantidad = can,
+                                PuConIgv = pu,
+                                Notas = (notas ?? string.Empty).Trim(),
+                                CdgComb = gid
+                            };
+                        }
+                        else
+                        {
+                            yield return new Plano
+                            {
+                                Cod10 = cod,
+                                Descripcion = des,
+                                Cantidad = can,
+                                PuConIgv = 0m,
+                                Notas = (notas ?? string.Empty).Trim(),
+                                CdgComb = gid
+                            };
+                        }
+                    }
+                    yield break;
+                }
+            }
+
+            string codHead = Get<string>(menu, "Codigo", "");
+            string descHead = Get<string>(menu, "Descripcion", "");
+            int qHead = Get<int>(menu, "Cantidad", 1);
+            decimal puHead = GetHeadPuConIgv(tipo, menu);
+            string notasHead = GetNotasEncabezadoAmigable(menu);
+
+            yield return new Plano
+            {
+                Cod10 = codHead,
+                Descripcion = descHead,
+                Cantidad = qHead,
+                PuConIgv = puHead,
+                Notas = (notasHead ?? string.Empty).Trim(),
+                CdgComb = gid
+            };
+        }
+
+        private static System.Collections.IEnumerable ExportSubitems(Type t, object instance, string methodName)
+        {
+            var m = GetMethod(t, methodName);
+            if (m == null) return Empty();
+            var obj = m.Invoke(instance, null) as System.Collections.IEnumerable;
+            return obj ?? Empty();
+        }
+
+        private static IEnumerable<object> Empty() { yield break; }
+
+        private static decimal GetHeadPuConIgv(Type t, object instance)
+        {
+            var p1 = t.GetProperty("PrecioUnitarioConIgv", BindingFlags.Public | BindingFlags.Instance);
+            if (p1 != null) { try { return Convert.ToDecimal(p1.GetValue(instance, null), CultureInfo.InvariantCulture); } catch { } }
+            var p2 = t.GetProperty("PrecioUnitario", BindingFlags.Public | BindingFlags.Instance);
+            if (p2 != null) { try { return Convert.ToDecimal(p2.GetValue(instance, null), CultureInfo.InvariantCulture); } catch { } }
+            return 0m;
+        }
+
+        private static string GetNotasEncabezadoAmigable(object obj)
+        {
+            if (obj == null) return string.Empty;
+            var p2 = obj.GetType().GetProperty("NotasEncabezado", BindingFlags.Public | BindingFlags.Instance);
+            if (p2 != null) try { return Convert.ToString(p2.GetValue(obj, null)) ?? ""; } catch { }
+            var m = obj.GetType().GetMethod("GetNotasEncabezadoRaw", BindingFlags.Public | BindingFlags.Instance);
+            if (m != null) try { return Convert.ToString(m.Invoke(obj, null)) ?? ""; } catch { }
+            var p1 = obj.GetType().GetProperty("Notas", BindingFlags.Public | BindingFlags.Instance);
+            if (p1 != null) try { return Convert.ToString(p1.GetValue(obj, null)) ?? ""; } catch { }
+            return string.Empty;
+        }
+
         private static IEnumerable<Control> EnumerarControles(Control.ControlCollection col)
         {
             foreach (Control c in col)
@@ -208,9 +455,7 @@ namespace CapaPresentacion
         }
 
         private static bool HasProp(object obj, string prop)
-        {
-            return obj?.GetType().GetProperty(prop, BindingFlags.Public | BindingFlags.Instance) != null;
-        }
+            => obj?.GetType().GetProperty(prop, BindingFlags.Public | BindingFlags.Instance) != null;
 
         private static T Get<T>(object obj, string prop, T def)
         {
@@ -240,21 +485,10 @@ namespace CapaPresentacion
             catch { return def; }
         }
 
-        /// <summary>Lee “Notas”, “NotasEncabezado” o “GetNotasEncabezadoRaw” si existen.</summary>
-        private static string GetNotasAmigable(object obj)
-        {
-            if (obj == null) return string.Empty;
+        private static MethodInfo GetMethod(Type t, string name)
+            => t?.GetMethod(name, BindingFlags.Public | BindingFlags.Instance);
 
-            var p1 = obj.GetType().GetProperty("Notas", BindingFlags.Public | BindingFlags.Instance);
-            if (p1 != null) try { return Convert.ToString(p1.GetValue(obj, null)) ?? ""; } catch { }
-
-            var p2 = obj.GetType().GetProperty("NotasEncabezado", BindingFlags.Public | BindingFlags.Instance);
-            if (p2 != null) try { return Convert.ToString(p2.GetValue(obj, null)) ?? ""; } catch { }
-
-            var m = obj.GetType().GetMethod("GetNotasEncabezadoRaw", BindingFlags.Public | BindingFlags.Instance);
-            if (m != null) try { return Convert.ToString(m.Invoke(obj, null)) ?? ""; } catch { }
-
-            return string.Empty;
-        }
+        private static string NotesTrimOrEmpty(this Plano p)
+            => (p.Notas ?? "").Trim();
     }
 }

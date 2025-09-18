@@ -55,6 +55,7 @@
       <HintPath>..\packages\Microsoft.SqlServer.Types.14.0.314.76\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Design" />
     <Reference Include="System.Management" />
@@ -280,6 +281,7 @@
     <Compile Include="frmValidacion.Designer.cs">
       <DependentUpon>frmValidacion.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\ComboTagHelper.cs" />
     <Compile Include="Helpers\ControlExtensions.cs" />
     <Compile Include="Helpers\DragScroller.cs" />
     <Compile Include="Helpers\FlowLayoutPanelSinScroll.cs">
@@ -288,9 +290,11 @@
     <Compile Include="Helpers\ISelectorProducto.cs" />
     <Compile Include="Helpers\LineaPedidoItemExtensions.cs" />
     <Compile Include="Helpers\LineaSelection.cs" />
+    <Compile Include="Helpers\LinesLocker.cs" />
     <Compile Include="Helpers\NoFocusScrollFlowLayoutPanel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Helpers\ReadOnlyController .cs" />
     <Compile Include="Helpers\SesionActual.cs" />
     <Compile Include="Helpers\TxtPedidoWriter.cs" />
     <Compile Include="Impresion\ComandaTicket.cs" />

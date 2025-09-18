@@ -511,7 +511,7 @@
             this.Text = "frmMenuPrincipal";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.frmMenuPrincipal_Load);
-            this.Shown += new System.EventHandler(this.frmMenuPrincipal_Shown);
+            //this.Shown += new System.EventHandler(this.frmMenuPrincipal_Shown);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.frmMenuPrincipal_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.frmMenuPrincipal_KeyUp);
             this.pnlTop.ResumeLayout(false);

@@ -48,6 +48,7 @@
     <Compile Include="ceProductos.cs" />
     <Compile Include="ceSesionActual.cs" />
     <Compile Include="ceVendedor.cs" />
+    <Compile Include="DetalleMeta.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

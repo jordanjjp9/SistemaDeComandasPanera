@@ -46,6 +46,9 @@
     <Compile Include="cnPedido.cs" />
     <Compile Include="cnProducto.cs" />
     <Compile Include="cnVendedor.cs" />
+    <Compile Include="MetaStore\CsvMetaStore .cs" />
+    <Compile Include="MetaStore\IMetaStore.cs" />
+    <Compile Include="MetaStore\MetaStoreFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

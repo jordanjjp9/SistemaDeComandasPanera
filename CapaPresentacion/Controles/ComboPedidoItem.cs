@@ -19,36 +19,31 @@ namespace CapaPresentacion.Controles
         public int Cantidad { get; private set; } = 1;
         public decimal PrecioUnitario { get; private set; } = 0m;   // PU final del combo (CON IGV)
         public decimal Total { get { return Cantidad * PrecioUnitario; } }
-        public string NotasEncabezado { get; private set; } = string.Empty;
-
+        //public string NotasEncabezado { get; private set; } = string.Empty;
+        public string NotasEncabezado => GetNotasEncabezadoRaw();
         // ======== Export plano ========
         public sealed class LineaExport
         {
-            public string Codigo { get; set; }                 // CDG_PROD (10 dígitos lo pone el DAO)
+            public string Codigo { get; set; }
             public string Descripcion { get; set; }
             public int Cantidad { get; set; }
-            public decimal PrecioUnitarioConIgv { get; set; }   // CON IGV (para extras es el recargo)
-            public string Notas { get; set; }                   // OBS_PPRD
+            public decimal PrecioUnitarioConIgv { get; set; }
+            public string Notas { get; set; }
         }
 
         private readonly List<LineaExport> _planas = new List<LineaExport>();
-        //   public IEnumerable<LineaExport> GetLineasExport() { return _planas.ToArray(); }
-
         public IEnumerable<LineaExport> GetLineasExport()
         {
-            // 1) Encabezado del combo (siempre, con su PU real)
             yield return new LineaExport
             {
                 Codigo = this.Codigo ?? string.Empty,
                 Descripcion = this.Descripcion ?? string.Empty,
                 Cantidad = this.Cantidad,
                 PrecioUnitarioConIgv = this.PrecioUnitario,
-                // Usa tu helper; si no lo tienes, reemplaza por (this.NotasEncabezado ?? "")
                 Notas = GetNotasEncabezadoRaw()
             };
 
-            // 2) Jugos (cada uno con PU = 0.00)
-            foreach (var j in _jugos)   // _jugos es tu lista interna (BloqueTexto u otro)
+            foreach (var j in _jugos)
             {
                 yield return new LineaExport
                 {
@@ -56,11 +51,9 @@ namespace CapaPresentacion.Controles
                     Descripcion = j.Descripcion ?? "JUGO",
                     Cantidad = j.Cantidad,
                     PrecioUnitarioConIgv = 0m,
-                    Notas = FormatearNotas(j.Notas) // si Notas ya es string, deja j.Notas
+                    Notas = FormatearNotas(j.Notas)
                 };
             }
-
-            // 3) Bebidas calientes (PU = 0.00)
             foreach (var b in _bebidas)
             {
                 yield return new LineaExport
@@ -72,8 +65,6 @@ namespace CapaPresentacion.Controles
                     Notas = FormatearNotas(b.Notas)
                 };
             }
-
-            // 4) Tamales (PU = 0.00)
             foreach (var t in _tamales)
             {
                 yield return new LineaExport
@@ -92,6 +83,10 @@ namespace CapaPresentacion.Controles
         public bool AgruparBebidasIguales { get; set; } = true;
         public bool AgruparTamalesIguales { get; set; } = true;
 
+        // ===== Solo lectura / política de edición =====
+        public bool ReadOnly { get; private set; } = false;
+        public void SetReadOnly(bool ro) { ReadOnly = ro; this.Cursor = Cursors.Default; foreach (Control c in Controls) c.Cursor = Cursors.Default; }
+
         // ===== Estado UI general =====
         private readonly ToolTip _tt = new ToolTip();
         private int _baseHeight;
@@ -106,14 +101,13 @@ namespace CapaPresentacion.Controles
         private sealed class BloqueTexto
         {
             public string Key;
-            public string Codigo;          // para exportar CDG_PROD
+            public string Codigo;
             public string Descripcion;
             public decimal PrecioExtra;
             public int Cantidad;
             public List<string> Notas = new List<string>();
             public Guna2TextBox TextBox;
-
-            public int ExportIndex = -1;   // índice dentro de _planas para mantener sincronía
+            public int ExportIndex = -1;
         }
 
         // Listas por tipo
@@ -121,15 +115,15 @@ namespace CapaPresentacion.Controles
         private readonly List<BloqueTexto> _bebidas = new List<BloqueTexto>();
         private readonly List<BloqueTexto> _tamales = new List<BloqueTexto>();
 
-        // Últimos agregados (para edición rápida)
+        // Últimos agregados (para edición rápida por botón)
         private BloqueTexto _ultimoJugo;
         private BloqueTexto _ultimaBebida;
         private BloqueTexto _ultimoTamal;
 
-        // Bloque actualmente seleccionado para editar notas
+        // Bloque actualmente seleccionado para editar notas (por botón)
         private BloqueTexto _bloqueSeleccionado;
 
-        // Notas del ENCABEZADO del combo (debajo de "N x DESCRIPCION = S/ …")
+        // Notas del ENCABEZADO del combo
         private readonly List<string> _notasEncabezado = new List<string>();
 
         // Marca si el usuario tocó el encabezado (txtCombo)
@@ -138,16 +132,12 @@ namespace CapaPresentacion.Controles
 
         // ===== ILineaSeleccionable =====
         public Control View { get { return this; } }
-        public void SetVisualSelected(bool selected)
-        {
-            this.BorderStyle = selected ? BorderStyle.FixedSingle : BorderStyle.None;
-        }
+        public void SetVisualSelected(bool selected) => this.BorderStyle = selected ? BorderStyle.FixedSingle : BorderStyle.None;
 
         public ComboPedidoItem()
         {
             InitializeComponent();
 
-            // Tomar plantillas (si existen) y sacarlas de sus contenedores
             _tplJugo = this.Controls.Find("txtJugoDesayuno", true).OfType<Guna2TextBox>().FirstOrDefault();
             _tplBeb = this.Controls.Find("txtBebCDesay", true).OfType<Guna2TextBox>().FirstOrDefault();
             _tplTamal = this.Controls.Find("txtTamal", true).OfType<Guna2TextBox>().FirstOrDefault();
@@ -164,6 +154,9 @@ namespace CapaPresentacion.Controles
             {
                 txtCombo.Click -= Header_Click; txtCombo.Click += Header_Click;
                 txtCombo.MouseDown -= Header_Click; txtCombo.MouseDown += Header_Click;
+                // importante: NO hay edición por doble click en el encabezado
+                txtCombo.DoubleClick -= Header_DoubleClick_NoEdit;
+                txtCombo.DoubleClick += Header_DoubleClick_NoEdit;
             }
 
             // Preparar contenedores
@@ -234,7 +227,6 @@ namespace CapaPresentacion.Controles
             Cantidad = Math.Max(1, cantidad);
             PrecioUnitario = Math.Max(0m, precioUnitarioFinal);
 
-            // Export: encabezado como primera línea
             _planas.Clear();
             _planas.Add(new LineaExport
             {
@@ -268,7 +260,6 @@ namespace CapaPresentacion.Controles
             if (string.IsNullOrWhiteSpace(notas)) return;
             foreach (var n in ToNotas(notas))
             {
-                // dedup simple (case-insensitive)
                 bool existe = _notasEncabezado.Any(x => string.Equals(x, n, StringComparison.OrdinalIgnoreCase));
                 if (!existe) _notasEncabezado.Add(n);
             }
@@ -292,16 +283,12 @@ namespace CapaPresentacion.Controles
                 _planas[0].Notas = GetNotasEncabezadoRaw();
         }
 
-        public string GetNotasEncabezadoRaw()
-        {
-            return FormatearNotas(_notasEncabezado);
-        }
+        public string GetNotasEncabezadoRaw() => FormatearNotas(_notasEncabezado);
 
         // ======= TAMALES =======
         public void ClearTamales()
         {
             foreach (var b in _tamales) RemoveExportLine(b);
-
             _tamales.Clear();
             _ultimoTamal = null;
             _bloqueSeleccionado = null;
@@ -312,61 +299,9 @@ namespace CapaPresentacion.Controles
             RecalcAutoGrowSafe();
         }
 
-        // Compatibilidad (sin código)
         public void AddTamalUnidad(string descripcion, decimal precioExtra, string notas, bool? forzarIndividual)
-        { AddTamalUnidad(string.Empty, descripcion, precioExtra, notas, forzarIndividual); }
+            => AddTamalUnidad(string.Empty, descripcion, precioExtra, notas, forzarIndividual);
 
-        // Con código
-        //public void AddTamalUnidad(string codigo, string descripcion, decimal precioExtra, string notas, bool? forzarIndividual)
-        //{
-        //    FlowLayoutPanel flpT;
-        //    if (!TryFindControl("flpTamal", out flpT)) return;
-
-        //    bool individual = (forzarIndividual.HasValue) ? forzarIndividual.Value : !AgruparTamalesIguales;
-
-        //    BloqueTexto bloque = null;
-        //    if (!individual)
-        //    {
-        //        string key = KeyDe(descripcion, precioExtra);
-        //        bloque = _tamales.FirstOrDefault(x => x.Key == key);
-        //    }
-
-        //    if (bloque == null)
-        //    {
-        //        bloque = new BloqueTexto
-        //        {
-        //            Key = KeyDe(descripcion, precioExtra),
-        //            Codigo = (codigo ?? "").Trim(),
-        //            Descripcion = (descripcion ?? "").Trim(),
-        //            PrecioExtra = precioExtra,
-        //            Cantidad = 1,
-        //            TextBox = CrearTextBoxDesdePlantilla(_tplTamal, flpT)
-        //        };
-
-        //        if (!string.IsNullOrWhiteSpace(notas))
-        //            bloque.Notas.AddRange(ToNotas(notas));
-
-        //        bloque.TextBox.Text = TextoDe(bloque);
-        //        VincularBloqueVisual(bloque);
-
-        //        flpT.Controls.Add(bloque.TextBox);
-        //        flpT.PerformLayout();
-
-        //        _tamales.Add(bloque);
-        //        AddExportLine(bloque);
-        //    }
-        //    else
-        //    {
-        //        bloque.Cantidad += 1;
-        //        if (!string.IsNullOrWhiteSpace(notas))
-        //            bloque.Notas.AddRange(ToNotas(notas));
-        //        bloque.TextBox.Text = TextoDe(bloque);
-        //        UpdateExportLine(bloque);
-        //    }
-
-        //    _ultimoTamal = bloque;
-        //    RecalcAutoGrowSafe();
-        //}
         public void AddTamalUnidad(string codigo, string descripcion, decimal precioExtra, string notas, bool? forzarIndividual)
         {
             FlowLayoutPanel flpT;
@@ -386,7 +321,7 @@ namespace CapaPresentacion.Controles
                 bloque = new BloqueTexto
                 {
                     Key = KeyDe(descripcion, precioExtra),
-                    Codigo = (codigo ?? "").Trim(),         // 👈 se guarda el CÓDIGO
+                    Codigo = (codigo ?? "").Trim(),
                     Descripcion = (descripcion ?? "").Trim(),
                     PrecioExtra = precioExtra,
                     Cantidad = 1,
@@ -403,7 +338,7 @@ namespace CapaPresentacion.Controles
                 flpT.PerformLayout();
 
                 _tamales.Add(bloque);
-                AddExportLine(bloque);   // esta línea crea LineaExport con Codigo = bloque.Codigo
+                AddExportLine(bloque);
             }
             else
             {
@@ -431,7 +366,6 @@ namespace CapaPresentacion.Controles
         public void ClearJugos()
         {
             foreach (var b in _jugos) RemoveExportLine(b);
-
             _jugos.Clear();
             _ultimoJugo = null;
             _bloqueSeleccionado = null;
@@ -439,11 +373,9 @@ namespace CapaPresentacion.Controles
             RecalcAutoGrowSafe();
         }
 
-        // Compatibilidad (sin código)
         public void AddJugoUnidad(string descripcion, decimal precioExtra, string notas, bool? forzarIndividual)
-        { AddJugoUnidad(string.Empty, descripcion, precioExtra, notas, forzarIndividual); }
+            => AddJugoUnidad(string.Empty, descripcion, precioExtra, notas, forzarIndividual);
 
-        // Con código
         public void AddJugoUnidad(string codigo, string descripcion, decimal precioExtra, string notas, bool? forzarIndividual)
         {
             if (flpJugos == null) return;
@@ -526,11 +458,9 @@ namespace CapaPresentacion.Controles
             RecalcAutoGrowSafe();
         }
 
-        // Compatibilidad (sin código)
         public void AddBebidaUnidad(string descripcion, decimal precioExtra, string notas, bool? forzarIndividual)
-        { AddBebidaUnidad(string.Empty, descripcion, precioExtra, notas, forzarIndividual); }
+            => AddBebidaUnidad(string.Empty, descripcion, precioExtra, notas, forzarIndividual);
 
-        // Con código
         public void AddBebidaUnidad(string codigo, string descripcion, decimal precioExtra, string notas, bool? forzarIndividual)
         {
             FlowLayoutPanel flpB;
@@ -600,32 +530,17 @@ namespace CapaPresentacion.Controles
         }
 
         public decimal GetExtraPromedioTotalPorUnidad(int cantidadTotal)
-        {
-            return GetExtraPromedioJugosPorUnidad(cantidadTotal) +
-                   GetExtraPromedioBebidasPorUnidad(cantidadTotal);
-        }
+            => GetExtraPromedioJugosPorUnidad(cantidadTotal) + GetExtraPromedioBebidasPorUnidad(cantidadTotal);
 
         // ===== Export helpers =====
         private void AddExportLine(BloqueTexto b)
         {
-            //var line = new LineaExport
-            //{
-            //    Codigo = b.Codigo ?? string.Empty,
-            //    Descripcion = b.Descripcion,
-            //    Cantidad = b.Cantidad,
-            //    PrecioUnitarioConIgv = b.PrecioExtra,
-            //    Notas = FormatearNotas(b.Notas)
-            //};
-            //_planas.Add(line);
-            //b.ExportIndex = _planas.Count - 1;
-
             var line = new LineaExport
             {
                 Codigo = b.Codigo ?? string.Empty,
                 Descripcion = b.Descripcion,
                 Cantidad = b.Cantidad,
-                // Las sub-líneas SIEMPRE salen con 0.00. El extra ya está incluido en el PU del combo.
-                PrecioUnitarioConIgv = 0m,
+                PrecioUnitarioConIgv = 0m, // sub-líneas siempre 0.00
                 Notas = FormatearNotas(b.Notas)
             };
             _planas.Add(line);
@@ -634,17 +549,9 @@ namespace CapaPresentacion.Controles
 
         private void UpdateExportLine(BloqueTexto b)
         {
-            //if (b.ExportIndex < 0 || b.ExportIndex >= _planas.Count) return;
-            //var line = _planas[b.ExportIndex];
-            //line.Cantidad = b.Cantidad;
-            //line.PrecioUnitarioConIgv = b.PrecioExtra;
-            ////line.Notas = FormatearNotas(b.Notes ?? b.Notas); // por compatibilidad
-            //line.Notas = FormatearNotas(b.Notas);   // << aquí estaba el error (antes decía b.Notes)
-
             if (b.ExportIndex < 0 || b.ExportIndex >= _planas.Count) return;
             var line = _planas[b.ExportIndex];
             line.Cantidad = b.Cantidad;
-            // Mantener 0.00 en sub-líneas
             line.PrecioUnitarioConIgv = 0m;
             line.Notas = FormatearNotas(b.Notas);
         }
@@ -654,8 +561,6 @@ namespace CapaPresentacion.Controles
             if (b.ExportIndex >= 0 && b.ExportIndex < _planas.Count)
             {
                 _planas.RemoveAt(b.ExportIndex);
-
-                // reindex simple de todos los bloques
                 Action<List<BloqueTexto>> fix = list =>
                 {
                     for (int i = 0; i < list.Count; i++)
@@ -694,15 +599,24 @@ namespace CapaPresentacion.Controles
             // marcar encabezado activo cuando tocan el inner
             inner.Click -= Inner_HeaderMark_Click; inner.Click += Inner_HeaderMark_Click;
             inner.MouseDown -= Inner_HeaderMark_Click; inner.MouseDown += Inner_HeaderMark_Click;
+
+            // ❌ Deshabilitar edición por doble-click en encabezado
+            inner.DoubleClick -= Header_DoubleClick_NoEdit;
+            inner.DoubleClick += Header_DoubleClick_NoEdit;
         }
 
         private void Inner_HeaderMark_Click(object sender, EventArgs e) { MarcarEncabezadoActivo(); }
-
         private void Header_Click(object sender, EventArgs e) { MarcarEncabezadoActivo(); }
+        private void Header_DoubleClick_NoEdit(object sender, EventArgs e)
+        {
+            // Solo marcar selección; NO abrir ningún editor
+            try { System.Media.SystemSounds.Beep.Play(); } catch { }
+            MarcarEncabezadoActivo();
+        }
 
         private void Any_Click_Select(object sender, EventArgs e)
         {
-            LineaSelection.Select(this, true);   // selección global única
+            LineaSelection.Select(this, true);
         }
 
         // ===== AutoGrow / medidas =====
@@ -873,12 +787,13 @@ namespace CapaPresentacion.Controles
                 LineaSelection.Select(this, true);
             };
 
-            // Doble clic: editor de notas por bloque
+            // ❌ Doble clic: NO editar
             tb.DoubleClick += (s, e) =>
             {
                 _encabezadoActivo = false;
                 _bloqueSeleccionado = (BloqueTexto)((Control)s).Tag;
-                EditarNotasSeleccionadas(this.FindForm());
+                try { System.Media.SystemSounds.Beep.Play(); } catch { }
+                // Intencionalmente NO se llama a EditarNotasSeleccionadas
             };
 
             return tb;
@@ -962,11 +877,12 @@ namespace CapaPresentacion.Controles
                 LineaSelection.Select(this, true);
             };
 
+            // ❌ Doble clic: NO editar
             tb.DoubleClick += (s, e) =>
             {
                 _encabezadoActivo = false;
                 _bloqueSeleccionado = (BloqueTexto)((Control)s).Tag;
-                EditarNotasSeleccionadas(this.FindForm());
+                try { System.Media.SystemSounds.Beep.Play(); } catch { }
             };
         }
 
@@ -978,13 +894,12 @@ namespace CapaPresentacion.Controles
             return string.Join(Environment.NewLine, list);
         }
 
-        private static List<string> ParseNotas(string raw)
-        {
-            return new List<string>(ToNotas(raw));
-        }
+        private static List<string> ParseNotas(string raw) => new List<string>(ToNotas(raw));
 
+        // ==== Edición mediante botón/atajo (NO por doble-click) ====
         public bool EditarNotasSeleccionadas(IWin32Window owner)
         {
+            if (ReadOnly) return false;              // respeta solo-lectura
             if (_bloqueSeleccionado == null) return false;
 
             using (var frm = new CapaPresentacion.frmComentarioLbr())
@@ -1006,6 +921,8 @@ namespace CapaPresentacion.Controles
 
         public bool EditarUltimoJugoOBebida(IWin32Window owner)
         {
+            if (ReadOnly) return false;              // respeta solo-lectura
+
             BloqueTexto b = _bloqueSeleccionado;
             if (b == null && _ultimoTamal != null) b = _ultimoTamal;
             if (b == null && _ultimoJugo != null) b = _ultimoJugo;
@@ -1022,6 +939,8 @@ namespace CapaPresentacion.Controles
 
         public bool TieneSubItemEditable()
         {
+            if (ReadOnly) return false;              // respeta solo-lectura
+
             BloqueTexto candidato = _bloqueSeleccionado;
             if (candidato == null && _ultimoTamal != null) candidato = _ultimoTamal;
             if (candidato == null && _ultimoJugo != null) candidato = _ultimoJugo;

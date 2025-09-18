@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CapaDatos;
 using CapaEntidad;
 
@@ -10,7 +11,7 @@ namespace CapaNegocio
     /// </summary>
     public class cnPedido
     {
-        // ===================== Guardar =====================
+        // ===================== Guardar (insertar nuevo) =====================
 
         /// <summary>
         /// Guarda el pedido en BD (M_PEDIDO + D_PEDIDO) usando DAOPedido dentro
@@ -40,8 +41,9 @@ namespace CapaNegocio
             if (cabecera.FEC_PED == default(DateTime))
                 cabecera.FEC_PED = DateTime.Now;
 
+            // En tu esquema la moneda operativa suele ser "S" o "001".
             if (string.IsNullOrWhiteSpace(cabecera.CDG_MON))
-                cabecera.CDG_MON = "001"; // Moneda por defecto que usa el DAO (Soles)
+                cabecera.CDG_MON = "S";
 
             if (!string.IsNullOrEmpty(cabecera.CDG_AMB))
                 cabecera.CDG_AMB = cabecera.CDG_AMB.Trim();
@@ -59,12 +61,73 @@ namespace CapaNegocio
             return numPed;
         }
 
-        /// <summary>
-        /// Sobrecarga cómoda cuando no tienes resolutores.
-        /// </summary>
+        /// <summary>Conveniencia cuando no tienes resolutores.</summary>
         public string GuardarDb(ceMPedido cabecera)
         {
             return GuardarDb(cabecera, null, null);
+        }
+
+        // ===================== Anexar a pedido existente =====================
+
+        /// <summary>
+        /// Anexa SOLO los detalles enviados al pedido existente (NUM_PED),
+        /// y recalcula totales en M_PEDIDO. No crea cabecera nueva.
+        /// </summary>
+        /// <param name="numPed8">Número de pedido (8 dígitos).</param>
+        /// <param name="detallesNuevos">Renglones nuevos (tal como los arma TxtPedidoWriter).</param>
+        /// <param name="resolverImpresora">Opcional: resolver IMP_PROD por COD10.</param>
+        /// <param name="resolverTrib">Opcional: resolver POR_IGV/SWT_IGV por COD10.</param>
+        public void AnexarSoloDetalles(
+            string numPed8,
+            IList<ceDPedido> detallesNuevos,
+            Func<string, string> resolverImpresora,
+            Func<string, Tuple<decimal?, bool?>> resolverTrib
+        )
+        {
+            if (string.IsNullOrWhiteSpace(numPed8))
+                throw new ArgumentException("numPed vacío.", nameof(numPed8));
+
+            if (detallesNuevos == null || detallesNuevos.Count == 0)
+                return;
+
+            // Normalizaciones mínimas sobre cada detalle (por si viniera algo flojo)
+            foreach (var d in detallesNuevos)
+            {
+                // COD10 siempre con 10 posiciones si aplica
+                if (!string.IsNullOrWhiteSpace(d.COD10))
+                    d.COD10 = d.COD10.Trim().PadLeft(10, '0');
+
+                // CDG_PROD desde COD10 si falta
+                if (d.CDG_PROD <= 0 && !string.IsNullOrWhiteSpace(d.COD10))
+                    d.CDG_PROD = ceDPedido.CodigoToInt(d.COD10);
+
+                // Cantidad mínima = 1 (si viniera 0 o negativa)
+                if (d.CAN_PPRD <= 0)
+                    d.CAN_PPRD = 1;
+
+                // Asegura OBS_PPRD no nula
+                if (d.OBS_PPRD == null) d.OBS_PPRD = string.Empty;
+            }
+
+            // Delegamos TODO a DAO (transacción incluida):
+            //  1) Verificar que existe M_PEDIDO (y que está abierto si tu regla lo exige).
+            //  2) Insertar cada ceDPedido en D_PEDIDO con NUM_PED = numPed8
+            //     - Completar PRE_IGV/IMP_IGV/PU si hace falta (aunque idealmente ya vienen listos).
+            //     - Guardar OBS_PPRD tal como llega (con tags).
+            //     - Asignar IMP_PROD con resolverImpresora si lo pasaste.
+            //     - Aplicar resolverTrib (POR_IGV/SWT_IGV) si lo pasaste.
+            //  3) Recalcular totales de M_PEDIDO sumando todo lo que hay en D_PEDIDO.
+            //  4) (Opcional) Actualizar FEC_PED a GETDATE() si te interesa.
+            var dao = new DAOPedido();
+            dao.AnexarSoloDetalles(numPed8, detallesNuevos, resolverImpresora, resolverTrib);
+        }
+
+        /// <summary>
+        /// Overload sin resolutores.
+        /// </summary>
+        public void AnexarSoloDetalles(string numPed8, IList<ceDPedido> detallesNuevos)
+        {
+            AnexarSoloDetalles(numPed8, detallesNuevos, null, null);
         }
 
         // ===================== Lecturas / Estado =====================
