@@ -8,11 +8,18 @@ using System.Text;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
 using CapaPresentacion.Helpers;
+using CapaEntidad;
 
 namespace CapaPresentacion.Controles
 {
     public partial class MenuPedidoItem : UserControl, ILineaSeleccionable
     {
+        private DetalleRef _refDetalle;
+
+        public void SetRefDetalle(DetalleRef r) => _refDetalle = r;
+        public DetalleRef GetRefDetalle() => _refDetalle;
+        public bool TieneRefDetalle => _refDetalle != null;
+
         // ===== Datos del MENÚ (encabezado) =====
         public string Codigo { get; private set; } = "";
         public string Descripcion { get; private set; } = "";
@@ -91,20 +98,27 @@ namespace CapaPresentacion.Controles
             PrepTextBox(_txtMenu);
             PrepTextBox(_txtChich);
 
+            // Clicks sobre el propio Guna2TextBox (por si cae en bordes)
             if (_txtMenu != null)
             {
                 _txtMenu.Click += (s, e) => { ZonaActiva = ZonaNotas.Menu; LineaSelection.Select(this, true); };
                 _txtMenu.MouseDown += (s, e) => { ZonaActiva = ZonaNotas.Menu; LineaSelection.Select(this, true); };
+                _txtMenu.DoubleClick += (s, e) => { try { System.Media.SystemSounds.Beep.Play(); } catch { } };
             }
             if (_txtChich != null)
             {
                 _txtChich.Click += (s, e) => { ZonaActiva = ZonaNotas.Chicha; LineaSelection.Select(this, true); };
                 _txtChich.MouseDown += (s, e) => { ZonaActiva = ZonaNotas.Chicha; LineaSelection.Select(this, true); };
+                _txtChich.DoubleClick += (s, e) => { try { System.Media.SystemSounds.Beep.Play(); } catch { } };
             }
+
+            // 👇 NUEVO: cablear también el TextBox interno de Guna (donde realmente cae el click)
+            WireInner(_txtMenu, ZonaNotas.Menu);
+            WireInner(_txtChich, ZonaNotas.Chicha);
 
             this.SizeChanged += (s, e) => Recalc();
 
-            // selección con click en cualquier parte
+            // selección con click en cualquier parte del control
             WireSelectClick(this);
         }
 
@@ -305,6 +319,33 @@ namespace CapaPresentacion.Controles
                 return prop != null ? prop.GetValue(guna2TextBox, null) as TextBox : null;
             }
             catch { return null; }
+        }
+
+        // 👇 NUEVO: cableado del TextBox interno para asegurar selección
+        private void WireInner(Guna2TextBox tb, ZonaNotas zona)
+        {
+            if (tb == null) return;
+            var inner = TryInner(tb);
+            if (inner == null) return;
+
+            inner.ReadOnly = true;
+            inner.ShortcutsEnabled = false;
+            inner.Cursor = Cursors.Hand;
+
+            // limpio handlers previos por seguridad
+            inner.Click -= Any_Click_Select;
+            inner.MouseDown -= Any_Click_Select;
+            inner.DoubleClick -= Inner_DoubleClick_NoEdit;
+
+            inner.Click += (s, e) => { ZonaActiva = zona; LineaSelection.Select(this, true); };
+            inner.MouseDown += (s, e) => { ZonaActiva = zona; LineaSelection.Select(this, true); };
+            inner.DoubleClick += Inner_DoubleClick_NoEdit;
+        }
+
+        private void Inner_DoubleClick_NoEdit(object sender, EventArgs e)
+        {
+            try { System.Media.SystemSounds.Beep.Play(); } catch { }
+            // sólo marcamos selección, NO abrir editores aquí
         }
 
         private static List<string> ParseNotas(string raw)

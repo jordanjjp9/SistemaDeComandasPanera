@@ -20,29 +20,21 @@ namespace CapaDatos
 
         // ========================= Helpers =========================
 
-        /// <summary>
         /// Normaliza CDG_VEND a 3 dígitos (ajusta si tu esquema usa otra longitud).
-        /// </summary>
         private static string NormVend(string codigo)
             => (codigo ?? string.Empty).Trim().PadLeft(3, '0');
 
-        /// <summary>
         /// Normaliza CDG_USR (trim simple).
-        /// </summary>
         private static string NormUsr(string usr)
             => (usr ?? string.Empty).Trim();
 
-        /// <summary>
         /// Arma un LIKE seguro para filtros.
-        /// </summary>
         private static string Like(string s)
             => $"%{(s ?? string.Empty).Trim()}%";
 
         // ========================= POR CDG_VEND (EXISTENTE) =========================
 
-        /// <summary>
         /// Obtiene un vendedor por CDG_VEND. Devuelve null si no existe.
-        /// </summary>
         public ceVendedor ObtenerPorCodigo(string codigo)
         {
             const string sql = @"
@@ -75,33 +67,23 @@ namespace CapaDatos
             }
         }
 
-        /// <summary>
         /// Devuelve el nombre si existe (y opcionalmente activo); null si no.
-        /// </summary>
         public string ObtenerNombreSiExiste(string codigo, bool soloActivos = true)
         {
-            var sb = new StringBuilder(@"
-                SELECT DES_VEND
-                FROM dbo.M_VENDED
-                WHERE CDG_VEND = @cod");
-
-            if (soloActivos) sb.Append(" AND ISNULL(SWT_VEND,0) = 1");
-            sb.Append(";");
+            const string SQL = @"SELECT TOP 1 DES_VEND FROM dbo.M_VENDED WITH (NOLOCK)
+                     WHERE LTRIM(RTRIM(CDG_VEND)) = @cod;";
 
             using (var cn = new SqlConnection(_cs))
-            using (var cmd = new SqlCommand(sb.ToString(), cn))
+            using (var cmd = new SqlCommand(SQL, cn))
             {
-                cmd.Parameters.Add("@cod", SqlDbType.VarChar, 3).Value = NormVend(codigo);
+                cmd.Parameters.Add("@cod", SqlDbType.VarChar, 10).Value = (codigo ?? "").Trim();
                 cn.Open();
-
-                object r = cmd.ExecuteScalar();
-                return (r == null || r == DBNull.Value) ? null : (string)r;
+                var o = cmd.ExecuteScalar();
+                return (o == null || o == DBNull.Value) ? null : o.ToString();
             }
         }
 
-        /// <summary>
         /// Indica si existe el CDG_VEND (opcionalmente solo activos).
-        /// </summary>
         public bool Existe(string codigo, bool soloActivos = true)
         {
             var sb = new StringBuilder(@"
@@ -121,9 +103,7 @@ namespace CapaDatos
             }
         }
 
-        /// <summary>
         /// Lista vendedores con filtro (por código, nombre o usuario) y estado.
-        /// </summary>
         public List<ceVendedor> Listar(string filtro = null, bool? soloActivos = null)
         {
             var lista = new List<ceVendedor>();
@@ -172,9 +152,7 @@ namespace CapaDatos
             return lista;
         }
 
-        /// <summary>
         /// Actualiza el estado activo/inactivo por CDG_VEND. Devuelve filas afectadas.
-        /// </summary>
         public int ActualizarEstado(string codigo, bool activo)
         {
             const string sql = @"
@@ -195,9 +173,7 @@ namespace CapaDatos
 
         // ========================= POR CDG_USR (NUEVO) =========================
 
-        /// <summary>
         /// Indica si existe el CDG_USR (opcionalmente solo activos).
-        /// </summary>
         public bool ExistePorUsr(string cdgUsr, bool soloActivos = true)
         {
             var sb = new StringBuilder(@"
@@ -217,9 +193,7 @@ namespace CapaDatos
             }
         }
 
-        /// <summary>
         /// Obtiene un vendedor por CDG_USR. Si soloActivos=true, filtra por SWT_VEND=1.
-        /// </summary>
         public ceVendedor ObtenerPorUsr(string cdgUsr, bool soloActivos = true)
         {
             var sb = new StringBuilder(@"
@@ -337,6 +311,59 @@ namespace CapaDatos
 
                 cn.Open();
                 return cmd.ExecuteNonQuery();
+            }
+        }
+        public bool EsAdminPorCodigo(string codVend)
+        {
+            //const string SQL = @"
+            //SELECT 1
+            //FROM dbo.M_VENDED
+            //WHERE LTRIM(RTRIM(COD_VEND)) = @cod
+            //  AND ISNULL(FAX_VEND, 0) = 1;";
+
+            //using (var cn = new SqlConnection(_cs))
+            //using (var cmd = new SqlCommand(SQL, cn))
+            //{
+            //    cmd.Parameters.Add("@cod", SqlDbType.VarChar, 10).Value = (codVend ?? "").Trim();
+            //    cn.Open();
+            //    var o = cmd.ExecuteScalar();
+            //    return o != null;
+            //}
+            const string SQL = @"
+                SELECT TOP 1 1
+                FROM dbo.M_VENDED WITH (NOLOCK)
+                WHERE LTRIM(RTRIM(CDG_USR)) = @usr
+                  AND (
+                        LTRIM(RTRIM(FAX_VEND)) = '1'      -- char/varchar
+                     OR TRY_CONVERT(int, FAX_VEND) = 1    -- si fuera numérico
+                  );";
+            using (var cn = new SqlConnection(_cs))
+            using (var cmd = new SqlCommand(SQL, cn))
+            {
+                cmd.Parameters.Add("@usr", SqlDbType.VarChar, 20)
+                   .Value = (codVend ?? "").Trim();
+                cn.Open();
+                var o = cmd.ExecuteScalar();
+                return o != null; // es admin
+            }
+        }
+        public bool EsAdminPorUsuario(string cdgUsr)
+        {
+            const string SQL = @"
+            SELECT TOP 1 1
+            FROM dbo.M_VENDED WITH (NOLOCK)
+            WHERE LTRIM(RTRIM(CDG_USR)) = @usr
+              AND (
+                    LTRIM(RTRIM(FAX_VEND)) = '1'      -- si es char/varchar
+                 OR TRY_CONVERT(int, FAX_VEND) = 1    -- si fuese numérico
+              );";
+
+            using (var cn = new SqlConnection(_cs))
+            using (var cmd = new SqlCommand(SQL, cn))
+            {
+                cmd.Parameters.Add("@usr", SqlDbType.VarChar, 20).Value = (cdgUsr ?? "").Trim();
+                cn.Open();
+                return cmd.ExecuteScalar() != null;
             }
         }
     }

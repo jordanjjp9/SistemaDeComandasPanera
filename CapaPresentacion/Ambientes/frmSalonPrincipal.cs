@@ -19,43 +19,61 @@ namespace CapaPresentacion.Ambientes
     {
         private readonly cnPedido _srv = new cnPedido();
 
-        // mapa "001" -> botón
-        //private Dictionary<string, Button> _botonesMesa;
+        // Inicio (UTC) de cada mesa con pedido abierto
+        private readonly Dictionary<int, DateTime> _inicioMesaUtc = new Dictionary<int, DateTime>();
+
+        // Timer general que actualiza visualmente HH:mm:ss cada segundo
+        private readonly Timer _timerMesas = new Timer { Interval = 1000 }; // 1 s
+
+        // Mapa "001" -> control (botón) de mesa
         private Dictionary<string, Control> _botonesMesa;
 
-        // colores (ajústalos a tu paleta)
+        // Colores para libre/ocupada
         private readonly Color _colorLibre = Color.FromArgb(224, 224, 224);
         private readonly Color _colorOcupada = Color.RoyalBlue;
+
+        // Timer que refresca estado (BD) cada N segundos
         private Timer _tRefresco;
+
         public frmSPrincipal()
         {
             InitializeComponent();
-            this.Load += Frm_Load;
             this.StartPosition = FormStartPosition.CenterScreen;
 
-            WireMesaButtons(this);
-
-            // Si en el futuro agregas mesas dinámicamente:
+            this.Load += Frm_Load;
             this.ControlAdded += (_, ev) => WireMesaButtons(ev.Control);
 
+            _timerMesas.Tick += TimerMesas_Tick;
+            _timerMesas.Start();
+
+            WireMesaButtons(this);
         }
 
+        // ===== Ciclos de vida =====
         private void Frm_Load(object sender, EventArgs e)
         {
-            // Busca y enlaza TODOS los botones que se llamen btnMesa*
-            // Si tus mesas están dentro de un panel específico, cámbialo por ese panel:
-            // WireMesaButtons(pnlMesas);
+            // Cablea por si acaso (si hay contenedores)
             WireMesaButtons(this);
 
+            // Descubre todos los botones de mesas y primer refresco
             _botonesMesa = DescubrirBotonesDeMesas();
+            RefrescarMesasYTimers();
 
-            // primer pintado
-            RefrescarColoresMesas();
-
-            // refresco periódico
+            // Refresco periódico desde BD (colores + timers)
             _tRefresco = new Timer { Interval = 4000 };
-            _tRefresco.Tick += (s, ev) => RefrescarColoresMesas();
+            _tRefresco.Tick += (s, ev) => RefrescarMesasYTimers();
             _tRefresco.Start();
+        }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+            // Al volver a esta ventana, sincroniza inmediatamente
+            RefrescarMesasYTimers();
+        }
+        public void RefrescarEstadoMesas()
+        {
+            RefrescarMesasYTimers(); // método privado interno
         }
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
@@ -67,27 +85,27 @@ namespace CapaPresentacion.Ambientes
                     _tRefresco.Dispose();
                     _tRefresco = null;
                 }
+                _timerMesas.Stop();
+                _timerMesas.Dispose();
             }
-            catch { }
+            catch { /* ignorar */ }
+
             base.OnFormClosed(e);
         }
 
-        /* private void frmSPrincipal_Load(object sender, EventArgs e)
-         {
-
-         }*/
-
+        // ===== Cableado de mesas (clic) =====
         private void WireMesaButtons(Control root)
         {
-            // ¿Este control es una “mesa”?
-            if (root != null && root.Name.StartsWith("btnMesa", StringComparison.OrdinalIgnoreCase))
+            if (root == null) return;
+
+            if (root.Name.StartsWith("btnMesa", StringComparison.OrdinalIgnoreCase))
             {
                 root.Click -= BtnMesa_Click;
                 root.Click += BtnMesa_Click;
             }
 
-            // Recorre hijos recursivamente
-            foreach (Control c in root.Controls) WireMesaButtons(c);
+            foreach (Control c in root.Controls)
+                WireMesaButtons(c);
         }
 
         private void BtnMesa_Click(object sender, EventArgs e)
@@ -99,13 +117,13 @@ namespace CapaPresentacion.Ambientes
             int num = ExtraerNumero(name);
             if (num == 0) num = ExtraerNumero(text);
 
-            // Ambiente => código "001"
+            // Ambiente => SALÓN
             SesionActual.SetAmbiente(AmbienteTipo.Salon);
 
             // Mesa seleccionada
             SesionActual.Mesa = new ceMesa { Numero = num };
 
-            // ... continuar con tu flujo (validación / abrir form etc.)
+            // Mostrar validación / abrir flujo
             var host = this.FindForm() as frmMesas
                        ?? this.TopLevelControl as frmMesas
                        ?? Application.OpenForms.OfType<frmMesas>().FirstOrDefault();
@@ -118,52 +136,48 @@ namespace CapaPresentacion.Ambientes
             return m.Success ? int.Parse(m.Value) : 0;
         }
 
-        // ================= PINTADO / REFRESCO =================
-
-        /// <summary>Forzar repintado desde afuera si lo necesitas.</summary>
-        //public void RefrescarColoresMesas()
-        //{
-        //    if (_botonesMesa == null || _botonesMesa.Count == 0) _botonesMesa = DescubrirBotonesDeMesas();
-
-        //    foreach (var kv in _botonesMesa)
-        //    {
-        //        string mesa3 = kv.Key;  // "001"
-        //        Button btn = kv.Value;
-
-        //        string numPed = _srv.ObtenerNumPedAbiertoPorMesa(mesa3);
-        //        bool ocupada = !string.IsNullOrEmpty(numPed);
-
-        //        btn.BackColor = ocupada ? _colorOcupada : _colorLibre;
-        //        btn.ForeColor = ocupada ? Color.White : Color.Black;
-        //    }
-        //}
-        public void RefrescarColoresMesas()
+        // ===== Refresco unificado (colores + timers) =====
+        private void RefrescarMesasYTimers()
         {
             if (_botonesMesa == null || _botonesMesa.Count == 0)
                 _botonesMesa = DescubrirBotonesDeMesas();
 
-            var srv = new CapaNegocio.cnPedido();
             foreach (var par in _botonesMesa)
             {
-                string mesa3 = par.Key;
+                string mesa3 = par.Key;            // "001"
+                int mesaNum = int.Parse(mesa3);    // 1..N
                 var ctrl = par.Value;
 
-                bool ocupada = !string.IsNullOrEmpty(srv.ObtenerNumPedAbiertoPorMesa(mesa3));
-                PintarMesa(ctrl, ocupada);
+                // Si este método ya filtra SWT_PED<>'T', devuelve vacío cuando está cerrada:
+                string numPed8 = _srv.ObtenerNumPedAbiertoPorMesa(mesa3);
+
+                if (string.IsNullOrWhiteSpace(numPed8))
+                {
+                    // No hay pedido abierto
+                    PintarMesa(ctrl, false);
+                    StopMesa(mesaNum);
+                    continue;
+                }
+
+                // Hay pedido abierto => pinta ocupada y sincroniza timer
+                PintarMesa(ctrl, true);
+
+                var cab = _srv.ObtenerCabeceraPorNum(numPed8);
+                bool cerrada = (cab != null) && string.Equals(cab.SWT_PED, "T", StringComparison.OrdinalIgnoreCase);
+                if (cerrada)
+                {
+                    // Por seguridad, si la cabecera indica cerrada
+                    PintarMesa(ctrl, false);
+                    StopMesa(mesaNum);
+                    continue;
+                }
+
+                var fec = (cab != null && cab.FEC_PED != default(DateTime)) ? cab.FEC_PED : DateTime.Now;
+                StartMesa(mesaNum, fec);
             }
         }
 
-        //private Dictionary<string, Button> DescubrirBotonesDeMesas()
-        //{
-        //    var dict = new Dictionary<string, Button>(StringComparer.OrdinalIgnoreCase);
-        //    foreach (var btn in EnumerarBotones(this))
-        //    {
-        //        string mesa3 = ObtenerCodigoMesa3(btn); // "001"
-        //        if (!string.IsNullOrEmpty(mesa3) && !dict.ContainsKey(mesa3))
-        //            dict.Add(mesa3, btn);
-        //    }
-        //    return dict;
-        //}
+        // ===== Buscar controles de mesas =====
         private Dictionary<string, Control> DescubrirBotonesDeMesas()
         {
             var dic = new Dictionary<string, Control>(StringComparer.OrdinalIgnoreCase);
@@ -175,23 +189,14 @@ namespace CapaPresentacion.Ambientes
             }
             return dic;
         }
-        //private static IEnumerable<Button> EnumerarBotones(Control root)
-        //{
-        //    foreach (Control c in root.Controls)
-        //    {
-        //        if (c is Button b) yield return b;
-        //        foreach (var child in EnumerarBotones(c)) yield return child;
-        //    }
-        //}
+
         private static IEnumerable<Control> EnumerarControles(Control root)
         {
             if (root == null) yield break;
 
-            // ¿Es una mesa? (btnMesa*, o Tag numérico)
             bool esMesa = root.Name.StartsWith("btnMesa", StringComparison.OrdinalIgnoreCase)
                           || (root.Tag is string t && Regex.IsMatch(t, @"^\d+$"));
 
-            // Solo controles "clickables" típicos: Guna2Button o Button
             if (esMesa && (root is Guna2Button || root is Button))
                 yield return root;
 
@@ -200,27 +205,6 @@ namespace CapaPresentacion.Ambientes
                     yield return x;
         }
 
-        /// <summary>
-        /// Obtiene el código de mesa a 3 dígitos desde Tag / Name / Text.
-        ///  - Tag: si pones 21 → "021"
-        ///  - Name/Text: "MESA 12" → "012"
-        /// </summary>
-        //private static string ObtenerCodigoMesa3(Button btn)
-        //{
-        //    // 1) Tag
-        //    if (btn.Tag != null)
-        //    {
-        //        var s = new string(btn.Tag.ToString().Where(char.IsDigit).ToArray());
-        //        if (int.TryParse(s, out int n)) return n.ToString("000");
-        //    }
-
-        //    // 2) Name o Text
-        //    var m = Regex.Match(btn.Text ?? btn.Name ?? "", @"\d+");
-        //    if (m.Success && int.TryParse(m.Value, out int num))
-        //        return num.ToString("000");
-
-        //    return null;
-        //}
         private static string ObtenerCodigoMesa3(Control c)
         {
             string s = null;
@@ -232,6 +216,7 @@ namespace CapaPresentacion.Ambientes
                 var m = Regex.Match(c.Name, @"\d+");
                 if (m.Success) s = m.Value;
             }
+
             if (string.IsNullOrWhiteSpace(s) && !string.IsNullOrWhiteSpace(c.Text))
             {
                 var m2 = Regex.Match(c.Text, @"\d+");
@@ -241,6 +226,8 @@ namespace CapaPresentacion.Ambientes
             if (string.IsNullOrWhiteSpace(s)) return null;
             return s.PadLeft(3, '0');
         }
+
+        // ===== Pintado de botones =====
         private void PintarMesa(Control c, bool ocupada)
         {
             var fondo = ocupada ? _colorOcupada : _colorLibre;
@@ -259,10 +246,73 @@ namespace CapaPresentacion.Ambientes
             }
             else
             {
-                // fallback
                 c.BackColor = fondo;
                 c.ForeColor = letra;
             }
+        }
+
+        // ===== Timers por mesa =====
+        private void TimerMesas_Tick(object sender, EventArgs e)
+        {
+            ActualizarTodosLosTimers();
+        }
+
+        /// <summary> Arranca/actualiza el contador de la mesa con la hora real de creación del pedido (local). </summary>
+        public void StartMesa(int mesa, DateTime fecPedLocal)
+        {
+            _inicioMesaUtc[mesa] = fecPedLocal.ToUniversalTime();
+
+            var lbl = GetLblMesa(mesa);   // Control
+            if (lbl != null)
+            {
+                lbl.Visible = true;
+                lbl.Text = "00:00:00";    // todos estos tipos tienen .Text
+            }
+        }
+
+        /// <summary> Detiene/oculta el contador de la mesa (pedido cerrado). </summary>
+        public void StopMesa(int mesa)
+        {
+            if (_inicioMesaUtc.ContainsKey(mesa))
+                _inicioMesaUtc.Remove(mesa);
+
+            var lbl = GetLblMesa(mesa);   // Control
+            if (lbl != null)
+                lbl.Visible = false;
+        }
+
+        /// <summary> Actualiza todos los labels a hh:mm:ss. </summary>
+        private void ActualizarTodosLosTimers()
+        {
+            if (_inicioMesaUtc.Count == 0) return;
+
+            var ahoraUtc = DateTime.UtcNow;
+
+            foreach (var kv in _inicioMesaUtc.ToArray())
+            {
+                int mesa = kv.Key;
+                DateTime inicioUtc = kv.Value;
+
+                var lbl = GetLblMesa(mesa);   // Control
+                if (lbl == null) continue;
+
+                var span = ahoraUtc - inicioUtc;
+                if (span < TimeSpan.Zero) span = TimeSpan.Zero;
+
+                var horas = span.Hours + span.Days * 24;
+                var ts = new TimeSpan(horas, span.Minutes, span.Seconds);
+
+                lbl.Text = ts.ToString(@"hh\:mm\:ss");
+                lbl.Visible = true;
+            }
+        }
+
+        // Busca lblTimerMesaN (Label clásico)
+        private Control GetLblMesa(int mesa)
+        {
+            var name = "lblTimerMesa" + mesa;
+            var arr = this.Controls.Find(name, true); // búsqueda recursiva
+            return (arr != null && arr.Length > 0) ? arr[0] : null; // <-- devuelve Control
         }
     }
 }

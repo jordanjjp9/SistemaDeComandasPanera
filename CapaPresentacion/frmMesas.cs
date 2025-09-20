@@ -168,12 +168,11 @@ namespace CapaPresentacion
         }
         public void RefrescarMesasUI()
         {
-            // Busca el formulario de salón embebido y le pide que repinte los colores de mesas
             var salon = pnlMCentral.Controls
                 .OfType<CapaPresentacion.Ambientes.frmSPrincipal>()
                 .FirstOrDefault();
 
-            salon?.RefrescarColoresMesas();
+            salon?.RefrescarEstadoMesas(); // ← wrapper público
         }
 
         private void btnSalon_Click(object sender, EventArgs e) 
@@ -182,7 +181,14 @@ namespace CapaPresentacion
             SesionActual.SetAmbiente(AmbienteTipo.Salon);
             RefrescarMesasUI();
             //RefrescarMesas();
-        }  
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            CapaPresentacion.Administrador.frmAddOn frmAdd = new Administrador.frmAddOn();
+            frmAdd.ShowDialog();
+
+        }
 
         //   private void btnSalon_Click_1(object sender, EventArgs e) => AbrirEnPanel<CapaPresentacion.Ambientes.frmSPrincipal>(centrar: true);
     }

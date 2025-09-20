@@ -121,3 +121,9 @@ C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\bin\Debug\
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\bin\Debug\zh-HANT\Microsoft.ReportViewer.WinForms.resources.dll
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Reportes.frmComanda.resources
 C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Reportes.frmPreCuenta.resources
+C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Administrador.frmCodAdmin.resources
+C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Administrador.frmAddOn.resources
+C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.ConfiguracionesAdd.frmComentarioDirigido.resources
+C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Ambientes.frmAmbDelivery.resources
+C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.Ambientes.frmAmbRappi.resources
+C:\Users\lenovo\source\repos\SistemaDeComandasPanera\CapaPresentacion\obj\Debug\CapaPresentacion.ConfiguracionesAdd.frmCambioMesa.resources

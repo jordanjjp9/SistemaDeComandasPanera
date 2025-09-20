@@ -26,8 +26,9 @@ namespace CapaNegocio
         public DataTable ListarProductosGrid4(string cdgLprc = "001")
             => _dao.ListarProductosGrid4(cdgLprc);
 
-        public DataTable ListarProductosConFormato(string cdgLprc = "001")
-            => _dao.ListarProductosConFormato(cdgLprc);
+        //public DataTable ListarProductosConFormato(string cdgLprc = "001")
+        //    => _dao.ListarProductosConFormato(cdgLprc);
+        public DataTable ListarProductosConFormato() => _dao.ListarProductosConFormato();              // ← SIN filtro (tu SELECT exacto)
 
         public DataTable ListarFormasImpresora()
             => _dao.ListarFormasImpresora();

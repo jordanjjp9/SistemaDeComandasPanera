@@ -8,18 +8,28 @@ using System.Text;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
 using CapaPresentacion.Helpers;   // ILineaSeleccionable y LineaSelection
+using CapaEntidad;
 
 namespace CapaPresentacion.Controles
 {
     public partial class ComboPedidoItem : UserControl, ILineaSeleccionable
     {
+        private DetalleRef _refDetalle;
+
+        public void SetRefDetalle(DetalleRef r) => _refDetalle = r;
+        public DetalleRef GetRefDetalle() => _refDetalle;
+        public bool TieneRefDetalle => _refDetalle != null;
+
+        //public DetalleRef RefDetalle { get; private set; }
+        //public void SetRefDetalle(DetalleRef r) => RefDetalle = r;
+        //public bool EsAntiguo => RefDetalle != null;
+
         // ===== Encabezado del combo =====
         public string Codigo { get; private set; } = "";
         public string Descripcion { get; private set; } = "";
         public int Cantidad { get; private set; } = 1;
         public decimal PrecioUnitario { get; private set; } = 0m;   // PU final del combo (CON IGV)
         public decimal Total { get { return Cantidad * PrecioUnitario; } }
-        //public string NotasEncabezado { get; private set; } = string.Empty;
         public string NotasEncabezado => GetNotasEncabezadoRaw();
         // ======== Export plano ========
         public sealed class LineaExport

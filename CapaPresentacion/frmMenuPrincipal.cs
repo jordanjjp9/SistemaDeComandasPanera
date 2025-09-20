@@ -10,10 +10,13 @@ using System.Windows.Forms;
 using CapaDatos;
 using CapaEntidad;
 using CapaNegocio;
+using CapaPresentacion.Administrador;
+using CapaPresentacion.Ambientes;
 using CapaPresentacion.Controles;
 using CapaPresentacion.Helpers;
 using CapaPresentacion.Impresion;
 using CapaPresentacion.Notas;
+
 
 namespace CapaPresentacion
 {
@@ -26,7 +29,7 @@ namespace CapaPresentacion
         private cnProducto _svcProductos;
         private readonly cnImpresora _cnImpresora = new cnImpresora();
         private readonly cnVendedor _cnVendedor = new cnVendedor();
-
+        private readonly cnPedido _cnPed = new cnPedido();
         // Caché: CDG_PROD -> ceProductos (búsqueda O(1))
         private Dictionary<string, ceProductos> _cachePorCodigo;
         private Form _formHijoActual;
@@ -147,19 +150,6 @@ namespace CapaPresentacion
             _lineasScroller = new CapaPresentacion.Helpers.DragScroller(
                 flpLineas, CapaPresentacion.Helpers.DragAxis.Vertical);
 
-            //LineaSelection.Changed += (s, ev) =>
-            //{
-            //    var sel = LineaSelection.Actual;              // puede ser LineaPedidoItem, ComboPedidoItem o MenuPedidoItem
-            //    bool haySel = (sel != null);
-
-            //    btnEliminar.Enabled = haySel;
-
-            //    // ⬇️ incluir MenuPedidoItem
-            //    btnComentarioLbr.Enabled =
-            //        (sel is LineaPedidoItem) ||
-            //        (sel is ComboPedidoItem) ||
-            //        (sel is MenuPedidoItem);
-            //};
             LineaSelection.Changed += (s, ev) =>
             {
                 var sel = LineaSelection.Actual;
@@ -173,11 +163,17 @@ namespace CapaPresentacion
                 bool esBloqueada = _lineasBloqueadas.Contains(sel.View);
 
                 // Eliminar sólo si NO es bloqueada
-                btnEliminar.Enabled = !esBloqueada;
+                //btnEliminar.Enabled = !esBloqueada;
 
-                // Comentario sólo si NO es bloqueada y el tipo lo permite
+                //// Comentario sólo si NO es bloqueada y el tipo lo permite
+                //btnComentarioLbr.Enabled = !esBloqueada &&
+                //    (sel is LineaPedidoItem || sel is ComboPedidoItem || sel is MenuPedidoItem);
+
+                // DEBE QUEDAR ASÍ
+                btnEliminar.Enabled = (sel != null); // ← siempre se puede intentar; la validación será en el Click
                 btnComentarioLbr.Enabled = !esBloqueada &&
                     (sel is LineaPedidoItem || sel is ComboPedidoItem || sel is MenuPedidoItem);
+
             };
 
             // Estado inicial de botones (nada seleccionado)
@@ -190,21 +186,6 @@ namespace CapaPresentacion
 
             chbNImpre.Checked = true;
 
-            // MostrarEnCentral(new CapaPresentacion.Botoneras.frmPastas());
-            //_ro = new ReadOnlyController(
-            //    form: this,
-            //    overlayHost: this,                       // o pnlCCentral si quieres cubrir solo esa zona
-            //    btnEliminar,
-            //    btnComentarioLbr,
-            //    btnActualizar,
-            //    txtCantidad,
-            //    chbNImpre,
-            //    btnListarProductos
-            //    // también puedes pasar flpBotoneraSup si quieres bloquear la botonera de familias:
-            //    //flpBotoneraSup
-            //);
-            // inicio normal: sin bloqueo
-            //_ro.Enable(false);
         }
 
         private int CantidadActual()
@@ -474,78 +455,8 @@ namespace CapaPresentacion
             return (false, 1, null);
         }
 
-
-
         private void btnComentarioLbr_Click(object sender, EventArgs e)
         {
-            //var sel = LineaSelection.Actual;
-            //if (sel == null)
-            //{
-            //    MessageBox.Show("Selecciona primero un ítem.", "Comentario",
-            //                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-            //    return;
-            //}
-
-            //if (sel is LineaPedidoItem lp)
-            //{
-            //    using (var dlg = new frmComentarioLbr())
-            //    {
-            //        dlg.Texto = lp.Notas ?? string.Empty;   // o lp.GetNotasRaw() si lo prefieres
-            //        dlg.TextoInicial = dlg.Texto;
-            //        if (dlg.ShowDialog(this) == DialogResult.OK)
-            //            lp.SetNotas(dlg.Comentario);
-            //    }
-            //}
-            //else if (sel is ComboPedidoItem ci)
-            //{
-            //    // 1) Si el usuario hizo click en el encabezado o mantiene SHIFT, edita encabezado
-            //    if (ci.EncabezadoActivo || (ModifierKeys & Keys.Shift) == Keys.Shift)
-            //    {
-            //        using (var dlg = new frmComentarioLbr())
-            //        {
-            //            dlg.Text = "Comentario del Combo";
-            //            dlg.Texto = ci.GetNotasEncabezadoRaw();
-            //            dlg.TextoInicial = dlg.Texto;
-            //            if (dlg.ShowDialog(this) == DialogResult.OK)
-            //                ci.SetNotasEncabezado(dlg.Comentario);
-            //        }
-            //        return;
-            //    }
-            //    // 2) Si hay subitems, intenta editarlos (si cancelas NO hace fallback a encabezado)
-            //    if (ci.TieneSubItemEditable())   // <— método que te pasé antes
-            //    {
-            //        ci.EditarUltimoJugoOBebida(this);
-            //        return;
-            //    }
-            //    // 3) Si no hay subitems, edita encabezado
-            //    using (var dlg = new frmComentarioLbr())
-            //    {
-            //        dlg.Text = "Comentario del Combo";
-            //        dlg.Texto = ci.GetNotasEncabezadoRaw();
-            //        dlg.TextoInicial = dlg.Texto;
-            //        if (dlg.ShowDialog(this) == DialogResult.OK)
-            //            ci.SetNotasEncabezado(dlg.Comentario);
-            //    }
-            //}
-            //else if (sel is MenuPedidoItem mi)
-            //{
-            //    // Igual que ya lo tenías
-            //    var zona = mi.ZonaActiva;
-            //    if (zona == MenuPedidoItem.ZonaNotas.Ninguna)
-            //        zona = MenuPedidoItem.ZonaNotas.Chicha;
-
-            //    using (var dlg = new frmComentarioLbr())
-            //    {
-            //        dlg.Texto = mi.GetNotasRaw(zona);
-            //        dlg.TextoInicial = dlg.Texto;
-            //        dlg.Text = (zona == MenuPedidoItem.ZonaNotas.Menu)
-            //                   ? "Comentario del Menú"
-            //                   : "Comentario de la Chicha";
-
-            //        if (dlg.ShowDialog(this) == DialogResult.OK)
-            //            mi.SetNotas(zona, dlg.Comentario);
-            //    }
-            //}
             var sel = LineaSelection.Actual;
             if (sel == null)
             {
@@ -670,9 +581,6 @@ namespace CapaPresentacion
             txtCantidad.Focus();
             e.SuppressKeyPress = true;
         }
-
-
-
         private void SeleccionarProducto(ceProductos prod, int cantidad)
         {
             if (prod == null || cantidad <= 0) return;
@@ -806,77 +714,36 @@ namespace CapaPresentacion
         private void btnEliminar_Click(object sender, EventArgs e)
         {
 
-            //var sel = LineaSelection.Actual;
-            //if (sel == null) return;
-
-            //var view = sel.View;                   // Control raíz del ítem seleccionado
-            //var parent = view?.Parent as Control;
-            //if (parent == null) return;
-
-            //// índice del control que se va
-            //int index = parent.Controls.IndexOf(view);
-
-            //parent.Controls.Remove(view);
-            //view.Dispose();
-
-            //// limpiar selección global
-            //LineaSelection.Clear();
-            //// intentar seleccionar un vecino (mismo índice o anterior)
-            //var vecino = BuscarSeleccionableVecino(parent, index);
-            //if (vecino != null)
-            //{
-            //    LineaSelection.Select(vecino, true);   // esto dispara LineaSelection.Changed y habilita botones
-            //}
-            //else
-            //{
-            //    // no quedó nada seleccionable
-            //    btnEliminar.Enabled = false;
-            //    btnComentarioLbr.Enabled = false;
-            //}
-
-            //ActualizarSubtotal();
-
+            // Selección actual
             var sel = LineaSelection.Actual;
-            if (sel == null) return;
-
-            var view = sel.View;                         // Control raíz del ítem seleccionado
-            var parent = view?.Parent as Control;
-            if (parent == null) return;
-
-            // ❗ No permitir eliminar si es una línea bloqueada (precargada desde BD)
-            if (_lineasBloqueadas.Contains(view))
+            if (sel == null)
             {
-                try { System.Media.SystemSounds.Beep.Play(); } catch { /* opcional */ }
+                try { System.Media.SystemSounds.Beep.Play(); } catch { }
                 return;
             }
 
-            // índice del control que se va
-            int index = parent.Controls.IndexOf(view);
+            var view = sel.View;
+            var parent = view?.Parent as Control;
+            if (parent == null) return;
 
-            // por si acaso: si estaba en el set (no debería), sácalo
-            _lineasBloqueadas.Remove(view);
-
-            parent.Controls.Remove(view);
-            view.Dispose();
-
-            // limpiar selección global
-            LineaSelection.Clear();
-
-            // intentar seleccionar un vecino (mismo índice o anterior)
-            var vecino = BuscarSeleccionableVecino(parent, index);
-            if (vecino != null)
+            // Si la línea viene de BD (bloqueada), solo permitir en reingreso y con clave de supervisor
+            if (_lineasBloqueadas.Contains(view))
             {
-                // esto disparará LineaSelection.Changed y actualizará los botones
-                LineaSelection.Select(vecino, true);
-            }
-            else
-            {
-                // no quedó nada seleccionable
-                btnEliminar.Enabled = false;
-                btnComentarioLbr.Enabled = false;
+                // En primer ingreso nunca hay líneas antiguas; si las hubiera, no permitir
+                if (!_esReingresoMesa)
+                {
+                    try { System.Media.SystemSounds.Beep.Play(); } catch { }
+                    return;
+                }
+
+                // Validación supervisor (por usuario) antes de permitir borrar
+                if (!PermiteEliminarAhora())
+                    return;
             }
 
-            ActualizarSubtotal();
+            // Ejecuta la eliminación: se encarga de borrar en BD (NUM_ITEM/CDG_FPRD),
+            // recalcular totales y quitar el control de la UI si corresponde.
+            EjecutarEliminacionSeleccionActual();
         }
 
         private ILineaSeleccionable BuscarSeleccionableVecino(Control parent, int removedIndex)
@@ -1446,21 +1313,7 @@ namespace CapaPresentacion
 
                 foreach (var d in detsDestino)
                 {
-                    //string nom;
-                    //if (!cacheNom.TryGetValue(d.CDG_PROD, out nom))
-                    //{
-                    //    nom = DAOProductos.ObtenerDescripcion(d.CDG_PROD);
-                    //    if (string.IsNullOrEmpty(nom))
-                    //        nom = !string.IsNullOrEmpty(d.COD10) ? d.COD10 : d.CDG_PROD.ToString();
-                    //    cacheNom[d.CDG_PROD] = nom;
-                    //}
 
-                    //t.Lineas.Add(new ComandaTicket.Linea
-                    //{
-                    //    Cantidad = d.CAN_PPRD,
-                    //    NombreProducto = nom,
-                    //    Notas = d.OBS_PPRD
-                    //});
                     string nom;
                     if (!cacheNom.TryGetValue(d.CDG_PROD, out nom))
                     {
@@ -1535,33 +1388,22 @@ namespace CapaPresentacion
         private readonly Timer _unlockF2Timer = new Timer { Interval = 200 };
         private void frmMenuPrincipal_KeyDown(object sender, KeyEventArgs e)
         {
-            //// ===== Bloquear cualquier tecla de edición si estamos en solo lectura =====
-            //if (_soloLectura)
+
+            //// Supr: solo si la línea seleccionada NO es bloqueada
+            //if (e.KeyCode == Keys.Delete)
             //{
-            //    if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.F2 || (e.Control && e.KeyCode == Keys.E))
+            //    var sel = LineaSelection.Actual;
+            //    if (sel != null && _lineasBloqueadas.Contains(sel.View))
             //    {
             //        e.SuppressKeyPress = true;
-            //        return;
+            //        return; // no borra
             //    }
             //}
-
-            //if (e.KeyCode == Keys.F2 && !_f2Bloqueado)
-            //{
-            //    _f2Bloqueado = true;
-            //    e.SuppressKeyPress = true;
-            //    AbrirListaProductos();
-            //    _unlockF2Timer.Start();
-            //}
-
-            // Supr: solo si la línea seleccionada NO es bloqueada
             if (e.KeyCode == Keys.Delete)
             {
-                var sel = LineaSelection.Actual;
-                if (sel != null && _lineasBloqueadas.Contains(sel.View))
-                {
-                    e.SuppressKeyPress = true;
-                    return; // no borra
-                }
+                e.SuppressKeyPress = true;
+                btnEliminar.PerformClick();   // deja que el handler pida CDG_USR si hace falta
+                return;
             }
 
             // F2: siempre permitido (para agregar más productos)
@@ -1627,49 +1469,14 @@ namespace CapaPresentacion
             public string Notas;   // N=
         }
 
-        // Regex que captura todos los campos del tag [#...#]
-        //private static readonly System.Text.RegularExpressions.Regex _rxTag =
-        //    new System.Text.RegularExpressions.Regex(
-        //        @"\[#T=(?<t>HEAD|JUG|BEB|TAM|CHI);C=(?<c>[^;#]+)(?:;COD=(?<cod>[^;#]+))?(?:;D=(?<d>[^;#]+))?(?:;Q=(?<q>\d+))?(?:;PU=(?<pu>\d+(?:\.\d+)?))?(?:;N=(?<n>[^#]*))?#\]",
-        //        System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant
-        //    );
-        ////    private static readonly System.Text.RegularExpressions.Regex _rxTag =
-        ////new System.Text.RegularExpressions.Regex(
-        ////    @"\[#T=(?<t>HEAD|JUG|BEB|TAM|CHI|CHICHA);C=(?<c>[^;#]+)(?:;COD=(?<cod>[^;#]+))?(?:;D=(?<d>[^;#]+))?(?:;Q=(?<q>\d+))?(?:;PU=(?<pu>\d+(?:\.\d+)?))?(?:;N=(?<n>[^#]*))?#\]",
-        ////    System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant
-        ////);
+
         private static readonly System.Text.RegularExpressions.Regex _rxTag =
         new System.Text.RegularExpressions.Regex(
             @"\[#T=(?<t>HEAD|MENU|JUG|BEB|TAM|CHI|CHICHA);C=(?<c>[^;#]+)(?:;COD=(?<cod>[^;#]+))?(?:;D=(?<d>[^;#]+))?(?:;Q=(?<q>\d+))?(?:;PU=(?<pu>\d+(?:\.\d+)?))?(?:;N=(?<n>[^#]*))?#\]",
             System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant
         );
 
-        // Devuelve el tag parseado y la OBS sin el tag
-        //private static TagInfo TryParseTag(string obs, out string obsLimpia)
-        //{
-        //    obsLimpia = (obs ?? string.Empty).Trim();
-        //    if (string.IsNullOrWhiteSpace(obsLimpia)) return null;
 
-        //    var m = _rxTag.Match(obsLimpia);
-        //    if (!m.Success) return null;
-
-        //    var ti = new TagInfo
-        //    {
-        //        Tipo = (m.Groups["t"].Value ?? "").Trim().ToUpperInvariant(),
-        //        Id = (m.Groups["c"].Value ?? "").Trim(),
-        //        Cod = (m.Groups["cod"].Success ? m.Groups["cod"].Value.Trim() : null),
-        //        Desc = (m.Groups["d"].Success ? m.Groups["d"].Value.Trim() : null),
-        //        Notas = (m.Groups["n"].Success ? m.Groups["n"].Value.Trim() : null),
-        //    };
-
-        //    if (m.Groups["q"].Success && int.TryParse(m.Groups["q"].Value, out var q)) ti.Q = q;
-        //    if (m.Groups["pu"].Success && decimal.TryParse(m.Groups["pu"].Value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var pu))
-        //        ti.Pu = pu;
-
-        //    // Limpia el tag del texto de notas que quedará visible
-        //    obsLimpia = obsLimpia.Remove(m.Index, m.Length).Trim();
-        //    return ti;
-        //}
         private static TagInfo TryParseTag(string obs, out string obsLimpia)
         {
             obsLimpia = (obs ?? string.Empty).Trim();
@@ -1708,505 +1515,28 @@ namespace CapaPresentacion
 
             return ti;
         }
-        //private void PrecargarPedidoAbiertoDeMesa()
-        //{
-        //    try
-        //    {
-        //        // 1) Mesa actual
-        //        int mesaNum = (SesionActual.Mesa != null) ? SesionActual.Mesa.Numero : 0;
-        //        if (mesaNum == 0) return;
-
-        //        string mesaStr = mesaNum.ToString("000");
-
-        //        // 2) BD
-        //        var dao = new DAOPedido();
-        //        string numPed = dao.ObtenerNumPedAbiertoPorMesa(mesaStr);
-        //        if (string.IsNullOrWhiteSpace(numPed)) return;
-
-        //        _numPedActual = numPed;
-        //        _hayPedidoAbierto = true; // evita pedir Nº personas otra vez
-
-        //        var cab = dao.ObtenerCabeceraPorNum(numPed);
-        //        if (cab != null && cab.NUM_PERS.HasValue && cab.NUM_PERS.Value > 0)
-        //            txtNPersonas.Text = cab.NUM_PERS.Value.ToString();
-
-        //        var detalles = dao.ObtenerDetallePorPedido(numPed);
-        //        if (detalles == null || detalles.Count == 0)
-        //        {
-        //            // No hay líneas que pintar; dejamos la pantalla operativa para seguir agregando.
-        //            return;
-        //        }
-
-        //        // 3) Preparar UI
-        //        flpLineas.SuspendLayout();
-        //        flpLineas.Controls.Clear();
-
-        //        // 4) Parsear/agrupadar por correlación C
-        //        var grupos = new Dictionary<string, Grupo>(StringComparer.OrdinalIgnoreCase);
-        //        var planas = new List<ceDPedido>();
-        //        bool huboTags = false;
-
-        //        foreach (var d in detalles)
-        //        {
-        //            string limpio;
-        //            var t = TryParseTag(d.OBS_PPRD, out limpio); // ← esta llamada elimina el [#...#] de la nota
-        //            d.OBS_PPRD = limpio;                         // no mostrar el tag en la UI
-
-        //            if (t == null) { planas.Add(d); continue; }
-        //            huboTags = true;
-
-        //            // Normaliza sinónimos por si TryParseTag no lo hizo
-        //            string tipo = (t.Tipo ?? "").Trim().ToUpperInvariant();
-        //            if (tipo == "CHICHA") tipo = "CHI";
-        //            if (tipo == "MENU") tipo = "HEAD";
-
-        //            if (!grupos.TryGetValue(t.Id, out var g))
-        //            {
-        //                g = new Grupo();
-        //                grupos[t.Id] = g;
-        //            }
-
-        //            switch (tipo)
-        //            {
-        //                case "HEAD": g.Head = d; g.HeadTag = t; break;
-        //                case "JUG": g.Jugos.Add(d); g.JugosTag.Add(t); break;
-        //                case "BEB": g.Bebidas.Add(d); g.BebidasTag.Add(t); break;
-        //                case "TAM": g.Tamales.Add(d); g.TamalesTag.Add(t); break;
-        //                case "CHI": g.Chicha = d; g.ChichaTag = t; break;
-        //            }
-        //        }
-
-        //        // 5) Reconstruir cada grupo
-        //        foreach (var kv in grupos)
-        //        {
-        //            var g = kv.Value;
-
-        //            // Si no hay HEAD, ese grupo se pinta plano
-        //            if (g.Head == null || g.HeadTag == null)
-        //            {
-        //                planas.AddRange(g.Jugos);
-        //                planas.AddRange(g.Bebidas);
-        //                planas.AddRange(g.Tamales);
-        //                if (g.Chicha != null) planas.Add(g.Chicha);
-        //                continue;
-        //            }
-
-        //            // Encabezado
-        //            string codHead =
-        //                !string.IsNullOrWhiteSpace(g.HeadTag.Cod) ? g.HeadTag.Cod.Trim().PadLeft(10, '0') :
-        //                !string.IsNullOrWhiteSpace(g.Head.COD10) ? g.Head.COD10.Trim().PadLeft(10, '0') :
-        //                (g.Head.CDG_PROD > 0 ? g.Head.CDG_PROD.ToString().PadLeft(10, '0') : "");
-
-        //            string desHead =
-        //                !string.IsNullOrWhiteSpace(g.HeadTag.Desc)
-        //                    ? g.HeadTag.Desc
-        //                    : ResolverDescripcionProducto(codHead, g.Head.CDG_PROD);
-
-        //            int cantidadHead =
-        //                g.HeadTag.Q.HasValue
-        //                    ? Math.Max(1, g.HeadTag.Q.Value)
-        //                    : Math.Max(1, (int)Math.Round(g.Head.CAN_PPRD, 0, MidpointRounding.AwayFromZero));
-
-        //            decimal puHeadConIgv =
-        //                g.HeadTag.Pu.HasValue ? g.HeadTag.Pu.Value : g.Head.PRE_IGV;
-
-        //            bool esMenu = (g.Chicha != null || g.ChichaTag != null);
-
-        //            if (esMenu)
-        //            {
-        //                // ===== MENÚ =====
-        //                var itemM = new MenuPedidoItem();
-        //                itemM.SetMenu(codHead, desHead, cantidadHead, puHeadConIgv);
-
-        //                // Notas del HEAD (ya sin el tag)
-        //                string notasHead = !string.IsNullOrWhiteSpace(g.HeadTag?.Notas) ? g.HeadTag.Notas
-        //                                  : (g.Head?.OBS_PPRD ?? string.Empty);
-        //                if (!string.IsNullOrWhiteSpace(notasHead))
-        //                    itemM.SetNotas(MenuPedidoItem.ZonaNotas.Menu, notasHead);
-
-        //                if (g.ChichaTag != null)
-        //                {
-        //                    string codCh =
-        //                        !string.IsNullOrWhiteSpace(g.ChichaTag.Cod) ? g.ChichaTag.Cod.Trim().PadLeft(10, '0') :
-        //                        !string.IsNullOrWhiteSpace(g.Chicha?.COD10) ? g.Chicha.COD10.Trim().PadLeft(10, '0') :
-        //                        (g.Chicha != null && g.Chicha.CDG_PROD > 0 ? g.Chicha.CDG_PROD.ToString().PadLeft(10, '0') : "");
-
-        //                    string desCh =
-        //                        !string.IsNullOrWhiteSpace(g.ChichaTag.Desc)
-        //                            ? g.ChichaTag.Desc
-        //                            : ResolverDescripcionProducto(codCh, g.Chicha?.CDG_PROD ?? 0);
-
-        //                    string notasCh = !string.IsNullOrWhiteSpace(g.ChichaTag.Notas) ? g.ChichaTag.Notas
-        //                                   : (g.Chicha?.OBS_PPRD ?? string.Empty);
-
-        //                    itemM.SetChicha(codCh, desCh, notasCh, cantidadHead);
-        //                }
-
-        //                AjustarAnchoItem(itemM);
-        //                flpLineas.Controls.Add(itemM);
-        //                MarcarSoloLectura(itemM);  // 🔒 bloquea edición/eliminación
-        //            }
-        //            else
-        //            {
-        //                // ===== COMBO =====
-        //                var itemC = new ComboPedidoItem
-        //                {
-        //                    AgruparJugosIguales = true,
-        //                    AgruparBebidasIguales = true,
-        //                    AgruparTamalesIguales = true
-        //                };
-
-        //                // Jugos
-        //                for (int i = 0; i < g.Jugos.Count; i++)
-        //                {
-        //                    var d = g.Jugos[i];
-        //                    var t = g.JugosTag[i];
-
-        //                    string cod =
-        //                        !string.IsNullOrWhiteSpace(t.Cod) ? t.Cod.Trim().PadLeft(10, '0') :
-        //                        !string.IsNullOrWhiteSpace(d.COD10) ? d.COD10.Trim().PadLeft(10, '0') :
-        //                        (d.CDG_PROD > 0 ? d.CDG_PROD.ToString().PadLeft(10, '0') : "");
-
-        //                    string des =
-        //                        !string.IsNullOrWhiteSpace(t.Desc) ? t.Desc : ResolverDescripcionProducto(cod, d.CDG_PROD);
-
-        //                    string notas = !string.IsNullOrWhiteSpace(t.Notas) ? t.Notas : (d.OBS_PPRD ?? string.Empty);
-
-        //                    int veces = Math.Max(1, (int)Math.Round(d.CAN_PPRD, 0, MidpointRounding.AwayFromZero));
-        //                    for (int k = 0; k < veces; k++)
-        //                        itemC.AddJugoUnidad(cod, des, 0m, notas, null);
-        //                }
-
-        //                // Bebidas calientes
-        //                for (int i = 0; i < g.Bebidas.Count; i++)
-        //                {
-        //                    var d = g.Bebidas[i];
-        //                    var t = g.BebidasTag[i];
-
-        //                    string cod =
-        //                        !string.IsNullOrWhiteSpace(t.Cod) ? t.Cod.Trim().PadLeft(10, '0') :
-        //                        !string.IsNullOrWhiteSpace(d.COD10) ? d.COD10.Trim().PadLeft(10, '0') :
-        //                        (d.CDG_PROD > 0 ? d.CDG_PROD.ToString().PadLeft(10, '0') : "");
-
-        //                    string des =
-        //                        !string.IsNullOrWhiteSpace(t.Desc) ? t.Desc : ResolverDescripcionProducto(cod, d.CDG_PROD);
-
-        //                    string notas = !string.IsNullOrWhiteSpace(t.Notas) ? t.Notas : (d.OBS_PPRD ?? string.Empty);
-
-        //                    int veces = Math.Max(1, (int)Math.Round(d.CAN_PPRD, 0, MidpointRounding.AwayFromZero));
-        //                    for (int k = 0; k < veces; k++)
-        //                        itemC.AddBebidaUnidad(cod, des, 0m, notas, false);
-        //                }
-
-        //                // Tamales
-        //                for (int i = 0; i < g.Tamales.Count; i++)
-        //                {
-        //                    var d = g.Tamales[i];
-        //                    var t = g.TamalesTag[i];
-
-        //                    string cod =
-        //                        !string.IsNullOrWhiteSpace(t.Cod) ? t.Cod.Trim().PadLeft(10, '0') :
-        //                        !string.IsNullOrWhiteSpace(d.COD10) ? d.COD10.Trim().PadLeft(10, '0') :
-        //                        (d.CDG_PROD > 0 ? d.CDG_PROD.ToString().PadLeft(10, '0') : "");
-
-        //                    string des =
-        //                        !string.IsNullOrWhiteSpace(t.Desc) ? t.Desc : ResolverDescripcionProducto(cod, d.CDG_PROD);
-
-        //                    string notas = !string.IsNullOrWhiteSpace(t.Notas) ? t.Notas : (d.OBS_PPRD ?? string.Empty);
-
-        //                    int veces = Math.Max(1, (int)Math.Round(d.CAN_PPRD, 0, MidpointRounding.AwayFromZero));
-        //                    for (int k = 0; k < veces; k++)
-        //                        itemC.AddTamalUnidad(cod, des, 0m, notas, null);
-        //                }
-
-        //                // Encabezado (PU CON IGV)
-        //                itemC.SetCombo(codHead, desHead, cantidadHead, puHeadConIgv);
-
-        //                AjustarAnchoItem(itemC);
-        //                flpLineas.Controls.Add(itemC);
-        //                MarcarSoloLectura(itemC);    // 🔒 bloquea edición/eliminación
-        //            }
-        //        }
-
-        //        // 6) Líneas planas (sin tag) o fallback si nunca hubo tags
-        //        if (!huboTags && flpLineas.Controls.Count == 0)
-        //            planas = detalles; // compatibilidad con pedidos viejos
-
-        //        foreach (var d in planas)
-        //        {
-        //            string cod10 =
-        //                !string.IsNullOrWhiteSpace(d.COD10) ? d.COD10.Trim().PadLeft(10, '0') :
-        //                (d.CDG_PROD > 0 ? d.CDG_PROD.ToString().PadLeft(10, '0') : "");
-
-        //            string descripcion =
-        //                !string.IsNullOrWhiteSpace(d.DESCRIPCION)
-        //                    ? d.DESCRIPCION
-        //                    : ResolverDescripcionProducto(cod10, d.CDG_PROD);
-
-        //            decimal puConIgv = d.PRE_IGV; // unitario CON IGV
-        //            int cantidad = Math.Max(1, (int)Math.Round(d.CAN_PPRD, 0, MidpointRounding.AwayFromZero));
-        //            string notas = d.OBS_PPRD ?? string.Empty;
-
-        //            var li = new CapaPresentacion.Controles.LineaPedidoItem();
-        //            li.Configurar(cod10, descripcion, cantidad, puConIgv, notas);
-        //            AjustarAnchoItem(li);
-        //            flpLineas.Controls.Add(li);
-        //            MarcarSoloLectura(li);          // 🔒 bloquea edición/eliminación
-        //        }
-
-        //        flpLineas.ResumeLayout(true);
-
-        //        // 7) Totales y estado de botones (sin activar solo-lectura global)
-        //        ActualizarSubtotal();
-        //        LineaSelection.Clear();
-        //        btnEliminar.Enabled = false;
-        //        btnComentarioLbr.Enabled = false;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show(
-        //            "No se pudo precargar el pedido abierto de la mesa.\n\nDetalle: " + ex.Message,
-        //            "Pedidos",
-        //            MessageBoxButtons.OK,
-        //            MessageBoxIcon.Warning
-        //        );
-        //    }
-        //}
-        ////private void PrecargarPedidoAbiertoDeMesa()
-        ////{
-        ////    try
-        ////    {
-        ////        int mesaNum = (SesionActual.Mesa != null) ? SesionActual.Mesa.Numero : 0;
-        ////        if (mesaNum == 0) return;
-
-        ////        string mesaStr = mesaNum.ToString("000");
-
-        ////        var dao = new DAOPedido();
-        ////        string numPed = dao.ObtenerNumPedAbiertoPorMesa(mesaStr);
-        ////        if (string.IsNullOrWhiteSpace(numPed)) return;
-
-        ////        _numPedActual = numPed;
-        ////        _hayPedidoAbierto = true;
-
-        ////        var cab = dao.ObtenerCabeceraPorNum(numPed);
-        ////        if (cab != null && cab.NUM_PERS.HasValue && cab.NUM_PERS.Value > 0)
-        ////            txtNPersonas.Text = cab.NUM_PERS.Value.ToString();
-
-        ////        var detalles = dao.ObtenerDetallePorPedido(numPed);
-        ////        if (detalles == null || detalles.Count == 0) return;
-
-        ////        flpLineas.SuspendLayout();
-        ////        flpLineas.Controls.Clear();
-
-        ////        // 1) Armar grupos por CDG_FPRD (reutilizado como "correlación")
-        ////        //    - Si CDG_FPRD == "000" (o vacío), probamos tag C= como fallback (pedidos antiguos)
-        ////        //    - Si no hay ni CDG_FPRD ni tag, la línea queda "plana"
-        ////        var grupos = new Dictionary<string, Grupo>(StringComparer.OrdinalIgnoreCase);
-        ////        var planas = new List<ceDPedido>();
-
-        ////        foreach (var d in detalles)
-        ////        {
-        ////            //string grp = (d.CDG_FPRD ?? "").Trim();
-        ////            string grp = (d.CDG_FPRD == 0 ? "" : d.CDG_FPRD.ToString("000"));
-
-        ////            // Y deja el if tal como lo tienes:
-        ////            if (string.IsNullOrEmpty(grp) || grp == "000")
-        ////            {
-        ////                // fallback a tag, etc.
-        ////            }
-        ////            if (string.IsNullOrEmpty(grp) || grp == "000")
-        ////            {
-        ////                // intentar fallback con tag (compatibilidad)
-        ////                string limpio;
-        ////                var ti = TryParseTag(d.OBS_PPRD, out limpio);
-        ////                if (ti != null && !string.IsNullOrWhiteSpace(ti.Id))
-        ////                {
-        ////                    grp = ti.Id.Trim();
-        ////                    d.OBS_PPRD = limpio; // mostramos limpio en UI
-        ////                                         // Normaliza HEAD/MENU/CHI
-        ////                    var tipo = (ti.Tipo ?? "").Trim().ToUpperInvariant();
-        ////                    if (tipo == "MENU") tipo = "HEAD";
-        ////                    if (tipo == "CHICHA") tipo = "CHI";
-
-        ////                    if (!grupos.TryGetValue(grp, out var g0)) { g0 = new Grupo(); grupos[grp] = g0; }
-        ////                    switch (tipo)
-        ////                    {
-        ////                        case "HEAD": g0.Head = d; g0.HeadTag = new TagInfo { Tipo = "HEAD", Id = grp, Cod = ti.Cod, Desc = ti.Desc, Q = ti.Q, Pu = ti.Pu, Notas = ti.Notas }; break;
-        ////                        case "JUG": g0.Jugos.Add(d); g0.JugosTag.Add(new TagInfo { Cod = ti.Cod, Desc = ti.Desc, Notas = ti.Notas }); break;
-        ////                        case "BEB": g0.Bebidas.Add(d); g0.BebidasTag.Add(new TagInfo { Cod = ti.Cod, Desc = ti.Desc, Notas = ti.Notas }); break;
-        ////                        case "TAM": g0.Tamales.Add(d); g0.TamalesTag.Add(new TagInfo { Cod = ti.Cod, Desc = ti.Desc, Notas = ti.Notas }); break;
-        ////                        case "CHI": g0.Chicha = d; g0.ChichaTag = new TagInfo { Cod = ti.Cod, Desc = ti.Desc, Notas = ti.Notas }; break;
-        ////                        default: planas.Add(d); break;
-        ////                    }
-        ////                    continue;
-        ////                }
-
-        ////                // sin CDG_FPRD ni tag -> plana
-        ////                planas.Add(d);
-        ////                continue;
-        ////            }
-
-        ////            // Con CDG_FPRD (nuevo esquema "limpio")
-        ////            if (!grupos.TryGetValue(grp, out var g))
-        ////            {
-        ////                g = new Grupo();
-        ////                grupos[grp] = g;
-        ////            }
-
-        ////            // Heurística: HEAD = item con precio unitario > 0 y que en maestro sea combo/menú
-        ////            bool esHeadCandidato = (d.PRE_IGV > 0m);
-        ////            if (esHeadCandidato && g.Head == null)
-        ////            {
-        ////                g.Head = d;
-        ////            }
-        ////            else
-        ////            {
-        ////                // Subítems (jugo/bebida/tamal/chicha). No tenemos el tipo: lo inferimos por el código al reconstruir.
-        ////                // Por simplicidad, los metemos todos a "bebidas" y luego asignamos por código si quieres,
-        ////                // o déjalo así si no necesitas distinguir en UI más que listar subítems.
-        ////                g.Bebidas.Add(d);
-        ////                g.BebidasTag.Add(null); // notas van en d.OBS_PPRD limpio
-        ////            }
-        ////        }
-
-        ////        // 2) Reconstruir grupos
-        ////        foreach (var kv in grupos)
-        ////        {
-        ////            var g = kv.Value;
-
-        ////            if (g.Head == null)
-        ////            {
-        ////                // Sin HEAD, no hay cómo formar combo/menú fiable → todo plano
-        ////                planas.AddRange(g.Jugos);
-        ////                planas.AddRange(g.Bebidas);
-        ////                planas.AddRange(g.Tamales);
-        ////                if (g.Chicha != null) planas.Add(g.Chicha);
-        ////                continue;
-        ////            }
-
-        ////            // Encabezado
-        ////            string codHead = !string.IsNullOrWhiteSpace(g.Head.COD10) ? g.Head.COD10.Trim().PadLeft(10, '0')
-        ////                            : (g.Head.CDG_PROD > 0 ? g.Head.CDG_PROD.ToString().PadLeft(10, '0') : "");
-
-        ////            string desHead = !string.IsNullOrWhiteSpace(g.Head.DESCRIPCION)
-        ////                                ? g.Head.DESCRIPCION
-        ////                                : ResolverDescripcionProducto(codHead, g.Head.CDG_PROD);
-
-        ////            int cantidadHead = Math.Max(1, (int)Math.Round(g.Head.CAN_PPRD, 0, MidpointRounding.AwayFromZero));
-        ////            decimal puHeadConIgv = g.Head.PRE_IGV;
-
-        ////            // ¿Es menú? Si hay una “chicha” explícita (en grupos por tag) o si tu lógica quiere forzarlo por código
-        ////            bool esMenu = (g.Chicha != null || (g.ChichaTag != null));
-
-        ////            if (esMenu)
-        ////            {
-        ////                var itemM = new MenuPedidoItem();
-        ////                itemM.SetMenu(codHead, desHead, cantidadHead, puHeadConIgv);
-
-        ////                // Notas HEAD: lo que venga limpio en OBS_PPRD
-        ////                var notasHead = g.Head.OBS_PPRD ?? string.Empty;
-        ////                if (!string.IsNullOrWhiteSpace(notasHead))
-        ////                    itemM.SetNotas(MenuPedidoItem.ZonaNotas.Menu, notasHead);
-
-        ////                // Chicha (si existe en grupo)
-        ////                if (g.Chicha != null)
-        ////                {
-        ////                    string codCh = !string.IsNullOrWhiteSpace(g.Chicha.COD10) ? g.Chicha.COD10.Trim().PadLeft(10, '0')
-        ////                                   : (g.Chicha.CDG_PROD > 0 ? g.Chicha.CDG_PROD.ToString().PadLeft(10, '0') : "");
-
-        ////                    string desCh = !string.IsNullOrWhiteSpace(g.Chicha.DESCRIPCION)
-        ////                                      ? g.Chicha.DESCRIPCION
-        ////                                      : ResolverDescripcionProducto(codCh, g.Chicha.CDG_PROD);
-
-        ////                    string notasCh = g.Chicha.OBS_PPRD ?? string.Empty;
-        ////                    itemM.SetChicha(codCh, desCh, notasCh, cantidadHead);
-        ////                }
-
-        ////                AjustarAnchoItem(itemM);
-        ////                flpLineas.Controls.Add(itemM);
-        ////                MarcarSoloLectura(itemM);
-        ////            }
-        ////            else
-        ////            {
-        ////                var itemC = new ComboPedidoItem
-        ////                {
-        ////                    AgruparJugosIguales = true,
-        ////                    AgruparBebidasIguales = true,
-        ////                    AgruparTamalesIguales = true
-        ////                };
-
-        ////                // Subítems (nuevos “limpios” → todas las notas vienen ya sin tag)
-        ////                foreach (var d in g.Jugos.Concat(g.Bebidas).Concat(g.Tamales))
-        ////                {
-        ////                    string cod = !string.IsNullOrWhiteSpace(d.COD10) ? d.COD10.Trim().PadLeft(10, '0')
-        ////                                 : (d.CDG_PROD > 0 ? d.CDG_PROD.ToString().PadLeft(10, '0') : "");
-        ////                    string des = !string.IsNullOrWhiteSpace(d.DESCRIPCION) ? d.DESCRIPCION : ResolverDescripcionProducto(cod, d.CDG_PROD);
-        ////                    string notas = d.OBS_PPRD ?? string.Empty; // ← texto limpio
-
-        ////                    // Si quieres distinguir JUGO/BEBIDA/TAMAL por código, hazlo aquí con tu catálogo
-        ////                    // Por simplicidad, lo mando como BEBIDA (no afecta al total: PU=0)
-        ////                    itemC.AddBebidaUnidad(cod, des, 0m, notas, false);
-        ////                }
-
-        ////                itemC.SetCombo(codHead, desHead, cantidadHead, puHeadConIgv);
-
-        ////                AjustarAnchoItem(itemC);
-        ////                flpLineas.Controls.Add(itemC);
-        ////                MarcarSoloLectura(itemC);
-        ////            }
-        ////        }
-
-        ////        // 3) Líneas planas
-        ////        foreach (var d in planas)
-        ////        {
-        ////            string cod10 = !string.IsNullOrWhiteSpace(d.COD10) ? d.COD10.Trim().PadLeft(10, '0')
-        ////                         : (d.CDG_PROD > 0 ? d.CDG_PROD.ToString().PadLeft(10, '0') : "");
-
-        ////            string descripcion = !string.IsNullOrWhiteSpace(d.DESCRIPCION)
-        ////                                 ? d.DESCRIPCION
-        ////                                 : ResolverDescripcionProducto(cod10, d.CDG_PROD);
-
-        ////            decimal puConIgv = d.PRE_IGV;
-        ////            int cantidad = Math.Max(1, (int)Math.Round(d.CAN_PPRD, 0, MidpointRounding.AwayFromZero));
-        ////            string notas = d.OBS_PPRD ?? string.Empty; // limpio
-
-        ////            var li = new CapaPresentacion.Controles.LineaPedidoItem();
-        ////            li.Configurar(cod10, descripcion, cantidad, puConIgv, notas);
-        ////            AjustarAnchoItem(li);
-        ////            flpLineas.Controls.Add(li);
-        ////            MarcarSoloLectura(li);
-        ////        }
-
-        ////        flpLineas.ResumeLayout(true);
-        ////        ActualizarSubtotal();
-        ////        LineaSelection.Clear();
-        ////        btnEliminar.Enabled = false;
-        ////        btnComentarioLbr.Enabled = false;
-        ////    }
-        ////    catch (Exception ex)
-        ////    {
-        ////        MessageBox.Show("No se pudo precargar el pedido abierto de la mesa.\n\nDetalle: " + ex.Message,
-        ////            "Pedidos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        ////    }
-        ////}
-
         private void PrecargarPedidoAbiertoDeMesa()
         {
             try
             {
-                // 1) Mesa actual
                 int mesaNum = (SesionActual.Mesa != null) ? SesionActual.Mesa.Numero : 0;
-                if (mesaNum == 0) return;
+                if (mesaNum == 0) { _esReingresoMesa = false; return; }
 
                 string mesaStr = mesaNum.ToString("000");
 
-                // 2) BD
                 var dao = new DAOPedido();
                 string numPed = dao.ObtenerNumPedAbiertoPorMesa(mesaStr);
-                if (string.IsNullOrWhiteSpace(numPed)) return;
+                if (string.IsNullOrWhiteSpace(numPed))
+                {
+                    _numPedActual = null;
+                    _hayPedidoAbierto = false;
+                    _esReingresoMesa = false;   // primer ingreso
+                    return;
+                }
 
                 _numPedActual = numPed;
-                _hayPedidoAbierto = true; // evita pedir Nº personas otra vez
+                _hayPedidoAbierto = true;
+                _esReingresoMesa = true;        // re-ingreso
 
                 var cab = dao.ObtenerCabeceraPorNum(numPed);
                 if (cab != null && cab.NUM_PERS.HasValue && cab.NUM_PERS.Value > 0)
@@ -2216,19 +1546,17 @@ namespace CapaPresentacion
                 if (detalles == null || detalles.Count == 0)
                     return;
 
-                // 3) Preparar UI
                 flpLineas.SuspendLayout();
                 flpLineas.Controls.Clear();
 
-                // 4) Armar grupos priorizando CDG_COMB (luego CDG_FPRD y, por compatibilidad, tag [#...#])
                 var grupos = new Dictionary<string, Grupo>(StringComparer.OrdinalIgnoreCase);
                 var planas = new List<ceDPedido>();
 
+                // === Particionar por grupo (CDG_COMB o fallback/tag) ===
                 foreach (var d in detalles)
                 {
-                    // a) intentar con CDG_COMB
+                    // 1) Determinar ID de grupo
                     string grp = "";
-                    bool tieneAgrupador = false; // indica si tenemos un agrupador explícito (COMB/FPRD/TAG)
                     try
                     {
                         var pComb = d.GetType().GetProperty("CDG_COMB");
@@ -2239,16 +1567,14 @@ namespace CapaPresentacion
                             s = (s ?? "").Trim();
                             if (!string.IsNullOrWhiteSpace(s))
                             {
-                                // Usar sin ceros a la izquierda si es numérico; de lo contrario tal cual
                                 grp = s.TrimStart('0');
                                 if (grp.Length == 0) grp = "0";
-                                tieneAgrupador = true;
                             }
                         }
                     }
                     catch { /* ignorar */ }
 
-                    // b) si aún no hay, intentar CDG_FPRD (como antes)
+                    // Fallback por CDG_FPRD si no hay grupo
                     if (string.IsNullOrWhiteSpace(grp))
                     {
                         try
@@ -2262,54 +1588,41 @@ namespace CapaPresentacion
                                     int n;
                                     if (val is int) n = (int)val;
                                     else if (!int.TryParse(Convert.ToString(val, CultureInfo.InvariantCulture), out n)) n = 0;
-                                    if (n != 0)
-                                    {
-                                        grp = n.ToString(CultureInfo.InvariantCulture);
-                                        tieneAgrupador = true;
-                                    }
+                                    if (n != 0) grp = n.ToString(CultureInfo.InvariantCulture);
                                 }
                             }
                         }
                         catch { grp = ""; }
                     }
 
-                    // c) parsear tag para dejar notas “limpias” (compatibilidad)
+                    // 2) Parsear tag y limpiar OBS_PPRD visible
                     string limpio;
                     var ti = TryParseTag(d.OBS_PPRD, out limpio);
-                    d.OBS_PPRD = limpio; // en la UI no se verá el tag
+                    d.OBS_PPRD = limpio;
 
-                    // d) si aún no hay agrupador, usar Id del tag como correlación (compatibilidad)
+                    // Si el tag tiene C=... úsalo como grupo
                     if (string.IsNullOrWhiteSpace(grp) && ti != null && !string.IsNullOrWhiteSpace(ti.Id))
-                    {
                         grp = ti.Id.Trim();
-                        tieneAgrupador = true;
-                    }
 
-                    // e) si no hay agrupador, es línea plana
+                    // 3) Si sigue sin grupo → va a planas
                     if (string.IsNullOrWhiteSpace(grp))
                     {
                         planas.Add(d);
                         continue;
                     }
 
-                    // Normaliza tipos del tag (si los hay)
+                    // Normalizar tipo del tag
                     string tipo = (ti?.Tipo ?? "").Trim().ToUpperInvariant();
-                    if (tipo == "MENU") tipo = "HEAD";  // HEAD del menú
-                    if (tipo == "CHICHA") tipo = "CHI"; // alias
+                    if (tipo == "MENU") tipo = "HEAD";
+                    if (tipo == "CHICHA") tipo = "CHI";
 
-                    // crear (o tomar) el grupo
+                    // 4) Agregar al grupo correspondiente
                     if (!grupos.TryGetValue(grp, out var g))
                     {
                         g = new Grupo();
                         grupos[grp] = g;
                     }
 
-                    // f) Clasificación dentro del grupo
-                    //    1) Si hay tag conocido => usarlo (HEAD/JUG/BEB/TAM/CHI).
-                    //    2) Si NO hay tag: heurística SIN metadatos:
-                    //       - elegir como HEAD el renglón con PRE_IGV > 0 (si hay varios, el de mayor PRE_IGV);
-                    //       - los demás del grupo van como subitems “genéricos” en Jugos
-                    //         (para mantener alineadas g.Jugos y g.JugosTag).
                     if (!string.IsNullOrEmpty(tipo))
                     {
                         switch (tipo)
@@ -2320,7 +1633,7 @@ namespace CapaPresentacion
                             case "TAM": g.Tamales.Add(d); g.TamalesTag.Add(ti); break;
                             case "CHI": g.Chicha = d; g.ChichaTag = ti; break;
                             default:
-                                // tipo desconocido -> aplicar heurística de agrupación
+                                // Heurística: si tiene precio, podría ser la cabecera más cara
                                 if (d.PRE_IGV > 0m)
                                 {
                                     if (g.Head == null || d.PRE_IGV >= g.Head.PRE_IGV)
@@ -2342,7 +1655,7 @@ namespace CapaPresentacion
                     }
                     else
                     {
-                        // SIN tag -> heurística pura
+                        // Sin tipo de tag: misma heurística
                         if (d.PRE_IGV > 0m)
                         {
                             if (g.Head == null || d.PRE_IGV >= g.Head.PRE_IGV)
@@ -2362,12 +1675,12 @@ namespace CapaPresentacion
                     }
                 }
 
-                // 5) Reconstruir cada grupo
+                // === Renderizar grupos ===
                 foreach (var kv in grupos)
                 {
                     var g = kv.Value;
 
-                    // Si no hay HEAD, ese grupo se pinta plano (faltan datos para reconstruir)
+                    // Si no hay head, flatear
                     if (g.Head == null)
                     {
                         if (g.Chicha != null) planas.Add(g.Chicha);
@@ -2377,7 +1690,7 @@ namespace CapaPresentacion
                         continue;
                     }
 
-                    // ==== Resolver encabezado (código/desc/cantidad/PU CON IGV) ====
+                    // Resolver datos del HEAD
                     string codHead =
                         (!string.IsNullOrWhiteSpace(g.HeadTag?.Cod)) ? g.HeadTag.Cod.Trim().PadLeft(10, '0') :
                         (!string.IsNullOrWhiteSpace(g.Head.COD10)) ? g.Head.COD10.Trim().PadLeft(10, '0') :
@@ -2400,7 +1713,7 @@ namespace CapaPresentacion
 
                     if (esMenu)
                     {
-                        // ===== MENÚ =====
+                        // ====== MENÚ ======
                         var itemM = new MenuPedidoItem();
                         itemM.SetMenu(codHead, desHead, cantidadHead, puHeadConIgv);
 
@@ -2427,13 +1740,26 @@ namespace CapaPresentacion
                             itemM.SetChicha(codCh, desCh, notasCh, cantidadHead);
                         }
 
+                        // Referencia extendida (para borrado exacto)
+                        string combHead = null, numItemHead = null;
+                        try { var p = g.Head.GetType().GetProperty("CDG_COMB"); if (p != null) combHead = Convert.ToString(p.GetValue(g.Head, null)) ?? ""; } catch { }
+                        try { var p = g.Head.GetType().GetProperty("NUM_ITEM"); if (p != null) numItemHead = Convert.ToString(p.GetValue(g.Head, null)) ?? ""; } catch { }
+
+                        itemM.SetRefDetalle(new CapaEntidad.DetalleRef
+                        {
+                            NumPed = _numPedActual,
+                            CdgFprd = g.Head.CDG_FPRD,
+                            CdgComb = (combHead ?? "").Trim(),
+                            NumItem = (numItemHead ?? "").Trim()
+                        });
+
                         AjustarAnchoItem(itemM);
                         flpLineas.Controls.Add(itemM);
                         MarcarSoloLectura(itemM);  // 🔒 bloquea edición/eliminación
                     }
                     else
                     {
-                        // ===== COMBO ===== (sin tags: subitems genéricos cargados en Jugos)
+                        // ====== COMBO ======
                         var itemC = new ComboPedidoItem
                         {
                             AgruparJugosIguales = true,
@@ -2441,27 +1767,7 @@ namespace CapaPresentacion
                             AgruparTamalesIguales = true
                         };
 
-                        // Jugos (incluye subitems “genéricos” cuando no hay tags)
-                        //for (int i = 0; i < g.Jugos.Count; i++)
-                        //{
-                        //    var d = g.Jugos[i];
-                        //    var t = (i < g.JugosTag.Count) ? g.JugosTag[i] : null;
-
-                        //    string cod =
-                        //        (!string.IsNullOrWhiteSpace(t?.Cod)) ? t.Cod.Trim().PadLeft(10, '0') :
-                        //        (!string.IsNullOrWhiteSpace(d.COD10)) ? d.COD10.Trim().PadLeft(10, '0') :
-                        //        (d.CDG_PROD > 0 ? d.CDG_PROD.ToString().PadLeft(10, '0') : "");
-
-                        //    string des =
-                        //        !string.IsNullOrWhiteSpace(t?.Desc) ? t.Desc : ResolverDescripcionProducto(cod, d.CDG_PROD);
-
-                        //    // 👇 AQUÍ el fix (siempre t?.Notas)
-                        //    string notas = !string.IsNullOrWhiteSpace(t?.Notas) ? t.Notas : (d.OBS_PPRD ?? string.Empty);
-
-                        //    int veces = Math.Max(1, (int)Math.Round(d.CAN_PPRD, 0, MidpointRounding.AwayFromZero));
-                        //    for (int k = 0; k < veces; k++)
-                        //        itemC.AddJugoUnidad(cod, des, 0m, notas, null);
-                        //}
+                        // Jugos
                         for (int i = 0; i < g.Jugos.Count; i++)
                         {
                             var d = g.Jugos[i];
@@ -2475,7 +1781,6 @@ namespace CapaPresentacion
                             string des =
                                 !string.IsNullOrWhiteSpace(t?.Desc) ? t.Desc : ResolverDescripcionProducto(cod, d.CDG_PROD);
 
-                            // 👇 AQUÍ el fix (siempre t?.Notas)
                             string notas = !string.IsNullOrWhiteSpace(t?.Notas) ? t.Notas : (d.OBS_PPRD ?? string.Empty);
 
                             int veces = Math.Max(1, (int)Math.Round(d.CAN_PPRD, 0, MidpointRounding.AwayFromZero));
@@ -2483,7 +1788,7 @@ namespace CapaPresentacion
                                 itemC.AddJugoUnidad(cod, des, 0m, notas, null);
                         }
 
-                        // Bebidas calientes (solo si vinieron por tag)
+                        // Bebidas
                         for (int i = 0; i < g.Bebidas.Count; i++)
                         {
                             var d = g.Bebidas[i];
@@ -2504,7 +1809,7 @@ namespace CapaPresentacion
                                 itemC.AddBebidaUnidad(cod, des, 0m, notas, false);
                         }
 
-                        // Tamales (solo si vinieron por tag)
+                        // Tamales
                         for (int i = 0; i < g.Tamales.Count; i++)
                         {
                             var d = g.Tamales[i];
@@ -2528,13 +1833,26 @@ namespace CapaPresentacion
                         // Encabezado (PU CON IGV)
                         itemC.SetCombo(codHead, desHead, cantidadHead, puHeadConIgv);
 
+                        // Referencia extendida (para borrado fino)
+                        string combHead = null, numItemHead = null;
+                        try { var p = g.Head.GetType().GetProperty("CDG_COMB"); if (p != null) combHead = Convert.ToString(p.GetValue(g.Head, null)) ?? ""; } catch { }
+                        try { var p = g.Head.GetType().GetProperty("NUM_ITEM"); if (p != null) numItemHead = Convert.ToString(p.GetValue(g.Head, null)) ?? ""; } catch { }
+
+                        itemC.SetRefDetalle(new CapaEntidad.DetalleRef
+                        {
+                            NumPed = _numPedActual,
+                            CdgFprd = g.Head.CDG_FPRD,
+                            CdgComb = (combHead ?? "").Trim(),
+                            NumItem = (numItemHead ?? "").Trim()
+                        });
+
                         AjustarAnchoItem(itemC);
                         flpLineas.Controls.Add(itemC);
                         MarcarSoloLectura(itemC);    // 🔒 bloquea edición/eliminación
                     }
                 }
 
-                // 6) Líneas planas (sin grupo/insuficientes datos)
+                // === Renderizar líneas planas ===
                 foreach (var d in planas)
                 {
                     string cod10 =
@@ -2548,10 +1866,25 @@ namespace CapaPresentacion
 
                     decimal puConIgv = d.PRE_IGV; // unitario CON IGV
                     int cantidad = Math.Max(1, (int)Math.Round(d.CAN_PPRD, 0, MidpointRounding.AwayFromZero));
-                    string notas = d.OBS_PPRD ?? string.Empty; // ya viene “limpio” si traía tag
+                    string notas = d.OBS_PPRD ?? string.Empty;
+
+                    // Intentar leer COMB y NUM_ITEM del renglón plano (si existen) para el borrado fino
+                    string comb = null, numItem = null;
+                    try { var p = d.GetType().GetProperty("CDG_COMB"); if (p != null) comb = Convert.ToString(p.GetValue(d, null)) ?? ""; } catch { }
+                    try { var p = d.GetType().GetProperty("NUM_ITEM"); if (p != null) numItem = Convert.ToString(p.GetValue(d, null)) ?? ""; } catch { }
 
                     var li = new CapaPresentacion.Controles.LineaPedidoItem();
                     li.Configurar(cod10, descripcion, cantidad, puConIgv, notas);
+
+                    // 🔸 Guarda referencia extendida para poder borrar exacto por NUM_ITEM
+                    li.SetRefDetalle(new CapaEntidad.DetalleRef
+                    {
+                        NumPed = _numPedActual,
+                        CdgFprd = d.CDG_FPRD,
+                        NumItem = TryGet<string>(d, "NUM_ITEM", ""), // ← debe existir en ceDPedido
+                        CdgComb = TryGet<string>(d, "CDG_COMB", "")
+                    });
+
                     AjustarAnchoItem(li);
                     flpLineas.Controls.Add(li);
                     MarcarSoloLectura(li); // 🔒 bloquea edición/eliminación
@@ -2559,7 +1892,6 @@ namespace CapaPresentacion
 
                 flpLineas.ResumeLayout(true);
 
-                // 7) Totales y estado de botones
                 ActualizarSubtotal();
                 LineaSelection.Clear();
                 btnEliminar.Enabled = false;
@@ -2574,6 +1906,160 @@ namespace CapaPresentacion
                     MessageBoxIcon.Warning
                 );
             }
+            var numPed8 = _numPedActual; // o la variable que uses
+            if (!string.IsNullOrWhiteSpace(numPed8))
+            {
+                var fecPedLocal = ObtenerFecPedLocal(numPed8);
+                StartTimerMesaActual(fecPedLocal);           // <-- ENCIENDE el timer si aún no estaba
+            }
+        }
+
+
+
+        private bool _esReingresoMesa = false;
+
+        private bool PermiteEliminarAhora()
+        {
+            // Si NO es reingreso de mesa, se permite eliminar sin pedir supervisor
+            if (!_esReingresoMesa) return true;
+
+            // En reingreso: solicitar código de supervisor (CDG_USR) y validar
+            using (var dlg = new frmCodAdmin())
+            {
+                dlg.StartPosition = FormStartPosition.CenterParent;
+
+                if (dlg.ShowDialog(this) != DialogResult.OK)
+                    return false;
+
+                var usr = (dlg.CodigoIngresado ?? "").Trim();  // CDG_USR
+                if (string.IsNullOrWhiteSpace(usr))
+                    return false;
+
+                bool ok = _cnVendedor.EsAdminPorUsuario(usr);  // valida por USUARIO (no por legajo)
+                if (!ok)
+                    MessageBox.Show("Código de supervisor inválido (CDG_USR).",
+                                    "Eliminar", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                return ok;
+            }
+        }
+
+
+        //private void HabilitarAccionesDeLinea(Control ctrlLinea)
+        //{
+        //    //// Ejemplos; ajusta a tus controles reales:
+        //    //if (ctrlLinea is MenuPedidoItem m)
+        //    //{
+        //    //    m.OnEliminarSolicitado -= Control_OnEliminarSolicitado;
+        //    //    m.OnEliminarSolicitado += Control_OnEliminarSolicitado;
+        //    //}
+        //    //else if (ctrlLinea is ComboPedidoItem c)
+        //    //{
+        //    //    c.OnEliminarSolicitado -= Control_OnEliminarSolicitado;
+        //    //    c.OnEliminarSolicitado += Control_OnEliminarSolicitado;
+        //    //}
+        //    //else if (ctrlLinea is LineaPedidoItem l)
+        //    //{
+        //    //    l.OnEliminarSolicitado -= Control_OnEliminarSolicitado;
+        //    //    l.OnEliminarSolicitado += Control_OnEliminarSolicitado;
+        //    //}
+
+        //    // si tenías readonly para textos/cantidad, puedes dejarlo;
+        //    // lo único crítico es NO bloquear el botón/el evento eliminar.
+        //}
+
+        private void Control_OnEliminarSolicitado(object sender, ceDPedido linea)
+        {
+            if (!PermiteEliminarAhora()) return;
+            EjecutarEliminacion(linea);
+        }
+        private void EjecutarEliminacion(ceDPedido _)
+        {
+            EjecutarEliminacionSeleccionActual();
+        }
+        private void EjecutarEliminacionSeleccionActual()
+        {
+            //ActualizarSubtotal();
+
+            var sel = LineaSelection.Actual;
+            if (sel == null) return;
+
+            var view = sel.View;
+            // Bloqueadas: solo si estás reingresando y pasa validación
+            //if (_lineasBloqueadas.Contains(view))
+            //{
+            //    if (!_esReingresoMesa || !PermiteEliminarAhora()) return;
+            //}
+
+            var svc = new CapaNegocio.cnPedido();
+
+            // === LineaPedidoItem ⇒ borrar por NUM_ITEM ===
+            if (sel is LineaPedidoItem li)
+            {
+                var refd = li.GetRefDetalle();
+                if (refd != null && !string.IsNullOrWhiteSpace(refd.NumPed) && !string.IsNullOrWhiteSpace(refd.NumItem))
+                {
+                    // elimina SOLO esa fila
+                    svc.EliminarDetallePorNumItem(refd.NumPed, refd.NumItem);
+                }
+                else if (refd != null && !string.IsNullOrWhiteSpace(refd.NumPed) && refd.CdgFprd > 0)
+                {
+                    // fallback (histórico) si te quedaras sin NumItem
+                    svc.EliminarDetalle(refd.NumPed, refd.CdgFprd);
+                    svc.RecalcularTotales(refd.NumPed);
+                }
+
+                QuitarControlSeleccionado(view);
+                return;
+            }
+
+            // === ComboPedidoItem / MenuPedidoItem ⇒ preferir CDG_COMB; si no, NUM_ITEM ===
+            if (sel is ComboPedidoItem ci)
+            {
+                var refd = ci.GetRefDetalle();
+                if (refd != null && !string.IsNullOrWhiteSpace(refd.NumPed))
+                {
+                    if (!string.IsNullOrWhiteSpace(refd.CdgComb))
+                        svc.EliminarDetallePorCombo(refd.NumPed, refd.CdgComb);
+                    else if (!string.IsNullOrWhiteSpace(refd.NumItem))
+                        svc.EliminarDetallePorNumItem(refd.NumPed, refd.NumItem);
+                }
+
+                QuitarControlSeleccionado(view);
+                return;
+            }
+
+            if (sel is MenuPedidoItem mi)
+            {
+                var refd = mi.GetRefDetalle();
+                if (refd != null && !string.IsNullOrWhiteSpace(refd.NumPed))
+                {
+                    if (!string.IsNullOrWhiteSpace(refd.CdgComb))
+                        svc.EliminarDetallePorCombo(refd.NumPed, refd.CdgComb);
+                    else if (!string.IsNullOrWhiteSpace(refd.NumItem))
+                        svc.EliminarDetallePorNumItem(refd.NumPed, refd.NumItem);
+                }
+
+                QuitarControlSeleccionado(view);
+                return;
+            }
+        }
+        private void QuitarControlSeleccionado(Control view)
+        {
+            var parent = view?.Parent as Control;
+            if (parent == null) return;
+
+            int idx = parent.Controls.IndexOf(view);
+            _lineasBloqueadas.Remove(view);
+            parent.Controls.Remove(view);
+            view.Dispose();
+
+            LineaSelection.Clear();
+            var vecino = BuscarSeleccionableVecino(parent, idx);
+            if (vecino != null) LineaSelection.Select(vecino, true);
+            btnEliminar.Enabled = (LineaSelection.Actual != null) && !_lineasBloqueadas.Contains(LineaSelection.Actual.View);
+            btnComentarioLbr.Enabled = btnEliminar.Enabled;
+            ActualizarSubtotal();
         }
 
         // Agrupación por correlación C= (para reconstruir cada combo/menú)
@@ -2643,20 +2129,70 @@ namespace CapaPresentacion
                                              // Opcional: tenue visual (si te gusta)
                                              // item.Enabled = true;  // IMPORTANT: mantener habilitado para que se vea “normal”
         }
-
-        //------------------------ACTUALIZAR------------------------
-        private IEnumerable<Control> ControlesNuevos()
+        private bool PermiteEliminarAhoraPara(Control view)
         {
-            foreach (Control c in flpLineas.Controls)
-                if (!_lineasBloqueadas.Contains(c))
-                    yield return c;
+            // Si no estamos en reingreso, no pide admin
+            if (!_esReingresoMesa) return true;
+
+            // Si la línea no es “antigua” (no viene de BD), no pide admin
+            var refAnt = (view as dynamic)?.RefDetalle as CapaEntidad.DetalleRef;
+            if (refAnt == null) return true;
+
+            using (var dlg = new CapaPresentacion.Administrador.frmCodAdmin())
+            {
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                if (dlg.ShowDialog(this) != DialogResult.OK) return false;
+
+                var usr = dlg.CodigoIngresado;
+                if (string.IsNullOrWhiteSpace(usr)) return false;
+
+                // ✅ VALIDACIÓN por USUARIO
+                return _cnVendedor.EsAdminPorUsuario(usr);
+            }
         }
 
-        // 2) Helper: después de guardar, marca como bloqueados los que se acaban de insertar
-        private void MarcarComoBloqueados(IEnumerable<Control> nuevos)
+        ///////-----TIMER MESAS---------/////
+        /// <summary> Devuelve el formulario de salón si está abierto. </summary>
+        private frmSPrincipal GetSalonForm()
         {
-            foreach (var c in nuevos)
-                MarcarSoloLectura(c); // ya tienes este método, añade el control al HashSet y ajusta cursor, etc.
+            return Application.OpenForms.OfType<frmSPrincipal>().FirstOrDefault();
+        }
+
+        /// <summary> Inicia el timer de la mesa actual con la FEC_PED indicada (horario local). </summary>
+        private void StartTimerMesaActual(DateTime fecPedLocal)
+        {
+            var salon = GetSalonForm();
+            if (salon == null) return;
+
+            var mesa = (SesionActual.Mesa != null) ? SesionActual.Mesa.Numero : 0;
+            if (mesa <= 0) return;
+
+            salon.StartMesa(mesa, fecPedLocal);
+        }
+
+        /// <summary> Detiene/oculta el timer de la mesa actual. </summary>
+        private void StopTimerMesaActual()
+        {
+            var salon = GetSalonForm();
+            if (salon == null) return;
+
+            var mesa = (SesionActual.Mesa != null) ? SesionActual.Mesa.Numero : 0;
+            if (mesa <= 0) return;
+
+            salon.StopMesa(mesa);
+        }
+
+        /// <summary> Lee FEC_PED real desde BD; si no existe, usa DateTime.Now. </summary>
+        private DateTime ObtenerFecPedLocal(string numPed8)
+        {
+            try
+            {
+                var cab = _cnPed.ObtenerCabeceraPorNum(numPed8);
+                if (cab != null && cab.FEC_PED != default(DateTime))
+                    return cab.FEC_PED;
+            }
+            catch { /* ignora y usa Now */ }
+            return DateTime.Now;
         }
     }
 }

@@ -71,6 +71,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Administrador\frmAddOn.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Administrador\frmAddOn.Designer.cs">
+      <DependentUpon>frmAddOn.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Administrador\frmCodAdmin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Administrador\frmCodAdmin.Designer.cs">
+      <DependentUpon>frmCodAdmin.cs</DependentUpon>
+    </Compile>
     <Compile Include="Administrador\frmCodigosUsuarios.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -100,6 +112,18 @@
     </Compile>
     <Compile Include="Administrador\frmPrincipal.Designer.cs">
       <DependentUpon>frmPrincipal.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Ambientes\frmAmbDelivery.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Ambientes\frmAmbDelivery.Designer.cs">
+      <DependentUpon>frmAmbDelivery.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Ambientes\frmAmbRappi.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Ambientes\frmAmbRappi.Designer.cs">
+      <DependentUpon>frmAmbRappi.cs</DependentUpon>
     </Compile>
     <Compile Include="Ambientes\frmSalonPrincipal.cs">
       <SubType>Form</SubType>
@@ -202,6 +226,18 @@
     </Compile>
     <Compile Include="Botoneras\frmWaffles.Designer.cs">
       <DependentUpon>frmWaffles.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ConfiguracionesAdd\frmCambioMesa.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConfiguracionesAdd\frmCambioMesa.Designer.cs">
+      <DependentUpon>frmCambioMesa.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ConfiguracionesAdd\frmComentarioDirigido.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConfiguracionesAdd\frmComentarioDirigido.Designer.cs">
+      <DependentUpon>frmComentarioDirigido.cs</DependentUpon>
     </Compile>
     <Compile Include="Controles\ComboPedidoItem.cs">
       <SubType>UserControl</SubType>
@@ -374,6 +410,12 @@
     <Compile Include="ucLineaPedido.Designer.cs">
       <DependentUpon>ucLineaPedido.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Administrador\frmAddOn.resx">
+      <DependentUpon>frmAddOn.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Administrador\frmCodAdmin.resx">
+      <DependentUpon>frmCodAdmin.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Administrador\frmCodigosUsuarios.resx">
       <DependentUpon>frmCodigosUsuarios.cs</DependentUpon>
     </EmbeddedResource>
@@ -388,6 +430,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Administrador\frmPrincipal.resx">
       <DependentUpon>frmPrincipal.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Ambientes\frmAmbDelivery.resx">
+      <DependentUpon>frmAmbDelivery.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Ambientes\frmAmbRappi.resx">
+      <DependentUpon>frmAmbRappi.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Ambientes\frmSalonPrincipal.resx">
       <DependentUpon>frmSalonPrincipal.cs</DependentUpon>
@@ -439,6 +487,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Botoneras\frmWaffles.resx">
       <DependentUpon>frmWaffles.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConfiguracionesAdd\frmCambioMesa.resx">
+      <DependentUpon>frmCambioMesa.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConfiguracionesAdd\frmComentarioDirigido.resx">
+      <DependentUpon>frmComentarioDirigido.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controles\ComboPedidoItem.resx">
       <DependentUpon>ComboPedidoItem.cs</DependentUpon>

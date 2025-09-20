@@ -5,11 +5,26 @@ using System.Windows.Forms;
 using System.Text;
 using Guna.UI2.WinForms;
 using CapaPresentacion.Helpers;
+using CapaEntidad;
 
 namespace CapaPresentacion.Controles
 {
     public partial class LineaPedidoItem : UserControl, ILineaSeleccionable
     {
+        public DetalleRef RefDetalle { get; private set; }
+
+        public void SetRefDetalle(DetalleRef r) => RefDetalle = r;
+        public DetalleRef GetRefDetalle() => RefDetalle;
+        ////private DetalleRef _refDetalle;
+        ////public void SetRefDetalle(DetalleRef r) => _refDetalle = r;
+        ////public DetalleRef GetRefDetalle() => _refDetalle;
+        ////public bool TieneRefDetalle => _refDetalle != null;
+
+        // public void SetRefDetalle(DetalleRef r) => RefDetalle = r;
+        //public bool EsAntiguo => RefDetalle != null;
+        /// <summary>
+        /// /-------------------------------------//
+        /// </summary>
         public string Codigo { get; private set; } = string.Empty;
         public string Descripcion { get; private set; } = string.Empty;
         public int Cantidad { get; private set; } = 1;

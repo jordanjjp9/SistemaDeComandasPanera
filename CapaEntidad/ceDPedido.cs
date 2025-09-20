@@ -12,6 +12,7 @@ namespace CapaEntidad
         public string COD10 { get; set; } = "";   // "0000000462" (útil para la UI)
         public int CDG_PROD { get; set; }         // 462 (para D_PED/BD)
         public int CDG_FPRD { get; set; } = 0;
+        public string NUM_ITEM { get; set; }   // correlativo/fila textual
 
         // === Cantidad y precios ===
         public decimal CAN_PPRD { get; set; } = 1;

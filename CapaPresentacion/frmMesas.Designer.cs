@@ -31,6 +31,7 @@
             this.pnlMesas = new System.Windows.Forms.Panel();
             this.pnlMCentral = new System.Windows.Forms.Panel();
             this.pnlTop = new System.Windows.Forms.Panel();
+            this.btnAdd = new Guna.UI2.WinForms.Guna2Button();
             this.pnlButons = new System.Windows.Forms.Panel();
             this.btnSalon = new Guna.UI2.WinForms.Guna2Button();
             this.btnRappi = new System.Windows.Forms.Button();
@@ -62,6 +63,7 @@
             // 
             // pnlTop
             // 
+            this.pnlTop.Controls.Add(this.btnAdd);
             this.pnlTop.Controls.Add(this.pnlButons);
             this.pnlTop.Controls.Add(this.btnClose);
             this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
@@ -70,6 +72,21 @@
             this.pnlTop.Size = new System.Drawing.Size(1155, 53);
             this.pnlTop.TabIndex = 0;
             this.pnlTop.SizeChanged += new System.EventHandler(this.pnlTop_SizeChanged);
+            // 
+            // btnAdd
+            // 
+            this.btnAdd.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnAdd.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnAdd.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnAdd.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnAdd.Dock = System.Windows.Forms.DockStyle.Left;
+            this.btnAdd.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.btnAdd.ForeColor = System.Drawing.Color.White;
+            this.btnAdd.Location = new System.Drawing.Point(0, 0);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(65, 53);
+            this.btnAdd.TabIndex = 5;
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
             // pnlButons
             // 
@@ -158,5 +175,6 @@
         private System.Windows.Forms.Button btnDelivery;
         private System.Windows.Forms.Panel pnlButons;
         private Guna.UI2.WinForms.Guna2Button btnSalon;
+        private Guna.UI2.WinForms.Guna2Button btnAdd;
     }
 }

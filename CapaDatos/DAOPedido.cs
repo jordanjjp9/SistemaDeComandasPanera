@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
-using System.Reflection; // para SetPropIfExists/GetProp
+using System.Reflection; // SetPropIfExists/GetProp
 using CapaEntidad;
 
 namespace CapaDatos
@@ -46,10 +46,10 @@ namespace CapaDatos
             return s.Length > 0;
         }
 
-        private static decimal Round2(decimal v) => Math.Round(v, 2, MidpointRounding.AwayFromZero);
-        private static decimal Round4(decimal v) => Math.Round(v, 4, MidpointRounding.AwayFromZero);
-        private static decimal Round10(decimal v) => Math.Round(v, 10, MidpointRounding.AwayFromZero);
-        private static string Nz(string s) => s == null ? "" : s.Trim();
+        private static decimal Round2(decimal v) { return Math.Round(v, 2, MidpointRounding.AwayFromZero); }
+        private static decimal Round4(decimal v) { return Math.Round(v, 4, MidpointRounding.AwayFromZero); }
+        private static decimal Round10(decimal v) { return Math.Round(v, 10, MidpointRounding.AwayFromZero); }
+        private static string Nz(string s) { return s == null ? "" : s.Trim(); }
 
         private static string GetStrPropOrEmpty(object obj, string propName)
         {
@@ -72,7 +72,9 @@ namespace CapaDatos
             try
             {
                 if (value == null)
+                {
                     p.SetValue(target, null, null);
+                }
                 else
                 {
                     var converted = Convert.ChangeType(value, p.PropertyType, CultureInfo.InvariantCulture);
@@ -86,13 +88,12 @@ namespace CapaDatos
         {
             var s = (comb ?? "").Trim();
             if (s.Length == 0) return "";
-            return To10(s); // acolcha a 10
+            return To10(s);
         }
 
         private static bool GetSwtIgvFromProducto(SqlConnection cn, SqlTransaction tx, string cod10)
         {
-            using (var cmd = new SqlCommand(
-                "SELECT SWT_IGV FROM dbo.M_PRODUC WHERE CDG_PROD = @p", cn, tx))
+            using (var cmd = new SqlCommand("SELECT SWT_IGV FROM dbo.M_PRODUC WHERE CDG_PROD = @p", cn, tx))
             {
                 cmd.Parameters.Add("@p", SqlDbType.Char, 10).Value = To10(cod10);
                 object o = cmd.ExecuteScalar();
@@ -125,7 +126,7 @@ namespace CapaDatos
             Func<string, Tuple<decimal?, bool?>> resolverTrib
         )
         {
-            if (cab == null) throw new ArgumentNullException(nameof(cab));
+            if (cab == null) throw new ArgumentNullException("cab");
             if (cab.Detalles == null || cab.Detalles.Count == 0)
                 throw new InvalidOperationException("El pedido no contiene detalles.");
 
@@ -211,8 +212,8 @@ namespace CapaDatos
             {
                 cmd.Parameters.Add("@NUM_PED", SqlDbType.Char, 8).Value = To8(cab.NUM_PED);
                 cmd.Parameters.Add("@CDG_VEND", SqlDbType.Char, 3).Value = (cab.CDG_VEND ?? "").PadLeft(3, '0');
-                cmd.Parameters.Add("@CDG_CPAG", SqlDbType.Char, 3).Value = "000";
-                cmd.Parameters.Add("@CDG_MON", SqlDbType.Char, 3).Value = "001";
+                cmd.Parameters.Add("@CDG_CPAG", SqlDbType.Char, 3).Value = CDG_CPAG;
+                cmd.Parameters.Add("@CDG_MON", SqlDbType.Char, 3).Value = CDG_MON_DEF;
                 cmd.Parameters.Add("@FEC_PED", SqlDbType.SmallDateTime).Value = cab.FEC_PED;
 
                 cmd.Parameters.Add("@NUM_OCOM", SqlDbType.Char, 60).Value = "";
@@ -220,7 +221,7 @@ namespace CapaDatos
                 cmd.Parameters.Add("@IMP_TIGV", SqlDbType.Decimal).Value = impTigv;
                 cmd.Parameters.Add("@IMP_TDCT", SqlDbType.Decimal).Value = 0.00m;
                 cmd.Parameters.Add("@IMP_TTOT", SqlDbType.Decimal).Value = impTtot;
-                cmd.Parameters.Add("@POR_TDCT", SqlDbType.Decimal).Value = 0.00m;
+                cmd.Parameters.Add("@POR_TDCT", SqlDbType.Decimal).Value = POR_TDCT_FIJO;
                 cmd.Parameters.Add("@POR_TIGV", SqlDbType.Decimal).Value = POR_TIGV_FIJO;
 
                 cmd.Parameters.Add("@OBS_PED", SqlDbType.Text).Value = Nz(cab.OBS_PED);
@@ -260,9 +261,9 @@ namespace CapaDatos
                 cmd.Parameters.Add("@CTA_IVA", SqlDbType.Char, 10).Value = "";
                 cmd.Parameters.Add("@CTA_ICA", SqlDbType.Char, 10).Value = "";
                 cmd.Parameters.Add("@CTA_FTE", SqlDbType.Char, 10).Value = "";
-                cmd.Parameters.Add("@POR_IVA", SqlDbType.Decimal).Value = 0.00m;
-                cmd.Parameters.Add("@POR_ICA", SqlDbType.Decimal).Value = 0.00m;
-                cmd.Parameters.Add("@POR_FTE", SqlDbType.Decimal).Value = 0.00m;
+                cmd.Parameters.Add("@POR_IVA", SqlDbType.Decimal).Value = POR_IVA;
+                cmd.Parameters.Add("@POR_ICA", SqlDbType.Decimal).Value = POR_ICA;
+                cmd.Parameters.Add("@POR_FTE", SqlDbType.Decimal).Value = POR_FTE;
 
                 cmd.Parameters.Add("@VAL_RET", SqlDbType.Decimal).Value = 0.00m;
                 cmd.Parameters.Add("@VAL_IVA", SqlDbType.Decimal).Value = 0.00m;
@@ -284,7 +285,7 @@ namespace CapaDatos
                 cmd.Parameters.Add("@TIP_PTV", SqlDbType.Char, 1).Value = "2";
                 cmd.Parameters.Add("@CDG_CAJA", SqlDbType.Char, 3).Value = Nz(cab.CDG_CAJA);
                 cmd.Parameters.Add("@CDG_AMB", SqlDbType.Char, 3).Value = Nz(cab.CDG_AMB).PadLeft(3, '0');
-                cmd.Parameters.Add("@IMP_TISC", SqlDbType.Decimal).Value = 0.00m;
+                cmd.Parameters.Add("@IMP_TISC", SqlDbType.Decimal).Value = IMP_TISC_FIJO;
 
                 cmd.Parameters["@IMP_STOT"].Precision = 15; cmd.Parameters["@IMP_STOT"].Scale = 2;
                 cmd.Parameters["@IMP_TIGV"].Precision = 15; cmd.Parameters["@IMP_TIGV"].Scale = 2;
@@ -435,11 +436,11 @@ namespace CapaDatos
                     cmd.Parameters.Add("@CAN_OTRB", SqlDbType.Decimal).Value = 0.0000m;
 
                     cmd.Parameters.Add("@CAN_UVTA", SqlDbType.Decimal).Value = can;
-                    cmd.Parameters.Add("@PRE_UVTA", SqlDbType.Decimal).Value = preI;
+                    cmd.Parameters.Add("@PRE_UVTA", SqlDbType.Decimal).Value = preUvta;
                     cmd.Parameters.Add("@VAL_UVTA", SqlDbType.Decimal).Value = pre;
                     cmd.Parameters.Add("@TOT_UVTA", SqlDbType.Decimal).Value = impt;
 
-                    cmd.Parameters.Add("@POR_TISC", SqlDbType.Decimal).Value = 0.00m;
+                    cmd.Parameters.Add("@POR_TISC", SqlDbType.Decimal).Value = POR_TISC;
                     cmd.Parameters.Add("@swt_igv", SqlDbType.Char, 1).Value = swt_igv_text;
                     cmd.Parameters.Add("@com_impo", SqlDbType.Decimal).Value = 0.00m;
 
@@ -452,9 +453,9 @@ namespace CapaDatos
                     cmd.Parameters.Add("@IMP_PROD", SqlDbType.Char, 3).Value = Nz(imp);
                     cmd.Parameters.Add("@SWT_IMPR", SqlDbType.Char, 1).Value = swtImpr;
 
-                    cmd.Parameters.Add("@PCT_CARG", SqlDbType.Decimal).Value = 0.00m;
-                    cmd.Parameters.Add("@IMP_CARG", SqlDbType.Decimal).Value = 0.00m;
-                    cmd.Parameters.Add("@ORI_PED", SqlDbType.Char, 8).Value = "";
+                    cmd.Parameters.Add("@PCT_CARG", SqlDbType.Decimal).Value = PCT_CARG;
+                    cmd.Parameters.Add("@IMP_CARG", SqlDbType.Decimal).Value = IMP_CARG;
+                    cmd.Parameters.Add("@ORI_PED", SqlDbType.Char, 8).Value = ORI_PED;
 
                     cmd.Parameters.Add("@CDG_COMB", SqlDbType.Char, 10).Value = combDb;
                     cmd.Parameters.Add("@TDC_COMA", SqlDbType.Char, 3).Value = TDC_COMA;
@@ -492,7 +493,7 @@ namespace CapaDatos
         )
         {
             if (string.IsNullOrWhiteSpace(numPed8))
-                throw new ArgumentException("NUM_PED vacío.", nameof(numPed8));
+                throw new ArgumentException("NUM_PED vacío.", "numPed8");
 
             if (detallesNuevos == null || detallesNuevos.Count == 0)
                 return;
@@ -504,7 +505,7 @@ namespace CapaDatos
                 {
                     try
                     {
-                        AsegurarExistePedido(cn, tx, numPed8, debeEstarAbierto: true);
+                        AsegurarExistePedido(cn, tx, numPed8, true);
 
                         InsertarDetallesEnPedidoExistente(cn, tx, numPed8, detallesNuevos, resolverImpresora, resolverTrib);
 
@@ -535,7 +536,7 @@ namespace CapaDatos
             {
                 cmd.Parameters.Add("@P", SqlDbType.Char, 8).Value = To8(numPed8);
                 int n = Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
-                if (n == 0) throw new InvalidOperationException($"El pedido {To8(numPed8)} no existe.");
+                if (n == 0) throw new InvalidOperationException("El pedido " + To8(numPed8) + " no existe.");
             }
 
             if (debeEstarAbierto)
@@ -547,7 +548,7 @@ namespace CapaDatos
                     cmd.Parameters.Add("@P", SqlDbType.Char, 8).Value = To8(numPed8);
                     object o = cmd.ExecuteScalar();
                     bool abierto = (o != null && Convert.ToInt32(o, CultureInfo.InvariantCulture) == 1);
-                    if (!abierto) throw new InvalidOperationException($"El pedido {To8(numPed8)} ya está cerrado/anulado.");
+                    if (!abierto) throw new InvalidOperationException("El pedido " + To8(numPed8) + " ya está cerrado/anulado.");
                 }
             }
         }
@@ -619,7 +620,6 @@ namespace CapaDatos
 
             int nextItem = ObtenerMaxNumItem(cn, tx, numPed8);
 
-            // ← piso 99 para que el siguiente asignado sea 100 si no existía ninguno
             int maxCombExistente = Math.Max(ObtenerMaxCdgComb(cn, tx, numPed8), 99);
             var mapComb = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
@@ -669,7 +669,8 @@ namespace CapaDatos
                     string combDb = "";
                     if (!string.IsNullOrWhiteSpace(combInput))
                     {
-                        if (!mapComb.TryGetValue(combInput, out int asignado))
+                        int asignado;
+                        if (!mapComb.TryGetValue(combInput, out asignado))
                         {
                             asignado = ++maxCombExistente;
                             mapComb[combInput] = asignado;
@@ -878,30 +879,107 @@ namespace CapaDatos
             }
         }
 
+        //public List<ceDPedido> ObtenerDetallePorPedido(string numPed8)
+        //{
+        //    var lista = new List<ceDPedido>();
+        //    using (var cn = new SqlConnection(_cs))
+        //    {
+        //        cn.Open();
+        //        using (var cmd = new SqlCommand(@"
+        //        SELECT 
+        //            d.NUM_PED,
+        //            d.CDG_PROD,
+        //            d.CAN_PPRD, d.PRE_PPRD, d.IMP_TPRD,
+        //            d.PRE_IGV, d.IMP_IGV,
+        //            d.OBS_PPRD,
+        //            d.CDG_LPRC,
+        //            d.NUM_ITEM,
+        //            d.IMP_PROD,
+        //            d.SWT_IMPR,
+        //            d.CDG_COMB,
+        //            p.DES_PROD AS DESCRIPCION
+        //        FROM dbo.D_PEDIDO d
+        //        LEFT JOIN dbo.M_PRODUC p
+        //               ON p.CDG_PROD = d.CDG_PROD
+        //        WHERE d.NUM_PED = @P
+        //        ORDER BY d.NUM_ITEM;", cn))
+        //        {
+        //            cmd.Parameters.Add("@P", SqlDbType.Char, 8).Value = To8(numPed8);
+
+        //            using (var rd = cmd.ExecuteReader())
+        //            {
+        //                while (rd.Read())
+        //                {
+        //                    string cod10 = rd["CDG_PROD"] == DBNull.Value ? "" : Convert.ToString(rd["CDG_PROD"]).Trim();
+        //                    int cdgProdInt = 0; int.TryParse(cod10, out cdgProdInt);
+
+        //                    var d = new ceDPedido
+        //                    {
+        //                        COD10 = cod10,
+        //                        CDG_PROD = cdgProdInt,
+        //                        CAN_PPRD = rd["CAN_PPRD"] == DBNull.Value ? 0m : Convert.ToDecimal(rd["CAN_PPRD"]),
+        //                        PRE_PPRD = rd["PRE_PPRD"] == DBNull.Value ? 0m : Convert.ToDecimal(rd["PRE_PPRD"]),
+        //                        IMP_TPRD = rd["IMP_TPRD"] == DBNull.Value ? 0m : Convert.ToDecimal(rd["IMP_TPRD"]),
+        //                        PRE_IGV = rd["PRE_IGV"] == DBNull.Value ? 0m : Convert.ToDecimal(rd["PRE_IGV"]),
+        //                        IMP_IGV = rd["IMP_IGV"] == DBNull.Value ? 0m : Convert.ToDecimal(rd["IMP_IGV"]),
+        //                        OBS_PPRD = rd["OBS_PPRD"] == DBNull.Value ? "" : Convert.ToString(rd["OBS_PPRD"]).Trim(),
+        //                        CDG_LPRC = rd["CDG_LPRC"] == DBNull.Value ? 0 : Convert.ToInt32(rd["CDG_LPRC"]),
+        //                        IMP_PROD = rd["IMP_PROD"] == DBNull.Value ? "" : Convert.ToString(rd["IMP_PROD"]).Trim(),
+        //                        SWT_IMPR = rd["SWT_IMPR"] == DBNull.Value ? (bool?)null :
+        //                                   (Convert.ToString(rd["SWT_IMPR"]).Trim().Equals("X", StringComparison.OrdinalIgnoreCase) ? true : (bool?)false),
+        //                        DESCRIPCION = rd["DESCRIPCION"] == DBNull.Value ? "" : Convert.ToString(rd["DESCRIPCION"]).Trim()
+        //                    };
+
+        //                    // === NUEVO: Propagar NUM_ITEM ===
+        //                    string numItemDb = rd["NUM_ITEM"] == DBNull.Value ? "" : Convert.ToString(rd["NUM_ITEM"]).Trim();
+        //                    if (!string.IsNullOrEmpty(numItemDb))
+        //                    {
+        //                        // Normalizamos a 5 dígitos por consistencia con la DB
+        //                        SetPropIfExists(d, "NUM_ITEM", numItemDb.PadLeft(5, '0'));
+        //                    }
+
+        //                    // Ya mapeabas CDG_COMB; mantenemos y normalizamos para el usuario
+        //                    string combDb = rd["CDG_COMB"] == DBNull.Value ? "" : Convert.ToString(rd["CDG_COMB"]).Trim();
+        //                    if (!string.IsNullOrEmpty(combDb))
+        //                    {
+        //                        string combUser = IsDigits(combDb) ? Convert.ToInt32(combDb).ToString() : combDb;
+        //                        SetPropIfExists(d, "CDG_COMB", combUser);
+        //                    }
+
+        //                    lista.Add(d);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return lista;
+        //}
         public List<ceDPedido> ObtenerDetallePorPedido(string numPed8)
         {
             var lista = new List<ceDPedido>();
+
             using (var cn = new SqlConnection(_cs))
             {
                 cn.Open();
+
                 using (var cmd = new SqlCommand(@"
-                SELECT 
-                    d.NUM_PED,
-                    d.CDG_PROD,
-                    d.CAN_PPRD, d.PRE_PPRD, d.IMP_TPRD,
-                    d.PRE_IGV, d.IMP_IGV,
-                    d.OBS_PPRD,
-                    d.CDG_LPRC,
-                    d.NUM_ITEM,
-                    d.IMP_PROD,
-                    d.SWT_IMPR,
-                    d.CDG_COMB,
-                    p.DES_PROD AS DESCRIPCION
-                FROM dbo.D_PEDIDO d
-                LEFT JOIN dbo.M_PRODUC p
-                       ON p.CDG_PROD = d.CDG_PROD
-                WHERE d.NUM_PED = @P
-                ORDER BY d.NUM_ITEM;", cn))
+            SELECT
+                d.NUM_PED,
+                d.CDG_FPRD,             -- ★ clave del detalle (fallback)
+                d.NUM_ITEM,             -- ★ identificador exacto de la fila
+                d.CDG_COMB,             -- ★ id de grupo (combo/menú) si aplica
+                d.CDG_PROD,
+                d.CAN_PPRD, d.PRE_PPRD, d.IMP_TPRD,
+                d.PRE_IGV,  d.IMP_IGV,
+                d.OBS_PPRD,
+                d.CDG_LPRC,
+                d.IMP_PROD,
+                d.SWT_IMPR,
+                p.DES_PROD AS DESCRIPCION
+            FROM dbo.D_PEDIDO d
+            LEFT JOIN dbo.M_PRODUC p
+                   ON p.CDG_PROD = d.CDG_PROD
+            WHERE d.NUM_PED = @P
+            ORDER BY d.NUM_ITEM;", cn))
                 {
                     cmd.Parameters.Add("@P", SqlDbType.Char, 8).Value = To8(numPed8);
 
@@ -909,31 +987,53 @@ namespace CapaDatos
                     {
                         while (rd.Read())
                         {
-                            string cod10 = rd["CDG_PROD"] == DBNull.Value ? "" : Convert.ToString(rd["CDG_PROD"]).Trim();
-                            int cdgProdInt = 0; int.TryParse(cod10, out cdgProdInt);
+                            // CDG_PROD puede venir numérico; lo expresamos también como COD10 (10 dígitos)
+                            string cdgProdStr = rd["CDG_PROD"] == DBNull.Value ? "" : Convert.ToString(rd["CDG_PROD"]).Trim();
+                            int cdgProdInt = 0;
+                            int.TryParse(cdgProdStr, out cdgProdInt);
+                            string cod10 = cdgProdInt > 0 ? cdgProdInt.ToString().PadLeft(10, '0') : cdgProdStr.PadLeft(10, '0');
 
                             var d = new ceDPedido
                             {
-                                COD10 = cod10,
+                                // claves / datos base
                                 CDG_PROD = cdgProdInt,
+                                COD10 = cod10,
+
+                                // montos
                                 CAN_PPRD = rd["CAN_PPRD"] == DBNull.Value ? 0m : Convert.ToDecimal(rd["CAN_PPRD"]),
                                 PRE_PPRD = rd["PRE_PPRD"] == DBNull.Value ? 0m : Convert.ToDecimal(rd["PRE_PPRD"]),
                                 IMP_TPRD = rd["IMP_TPRD"] == DBNull.Value ? 0m : Convert.ToDecimal(rd["IMP_TPRD"]),
                                 PRE_IGV = rd["PRE_IGV"] == DBNull.Value ? 0m : Convert.ToDecimal(rd["PRE_IGV"]),
                                 IMP_IGV = rd["IMP_IGV"] == DBNull.Value ? 0m : Convert.ToDecimal(rd["IMP_IGV"]),
+
+                                // otros campos
                                 OBS_PPRD = rd["OBS_PPRD"] == DBNull.Value ? "" : Convert.ToString(rd["OBS_PPRD"]).Trim(),
                                 CDG_LPRC = rd["CDG_LPRC"] == DBNull.Value ? 0 : Convert.ToInt32(rd["CDG_LPRC"]),
                                 IMP_PROD = rd["IMP_PROD"] == DBNull.Value ? "" : Convert.ToString(rd["IMP_PROD"]).Trim(),
-                                SWT_IMPR = rd["SWT_IMPR"] == DBNull.Value ? (bool?)null :
-                                           (Convert.ToString(rd["SWT_IMPR"]).Trim().Equals("X", StringComparison.OrdinalIgnoreCase) ? true : (bool?)false),
+                                SWT_IMPR = rd["SWT_IMPR"] == DBNull.Value ? (bool?)null
+                                            : (Convert.ToString(rd["SWT_IMPR"]).Trim().Equals("X", StringComparison.OrdinalIgnoreCase) ? true : (bool?)false),
                                 DESCRIPCION = rd["DESCRIPCION"] == DBNull.Value ? "" : Convert.ToString(rd["DESCRIPCION"]).Trim()
                             };
 
+                            // ★ CDG_FPRD (clave del detalle)
+                            if (rd["CDG_FPRD"] != DBNull.Value)
+                                d.CDG_FPRD = Convert.ToInt32(rd["CDG_FPRD"]);
+
+                            // ★ NUM_ITEM (left-pad a 5 si aplica)
+                            string numItemDb = rd["NUM_ITEM"] == DBNull.Value ? "" : Convert.ToString(rd["NUM_ITEM"]).Trim();
+                            if (!string.IsNullOrEmpty(numItemDb))
+                            {
+                                // si es numérico, normaliza a 5 dígitos; si no, deja el texto original
+                                string norm = IsDigits(numItemDb) ? numItemDb.PadLeft(5, '0') : numItemDb;
+                                SetPropIfExists(d, "NUM_ITEM", norm);   // o d.NUM_ITEM = norm; si la propiedad existe
+                            }
+
+                            // ★ CDG_COMB (normaliza visual si fue numérico con ceros)
                             string combDb = rd["CDG_COMB"] == DBNull.Value ? "" : Convert.ToString(rd["CDG_COMB"]).Trim();
                             if (!string.IsNullOrEmpty(combDb))
                             {
                                 string combUser = IsDigits(combDb) ? Convert.ToInt32(combDb).ToString() : combDb;
-                                SetPropIfExists(d, "CDG_COMB", combUser);
+                                SetPropIfExists(d, "CDG_COMB", combUser); // o d.CDG_COMB = combUser;
                             }
 
                             lista.Add(d);
@@ -941,7 +1041,123 @@ namespace CapaDatos
                     }
                 }
             }
+
             return lista;
+        }
+
+
+        // ======= Eliminación por selección (combo o línea suelta) + recalcular =======
+
+        /// <summary>
+        /// Elimina detalles de un pedido:
+        /// - Si cdgComb tiene valor, elimina todas las filas de ese combo/menú (CDG_COMB).
+        /// - Si numItem tiene valor, elimina SOLO esa línea (NUM_ITEM).
+        /// Luego recalcula los totales de la cabecera.
+        /// </summary>
+        public int EliminarDetallesSeleccion(string numPed8, string cdgComb /*puede ser null*/, string numItem /*puede ser null*/)
+        {
+            if (string.IsNullOrWhiteSpace(numPed8))
+                throw new ArgumentException("NUM_PED vacío.", "numPed8");
+
+            int filas = 0;
+
+            using (var cn = new SqlConnection(_cs))
+            {
+                cn.Open();
+                using (var tx = cn.BeginTransaction())
+                {
+                    try
+                    {
+                        // borrar por CDG_COMB
+                        if (!string.IsNullOrWhiteSpace(cdgComb))
+                        {
+                            using (var cmd = new SqlCommand(
+                                @"DELETE FROM dbo.D_PEDIDO 
+                                  WHERE NUM_PED = @n AND CDG_COMB = @c;", cn, tx))
+                            {
+                                cmd.Parameters.Add("@n", SqlDbType.Char, 8).Value = To8(numPed8);
+                                cmd.Parameters.Add("@c", SqlDbType.Char, 10).Value = To10(cdgComb);
+                                filas += cmd.ExecuteNonQuery();
+                            }
+                        }
+
+                        // borrar por NUM_ITEM (línea suelta)
+                        if (!string.IsNullOrWhiteSpace(numItem))
+                        {
+                            using (var cmd = new SqlCommand(
+                                @"DELETE FROM dbo.D_PEDIDO 
+                                  WHERE NUM_PED = @n AND NUM_ITEM = @i;", cn, tx))
+                            {
+                                cmd.Parameters.Add("@n", SqlDbType.Char, 8).Value = To8(numPed8);
+                                cmd.Parameters.Add("@i", SqlDbType.Char, 5).Value = numItem.Trim().PadLeft(5, '0');
+                                filas += cmd.ExecuteNonQuery();
+                            }
+                        }
+
+                        // Recalcular totales
+                        RecalcularTotalesCabeceraDesdeDetalle(cn, tx, numPed8);
+
+                        tx.Commit();
+                    }
+                    catch
+                    {
+                        tx.Rollback();
+                        throw;
+                    }
+                }
+            }
+
+            return filas;
+        }
+
+        // ========= NUEVO: atajos explícitos para borrar UNA línea o un combo =========
+        public int EliminarDetallePorNumItem(string numPed8, string numItem5)
+            => EliminarDetallesSeleccion(numPed8, null, numItem5);
+
+        public int EliminarDetallePorCombo(string numPed8, string cdgComb)
+            => EliminarDetallesSeleccion(numPed8, cdgComb, null);
+
+        // ========= Compatibilidad: elimina por CDG_FPRD (tu método original) =========
+        public int EliminarDetalle(string numPed, int cdgFprd)
+        {
+            const string SQL = @"DELETE FROM dbo.D_PEDIDO WHERE NUM_PED=@n AND CDG_FPRD=@f;";
+            using (var cn = new SqlConnection(_cs))
+            using (var cmd = new SqlCommand(SQL, cn))
+            {
+                cmd.Parameters.AddWithValue("@n", (numPed ?? "").Trim());
+                cmd.Parameters.AddWithValue("@f", cdgFprd);
+                cn.Open();
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        // ========= Recalcular Totales (versión rápida a partir de PRE_IGV*CAN_PPRD) =========
+        public void RecalcularTotales(string numPed)
+        {
+            const decimal POR_IGV = 0.18m; // cambia a 0.10m si tu IGV es 10%
+            const string SQL = @"
+            ;WITH x AS (
+                SELECT ISNULL(SUM(PRE_IGV * CAN_PPRD),0) AS TotConIgv
+                FROM dbo.D_PEDIDO
+                WHERE NUM_PED = @n
+            )
+            UPDATE dbo.M_PEDIDO
+               SET IMP_STOT = ROUND(x.TotConIgv / (1 + @pIgv), 2),
+                   IMP_TIGV = ROUND(x.TotConIgv - (x.TotConIgv / (1 + @pIgv)), 2),
+                   IMP_TTOT = ROUND(x.TotConIgv, 2)
+              FROM x
+             WHERE NUM_PED = @n;";
+
+            using (var cn = new SqlConnection(Conexion.Cadena))
+            using (var cmd = new SqlCommand(SQL, cn))
+            {
+                cmd.Parameters.AddWithValue("@n", (numPed ?? "").Trim());
+                cmd.Parameters.Add("@pIgv", SqlDbType.Decimal).Value = POR_IGV;
+                cmd.Parameters["@pIgv"].Precision = 5; cmd.Parameters["@pIgv"].Scale = 2;
+
+                cn.Open();
+                cmd.ExecuteNonQuery();
+            }
         }
     }
 }

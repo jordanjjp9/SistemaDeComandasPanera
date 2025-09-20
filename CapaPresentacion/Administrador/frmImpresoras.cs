@@ -17,7 +17,7 @@ namespace CapaPresentacion.Administrador
         private readonly BindingSource _bs = new BindingSource();
         private DataTable _dt;
 
-        private const string LISTA_PRECIO_POR_DEFECTO = "001";
+      //  private const string LISTA_PRECIO_POR_DEFECTO = "001";
 
         public frmImpresoras()
         {
@@ -28,7 +28,7 @@ namespace CapaPresentacion.Administrador
 
         private void frmImpresoras_Load(object sender, EventArgs e)
         {
-            CargarDatos(LISTA_PRECIO_POR_DEFECTO);
+            CargarDatos();
             txtProducto.Focus();
 
 
@@ -67,51 +67,63 @@ namespace CapaPresentacion.Administrador
             var c1 = new DataGridViewTextBoxColumn
             {
                 Name = "CDG_PROD",
-                HeaderText = "Código",
-                DataPropertyName = "CDG_PROD",     // alias del SELECT
+                HeaderText = "CDG_PROD",
+                DataPropertyName = "CDG_PROD",
                 ReadOnly = true,
-                SortMode = DataGridViewColumnSortMode.NotSortable,
-                FillWeight = 18
+                FillWeight = 16
             };
-            c1.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
 
             // 2) Descripción
             var c2 = new DataGridViewTextBoxColumn
             {
-                Name = "Producto",
-                HeaderText = "Descripción",
-                DataPropertyName = "Producto",     // alias del SELECT
+                Name = "DES_PROD",
+                HeaderText = "DES_PROD",
+                DataPropertyName = "DES_PROD",
                 ReadOnly = true,
-                SortMode = DataGridViewColumnSortMode.NotSortable,
-                FillWeight = 52
+                FillWeight = 44
             };
-            c2.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
 
-            // 3) Imp. Princ (Nombre)
+            // 3) IMP_PROD (código de formato principal)
             var c3 = new DataGridViewTextBoxColumn
             {
-                Name = "ImprePrin",
-                HeaderText = "Imp. Princ (Nombre)",
-                DataPropertyName = "ImprePrin",    // alias del SELECT
+                Name = "IMP_PROD",
+                HeaderText = "IMP_PROD",
+                DataPropertyName = "IMP_PROD",
                 ReadOnly = true,
-                SortMode = DataGridViewColumnSortMode.NotSortable,
-                FillWeight = 15
+                FillWeight = 10
             };
-            c3.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
 
-            // 4) Impresora Sec (Nombre)
+            // 4) DES_FORM (principal) — encabezado igual que en tu captura
             var c4 = new DataGridViewTextBoxColumn
             {
-                Name = "ImpreSec",
-                HeaderText = "Impresora Sec",
-                DataPropertyName = "ImpreSec",     // alias del SELECT
+                Name = "DES_FORM_PRN",
+                HeaderText = "DES_FORM",
+                DataPropertyName = "DES_FORM_PRN",
                 ReadOnly = true,
-                SortMode = DataGridViewColumnSortMode.NotSortable,
-                FillWeight = 15
+                FillWeight = 20
             };
-            c4.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
 
-            dgvImpre.Columns.AddRange(new DataGridViewColumn[] { c1, c2, c3, c4 });
+            // 5) CDG_IMP (código de formato secundario)
+            var c5 = new DataGridViewTextBoxColumn
+            {
+                Name = "CDG_IMP",
+                HeaderText = "CDG_IMP",
+                DataPropertyName = "CDG_IMP",
+                ReadOnly = true,
+                FillWeight = 10
+            };
+
+            // 6) DES_FORM (secundaria) — encabezado igual que en tu captura
+            var c6 = new DataGridViewTextBoxColumn
+            {
+                Name = "DES_FORM_SEC",
+                HeaderText = "DES_FORM",
+                DataPropertyName = "DES_FORM_SEC",
+                ReadOnly = true,
+                FillWeight = 20
+            };
+
+            dgvImpre.Columns.AddRange(new DataGridViewColumn[] { c1, c2, c3, c4, c5, c6 });
         }
 
 
@@ -130,11 +142,14 @@ namespace CapaPresentacion.Administrador
             btnAgregar.Click += btnAgregar_Click;
         }
 
-        private void CargarDatos(string cdgLprc)
+        private void CargarDatos()
         {
-            _dt = _svc.ListarProductosGrid4(cdgLprc); // 👈 ESTA
-            _bs.DataSource = _dt;
+            var dt = _svc.ListarProductosConFormato(); // ← sin parámetros
+            _bs.DataSource = dt;
             dgvImpre.DataSource = _bs;
+
+            foreach (DataGridViewColumn c in dgvImpre.Columns)
+                c.DefaultCellStyle.NullValue = "NULL";
         }
 
         private void AplicarFiltro()
@@ -154,9 +169,11 @@ namespace CapaPresentacion.Administrador
             // Filtro sobre las 4 columnas visibles
             _bs.Filter =
                 $"Convert(CDG_PROD,'System.String') LIKE '%{esc}%' " +
-                $"OR Producto LIKE '%{esc}%' " +
-                $"OR ImprePrin LIKE '%{esc}%' " +
-                $"OR ImpreSec LIKE '%{esc}%'";
+                $"OR DES_PROD LIKE '%{esc}%' " +
+                $"OR IMP_PROD LIKE '%{esc}%' " +
+                $"OR DES_FORM_PRN LIKE '%{esc}%' " +
+                $"OR CDG_IMP LIKE '%{esc}%' " +
+                $"OR DES_FORM_SEC LIKE '%{esc}%'";
         }
 
         private void txtProducto_TextChanged(object sender, EventArgs e)
@@ -175,40 +192,53 @@ namespace CapaPresentacion.Administrador
 
         private void btnAgregar_Click(object sender, EventArgs e)
         {
-
+            // 1) Validaciones básicas
             if (dgvImpre.CurrentRow == null)
             {
-                MessageBox.Show("Selecciona un producto.");
+                MessageBox.Show("Selecciona un producto.", "Impresoras", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
             string cdgProd = (dgvImpre.CurrentRow.Cells["CDG_PROD"].Value ?? "").ToString();
             if (string.IsNullOrWhiteSpace(cdgProd))
             {
-                MessageBox.Show("No se pudo obtener el código del producto.");
+                MessageBox.Show("No se pudo obtener el código del producto.", "Impresoras", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
+            // 2) Diálogo de selección de impresora
             using (var dlg = new frmListImpresoras())
             {
                 dlg.StartPosition = FormStartPosition.CenterParent;
 
-                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                if (dlg.ShowDialog(this) != DialogResult.OK)
+                    return;
 
-                // Código (001/002/...) y nombre elegidos del catálogo M_FRMIMP
-                string cod = dlg.CodigoSeleccionado;
-                string nom = dlg.NombreSeleccionado;
+                string cod = dlg.CodigoSeleccionado;   // p.ej. "004" o "" si se quiere quitar
+                string nom = dlg.NombreSeleccionado;   // p.ej. "JUGUERIA" o "" si se quiere quitar
 
-                // Guardar en BD: M_PRODUC.CDG_IMP = cod
-                bool ok = _svc.GuardarImpresoraSecundaria(cdgProd, cod);
+                // 3) Persistencia en BD (si cod vacío => dejar NULL)
+                bool ok = string.IsNullOrWhiteSpace(cod)
+                    ? _svc.QuitarImpresoraSecundaria(cdgProd)
+                    : _svc.GuardarImpresoraSecundaria(cdgProd, cod);
+
                 if (!ok)
                 {
-                    MessageBox.Show("No se pudo guardar la impresora.");
+                    MessageBox.Show("No se pudo guardar la impresora secundaria.", "Impresoras", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
-                // Reflejar en la UI: mostrar el NOMBRE en la columna visible ImpreSec
-                dgvImpre.CurrentRow.Cells["ImpreSec"].Value = nom;
+                // 4) Reflejar el cambio en la fila enlazada (sin recargar todo)
+                if (_bs.Current is DataRowView rv)
+                {
+                    // Código de formato secundario
+                    rv.Row["CDG_IMP"] = string.IsNullOrWhiteSpace(cod) ? (object)DBNull.Value : cod.PadLeft(3, '0');
+                    // Descripción (nombre) del formato secundario
+                    rv.Row["DES_FORM_SEC"] = string.IsNullOrWhiteSpace(nom) ? (object)DBNull.Value : nom.Trim();
+                    rv.EndEdit();
+                }
+
+                // 5) Refresco visual y mantener selección
                 dgvImpre.Refresh();
             }
         }

@@ -23,6 +23,9 @@ namespace CapaDatos
         /// <summary>
         /// PARA EL GRID (4 columnas): CDG_PROD | Producto | ImprePrin | ImpreSec (nombres).
         /// </summary>
+        /// <summary>
+        /// PARA EL GRID (4 columnas): CDG_PROD | Producto | ImprePrin | ImpreSec (nombres).
+        /// </summary>
         public DataTable ListarProductosGrid4(string cdgLprc)
         {
             var dt = new DataTable();
@@ -51,34 +54,58 @@ namespace CapaDatos
         }
 
         /// <summary>
-        /// COMPATIBILIDAD (6 columnas): CDG_PROD, DES_PROD, IMP_PROD, DES_FORM_PRN, CDG_IMP, DES_FORM_SEC.
+        /// COMPATIBILIDAD (6 columnas) CON FILTRO: CDG_PROD, DES_PROD, IMP_PROD, DES_FORM_PRN, CDG_IMP, DES_FORM_SEC.
         /// </summary>
-        public DataTable ListarProductosConFormato(string cdgLprc)
+        //public DataTable ListarProductosConFormato(string cdgLprc)
+        //{
+        //    var dt = new DataTable();
+
+        //    const string SQL = @"
+        //SELECT
+        //    LTRIM(RTRIM(mprod.CDG_PROD)) AS CDG_PROD,
+        //    LTRIM(RTRIM(mprod.DES_PROD)) AS DES_PROD,
+        //    LTRIM(RTRIM(mprod.IMP_PROD)) AS IMP_PROD,
+        //    LTRIM(RTRIM(fimp.DES_FORM))  AS DES_FORM_PRN, -- alias único para UI
+        //    LTRIM(RTRIM(mprod.CDG_IMP))  AS CDG_IMP,
+        //    LTRIM(RTRIM(fimp2.DES_FORM)) AS DES_FORM_SEC  -- alias único para UI
+        //FROM dbo.M_PRODUC mprod
+        //LEFT JOIN dbo.M_FRMIMP fimp  ON fimp.CDG_FORM  = mprod.IMP_PROD
+        //LEFT JOIN dbo.M_FRMIMP fimp2 ON fimp2.CDG_FORM = mprod.CDG_IMP
+        //ORDER BY mprod.DES_PROD;";
+
+        //    using (var cn = new SqlConnection(_cs))
+        //    using (var da = new SqlDataAdapter(SQL, cn))
+        //    {
+        //        da.Fill(dt);
+        //    }
+        //    return dt;
+        //}
+
+        /// <summary>
+        /// COMPATIBILIDAD (6 columnas) SIN FILTRO (tu SELECT exacto para mostrar como en la imagen).
+        /// </summary>
+        public DataTable ListarProductosConFormato()
         {
             var dt = new DataTable();
 
-            const string sql = @"
-            SELECT 
-                LTRIM(RTRIM(mprec.CDG_PROD)) AS CDG_PROD,
+            const string SQL = @"
+            SELECT
+                LTRIM(RTRIM(mprod.CDG_PROD)) AS CDG_PROD,
                 LTRIM(RTRIM(mprod.DES_PROD)) AS DES_PROD,
                 LTRIM(RTRIM(mprod.IMP_PROD)) AS IMP_PROD,
-                LTRIM(RTRIM(f1.DES_FORM))    AS DES_FORM_PRN,
+                LTRIM(RTRIM(fimp.DES_FORM))  AS DES_FORM_PRN, -- alias único para UI
                 LTRIM(RTRIM(mprod.CDG_IMP))  AS CDG_IMP,
-                LTRIM(RTRIM(f2.DES_FORM))    AS DES_FORM_SEC
-            FROM dbo.M_PRECIO  AS mprec
-            JOIN dbo.M_PRODUC  AS mprod ON mprod.CDG_PROD = mprec.CDG_PROD
-            LEFT JOIN dbo.M_FRMIMP AS f1 ON f1.CDG_FORM = mprod.IMP_PROD
-            LEFT JOIN dbo.M_FRMIMP AS f2 ON f2.CDG_FORM = mprod.CDG_IMP
-            WHERE mprec.CDG_LPRC = @lprc
+                LTRIM(RTRIM(fimp2.DES_FORM)) AS DES_FORM_SEC  -- alias único para UI
+            FROM dbo.M_PRODUC mprod
+            LEFT JOIN dbo.M_FRMIMP fimp  ON fimp.CDG_FORM  = mprod.IMP_PROD
+            LEFT JOIN dbo.M_FRMIMP fimp2 ON fimp2.CDG_FORM = mprod.CDG_IMP
             ORDER BY mprod.DES_PROD;";
 
             using (var cn = new SqlConnection(_cs))
-            using (var da = new SqlDataAdapter(sql, cn))
+            using (var da = new SqlDataAdapter(SQL, cn))
             {
-                da.SelectCommand.Parameters.Add("@lprc", SqlDbType.VarChar, 3).Value = Norm3(cdgLprc);
                 da.Fill(dt);
             }
-
             return dt;
         }
 

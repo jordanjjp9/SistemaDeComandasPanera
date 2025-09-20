@@ -283,5 +283,8 @@ namespace CapaNegocio
                 NuevoUsr = nuevoUsr
             };
         }
+        public bool EsAdminPorCodigo(string codVend) => _dao.EsAdminPorCodigo(codVend);
+        public bool EsAdminPorUsuario(string cdgUsr) => _dao.EsAdminPorUsuario(cdgUsr);
+
     }
 }
