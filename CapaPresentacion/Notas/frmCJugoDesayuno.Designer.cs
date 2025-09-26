@@ -33,9 +33,9 @@
             this.btnEliminar = new Guna.UI2.WinForms.Guna2Button();
             this.btnContinuar = new Guna.UI2.WinForms.Guna2Button();
             this.flpCJugoDes = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnProd0000001529 = new Guna.UI2.WinForms.Guna2Button();
-            this.btnProd0000001533 = new Guna.UI2.WinForms.Guna2Button();
-            this.btnProd0000001528 = new Guna.UI2.WinForms.Guna2Button();
+            this.btnProd0000001583 = new Guna.UI2.WinForms.Guna2Button();
+            this.btnProd0000001584 = new Guna.UI2.WinForms.Guna2Button();
+            this.btnProd0000001585 = new Guna.UI2.WinForms.Guna2Button();
             this.btnSnJug = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000000232 = new Guna.UI2.WinForms.Guna2Button();
             this.btnProd0000000233 = new Guna.UI2.WinForms.Guna2Button();
@@ -112,9 +112,9 @@
             // 
             // flpCJugoDes
             // 
-            this.flpCJugoDes.Controls.Add(this.btnProd0000001529);
-            this.flpCJugoDes.Controls.Add(this.btnProd0000001533);
-            this.flpCJugoDes.Controls.Add(this.btnProd0000001528);
+            this.flpCJugoDes.Controls.Add(this.btnProd0000001583);
+            this.flpCJugoDes.Controls.Add(this.btnProd0000001584);
+            this.flpCJugoDes.Controls.Add(this.btnProd0000001585);
             this.flpCJugoDes.Controls.Add(this.btnSnJug);
             this.flpCJugoDes.Controls.Add(this.btnProd0000000232);
             this.flpCJugoDes.Controls.Add(this.btnProd0000000233);
@@ -124,56 +124,56 @@
             this.flpCJugoDes.Size = new System.Drawing.Size(1043, 811);
             this.flpCJugoDes.TabIndex = 2;
             // 
-            // btnProd0000001529
+            // btnProd0000001583
             // 
-            this.btnProd0000001529.BorderRadius = 22;
-            this.btnProd0000001529.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000001529.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000001529.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnProd0000001529.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000001529.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnProd0000001529.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnProd0000001529.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000001529.Location = new System.Drawing.Point(3, 3);
-            this.btnProd0000001529.Name = "btnProd0000001529";
-            this.btnProd0000001529.Size = new System.Drawing.Size(202, 205);
-            this.btnProd0000001529.TabIndex = 110;
-            this.btnProd0000001529.Text = "JUGO DE PIÑA";
-            this.btnProd0000001529.TextOffset = new System.Drawing.Point(0, 70);
+            this.btnProd0000001583.BorderRadius = 22;
+            this.btnProd0000001583.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000001583.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000001583.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnProd0000001583.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnProd0000001583.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000001583.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProd0000001583.ForeColor = System.Drawing.Color.White;
+            this.btnProd0000001583.Location = new System.Drawing.Point(3, 3);
+            this.btnProd0000001583.Name = "btnProd0000001583";
+            this.btnProd0000001583.Size = new System.Drawing.Size(202, 205);
+            this.btnProd0000001583.TabIndex = 110;
+            this.btnProd0000001583.Text = "JUGO DE PIÑA";
+            this.btnProd0000001583.TextOffset = new System.Drawing.Point(0, 70);
             // 
-            // btnProd0000001533
+            // btnProd0000001584
             // 
-            this.btnProd0000001533.BorderRadius = 22;
-            this.btnProd0000001533.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000001533.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000001533.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnProd0000001533.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000001533.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnProd0000001533.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnProd0000001533.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000001533.Location = new System.Drawing.Point(211, 3);
-            this.btnProd0000001533.Name = "btnProd0000001533";
-            this.btnProd0000001533.Size = new System.Drawing.Size(202, 205);
-            this.btnProd0000001533.TabIndex = 111;
-            this.btnProd0000001533.Text = "JUGO DE PAPAYA";
-            this.btnProd0000001533.TextOffset = new System.Drawing.Point(0, 70);
+            this.btnProd0000001584.BorderRadius = 22;
+            this.btnProd0000001584.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000001584.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000001584.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnProd0000001584.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnProd0000001584.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000001584.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProd0000001584.ForeColor = System.Drawing.Color.White;
+            this.btnProd0000001584.Location = new System.Drawing.Point(211, 3);
+            this.btnProd0000001584.Name = "btnProd0000001584";
+            this.btnProd0000001584.Size = new System.Drawing.Size(202, 205);
+            this.btnProd0000001584.TabIndex = 111;
+            this.btnProd0000001584.Text = "JUGO DE PAPAYA";
+            this.btnProd0000001584.TextOffset = new System.Drawing.Point(0, 70);
             // 
-            // btnProd0000001528
+            // btnProd0000001585
             // 
-            this.btnProd0000001528.BorderRadius = 22;
-            this.btnProd0000001528.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000001528.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.btnProd0000001528.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.btnProd0000001528.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnProd0000001528.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
-            this.btnProd0000001528.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnProd0000001528.ForeColor = System.Drawing.Color.White;
-            this.btnProd0000001528.Location = new System.Drawing.Point(419, 3);
-            this.btnProd0000001528.Name = "btnProd0000001528";
-            this.btnProd0000001528.Size = new System.Drawing.Size(202, 205);
-            this.btnProd0000001528.TabIndex = 112;
-            this.btnProd0000001528.Text = "JUGO DE PAPAYA CON PIÑA";
-            this.btnProd0000001528.TextOffset = new System.Drawing.Point(0, 70);
+            this.btnProd0000001585.BorderRadius = 22;
+            this.btnProd0000001585.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000001585.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnProd0000001585.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnProd0000001585.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnProd0000001585.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(154)))), ((int)(((byte)(151)))), ((int)(((byte)(145)))));
+            this.btnProd0000001585.Font = new System.Drawing.Font("Segoe UI Historic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProd0000001585.ForeColor = System.Drawing.Color.White;
+            this.btnProd0000001585.Location = new System.Drawing.Point(419, 3);
+            this.btnProd0000001585.Name = "btnProd0000001585";
+            this.btnProd0000001585.Size = new System.Drawing.Size(202, 205);
+            this.btnProd0000001585.TabIndex = 112;
+            this.btnProd0000001585.Text = "JUGO DE PAPAYA CON PIÑA";
+            this.btnProd0000001585.TextOffset = new System.Drawing.Point(0, 70);
             // 
             // btnSnJug
             // 
@@ -373,9 +373,9 @@
         private System.Windows.Forms.FlowLayoutPanel flpCJugoDes;
         private Guna.UI2.WinForms.Guna2Button btnEliminar;
         private Guna.UI2.WinForms.Guna2Button btnContinuar;
-        private Guna.UI2.WinForms.Guna2Button btnProd0000001529;
-        private Guna.UI2.WinForms.Guna2Button btnProd0000001533;
-        private Guna.UI2.WinForms.Guna2Button btnProd0000001528;
+        private Guna.UI2.WinForms.Guna2Button btnProd0000001583;
+        private Guna.UI2.WinForms.Guna2Button btnProd0000001584;
+        private Guna.UI2.WinForms.Guna2Button btnProd0000001585;
         private Guna.UI2.WinForms.Guna2Button btnSnJug;
         private Guna.UI2.WinForms.Guna2Button btnProd0000000232;
         private Guna.UI2.WinForms.Guna2Button btnProd0000000233;

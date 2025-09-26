@@ -257,6 +257,14 @@
     <Compile Include="Controles\MenuPedidoItem.Designer.cs">
       <DependentUpon>MenuPedidoItem.cs</DependentUpon>
     </Compile>
+    <Compile Include="dsPrecuenta.cs">
+      <DependentUpon>dsPrecuenta.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="dsPrecuenta.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>dsPrecuenta.xsd</DependentUpon>
+    </Compile>
     <Compile Include="frmARappi.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -402,6 +410,11 @@
     </Compile>
     <Compile Include="Reportes\frmPreCuenta.Designer.cs">
       <DependentUpon>frmPreCuenta.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Sico_BorradorDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Sico_BorradorDataSet.xsd</DependentUpon>
     </Compile>
     <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="ucLineaPedido.cs">
@@ -573,6 +586,17 @@
     <EmbeddedResource Include="ucLineaPedido.resx">
       <DependentUpon>ucLineaPedido.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="dsPrecuenta.xsc">
+      <DependentUpon>dsPrecuenta.xsd</DependentUpon>
+    </None>
+    <None Include="dsPrecuenta.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>dsPrecuenta.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="dsPrecuenta.xss">
+      <DependentUpon>dsPrecuenta.xsd</DependentUpon>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -583,6 +607,17 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="Sico_BorradorDataSet.xsc">
+      <DependentUpon>Sico_BorradorDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="Sico_BorradorDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>Sico_BorradorDataSet.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Sico_BorradorDataSet.xss">
+      <DependentUpon>Sico_BorradorDataSet.xsd</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -685,7 +720,9 @@
   <ItemGroup>
     <None Include="Resources\menu.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="SqlServerTypes\x64\msvcr120.dll">

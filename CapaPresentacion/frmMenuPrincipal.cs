@@ -16,6 +16,7 @@ using CapaPresentacion.Controles;
 using CapaPresentacion.Helpers;
 using CapaPresentacion.Impresion;
 using CapaPresentacion.Notas;
+using CapaPresentacion.Reportes;
 
 
 namespace CapaPresentacion
@@ -2193,6 +2194,21 @@ namespace CapaPresentacion
             }
             catch { /* ignora y usa Now */ }
             return DateTime.Now;
+        }
+
+        //----------------------PRECUENTA-----------------------------//
+        private void btnPrecuenta_Click(object sender, EventArgs e)
+        {
+            var numPed = _numPedActual;
+            if (string.IsNullOrWhiteSpace(numPed))
+            {
+                MessageBox.Show("No hay un pedido guardado para precuenta.", "Aviso",
+                                MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            using (var frm = new frmPreCuenta(numPed, usarPrecioConIgv: false, incluirIGV0: false))
+                frm.ShowDialog(this);
         }
     }
 }

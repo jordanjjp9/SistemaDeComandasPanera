@@ -46,6 +46,7 @@
     <Compile Include="DAOImpresora.cs" />
     <Compile Include="DAOPedido.cs" />
     <Compile Include="DAOPedidoTxt.cs" />
+    <Compile Include="DAOPrecuenta.cs" />
     <Compile Include="DAOProductos.cs" />
     <Compile Include="DAOVendedor.cs" />
     <Compile Include="DataReaderX.cs" />

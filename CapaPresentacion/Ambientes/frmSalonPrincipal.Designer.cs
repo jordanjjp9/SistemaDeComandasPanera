@@ -139,7 +139,7 @@
             // 
             this.lblTimerMesa16.BackColor = System.Drawing.Color.Transparent;
             this.lblTimerMesa16.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, System.Drawing.FontStyle.Bold);
-            this.lblTimerMesa16.Location = new System.Drawing.Point(118, 51);
+            this.lblTimerMesa16.Location = new System.Drawing.Point(54, 94);
             this.lblTimerMesa16.Name = "lblTimerMesa16";
             this.lblTimerMesa16.Size = new System.Drawing.Size(41, 19);
             this.lblTimerMesa16.TabIndex = 22;
@@ -149,7 +149,7 @@
             // 
             this.lblTimerMesa21.BackColor = System.Drawing.Color.Transparent;
             this.lblTimerMesa21.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, System.Drawing.FontStyle.Bold);
-            this.lblTimerMesa21.Location = new System.Drawing.Point(485, 679);
+            this.lblTimerMesa21.Location = new System.Drawing.Point(480, 679);
             this.lblTimerMesa21.Name = "lblTimerMesa21";
             this.lblTimerMesa21.Size = new System.Drawing.Size(41, 19);
             this.lblTimerMesa21.TabIndex = 22;
@@ -159,7 +159,7 @@
             // 
             this.lblTimerMesa20.BackColor = System.Drawing.Color.Transparent;
             this.lblTimerMesa20.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, System.Drawing.FontStyle.Bold);
-            this.lblTimerMesa20.Location = new System.Drawing.Point(485, 512);
+            this.lblTimerMesa20.Location = new System.Drawing.Point(480, 512);
             this.lblTimerMesa20.Name = "lblTimerMesa20";
             this.lblTimerMesa20.Size = new System.Drawing.Size(41, 19);
             this.lblTimerMesa20.TabIndex = 22;
@@ -169,7 +169,7 @@
             // 
             this.lblTimerMesa19.BackColor = System.Drawing.Color.Transparent;
             this.lblTimerMesa19.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, System.Drawing.FontStyle.Bold);
-            this.lblTimerMesa19.Location = new System.Drawing.Point(624, 260);
+            this.lblTimerMesa19.Location = new System.Drawing.Point(556, 303);
             this.lblTimerMesa19.Name = "lblTimerMesa19";
             this.lblTimerMesa19.Size = new System.Drawing.Size(41, 19);
             this.lblTimerMesa19.TabIndex = 22;
@@ -179,7 +179,7 @@
             // 
             this.lblTimerMesa18.BackColor = System.Drawing.Color.Transparent;
             this.lblTimerMesa18.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, System.Drawing.FontStyle.Bold);
-            this.lblTimerMesa18.Location = new System.Drawing.Point(459, 260);
+            this.lblTimerMesa18.Location = new System.Drawing.Point(392, 303);
             this.lblTimerMesa18.Name = "lblTimerMesa18";
             this.lblTimerMesa18.Size = new System.Drawing.Size(41, 19);
             this.lblTimerMesa18.TabIndex = 22;
@@ -189,7 +189,7 @@
             // 
             this.lblTimerMesa17.BackColor = System.Drawing.Color.Transparent;
             this.lblTimerMesa17.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, System.Drawing.FontStyle.Bold);
-            this.lblTimerMesa17.Location = new System.Drawing.Point(239, 260);
+            this.lblTimerMesa17.Location = new System.Drawing.Point(174, 303);
             this.lblTimerMesa17.Name = "lblTimerMesa17";
             this.lblTimerMesa17.Size = new System.Drawing.Size(41, 19);
             this.lblTimerMesa17.TabIndex = 22;
@@ -199,7 +199,7 @@
             // 
             this.lblTimerMesa15.BackColor = System.Drawing.Color.Transparent;
             this.lblTimerMesa15.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, System.Drawing.FontStyle.Bold);
-            this.lblTimerMesa15.Location = new System.Drawing.Point(267, 51);
+            this.lblTimerMesa15.Location = new System.Drawing.Point(201, 94);
             this.lblTimerMesa15.Name = "lblTimerMesa15";
             this.lblTimerMesa15.Size = new System.Drawing.Size(41, 19);
             this.lblTimerMesa15.TabIndex = 22;
@@ -209,7 +209,7 @@
             // 
             this.lblTimerMesa14.BackColor = System.Drawing.Color.Transparent;
             this.lblTimerMesa14.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, System.Drawing.FontStyle.Bold);
-            this.lblTimerMesa14.Location = new System.Drawing.Point(416, 51);
+            this.lblTimerMesa14.Location = new System.Drawing.Point(349, 94);
             this.lblTimerMesa14.Name = "lblTimerMesa14";
             this.lblTimerMesa14.Size = new System.Drawing.Size(41, 19);
             this.lblTimerMesa14.TabIndex = 22;
@@ -219,7 +219,7 @@
             // 
             this.lblTimerMesa13.BackColor = System.Drawing.Color.Transparent;
             this.lblTimerMesa13.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, System.Drawing.FontStyle.Bold);
-            this.lblTimerMesa13.Location = new System.Drawing.Point(569, 51);
+            this.lblTimerMesa13.Location = new System.Drawing.Point(501, 94);
             this.lblTimerMesa13.Name = "lblTimerMesa13";
             this.lblTimerMesa13.Size = new System.Drawing.Size(41, 19);
             this.lblTimerMesa13.TabIndex = 22;
@@ -229,7 +229,7 @@
             // 
             this.lblTimerMesa12.BackColor = System.Drawing.Color.Transparent;
             this.lblTimerMesa12.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, System.Drawing.FontStyle.Bold);
-            this.lblTimerMesa12.Location = new System.Drawing.Point(716, 51);
+            this.lblTimerMesa12.Location = new System.Drawing.Point(652, 94);
             this.lblTimerMesa12.Name = "lblTimerMesa12";
             this.lblTimerMesa12.Size = new System.Drawing.Size(41, 19);
             this.lblTimerMesa12.TabIndex = 22;
